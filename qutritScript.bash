@@ -5,8 +5,15 @@
 #SBATCH --ntasks=1
 #SBATCH --exclusive
 #SBATCH --export=ALL
-#SBATCH --time=01:00:00 <- what
+#SBATCH --time=00:01:00 
+
+
+#Load Python Module
+module load apps/python3/2020.02
+
+#Activate Conda Environment
+source activate py7
 
 cd $SCRATCH
 ls > myfiles
-srun hostname
+srun python fidelity_subQutrit.py 
