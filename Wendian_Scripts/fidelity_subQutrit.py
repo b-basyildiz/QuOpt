@@ -14,8 +14,10 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
     @author: Bora & Alex
 
 
-    This function is essentially the qubit optimization done by Alex & I in Joel's experiment. But now we have drives from the |0> -> |1> and |1> -> |2>. 
+    DEF:This function is essentially the qubit optimization done by Alex & I in Joel's experiment. But now we have drives from the |0> -> |1> and |1> -> |2>. 
     We still are generating 2-qubit gates, but the inclusion of qutrit drives minimizes the generation time. See PRA paper promising initial results.  
+
+    LAST_ALTER: g2 turned off, only single qubit drive remains (removed |2> drives and reduced parameter number)
     """
     #imports
 
@@ -63,6 +65,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
 
     #variable initializations
     N = len(B)
+    #torch.manual_seed(9)
     torch.manual_seed(random.randint(0,1000))
     dt = torch.cdouble # datatype and precision
     infidelity_list=torch.zeros([N_iter,1])
@@ -88,10 +91,12 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
 
     #Coupling terms in Hamiltonian (g1(|01><10| + h.c.) + g2(|12><21| + h.c.)
     g1 = g #What are the values fo g1 are g2? 
-    g2 = g1
+    g2 = 0
     one_transition = np.outer(np.array([0,1,0,0,0,0,0,0,0]),np.array([0,0,0,1,0,0,0,0,0])) 
     two_transition = np.outer(np.array([0,0,0,0,1,0,0,0,0]),np.array([0,0,0,0,0,0,0,1,0])) 
-    H0 = H0 + g1*(torch.tensor(one_transition + np.conjugate(one_transition).T)) + g2*(torch.tensor(two_transition + np.conjugate(two_transition).T))
+    coupling = g1*(torch.tensor(one_transition + np.conjugate(one_transition).T)) + g2*(torch.tensor(two_transition + np.conjugate(two_transition).T))
+    #H0 = H0 + coupling
+    H0 = coupling
     #for i,u in enumerate(permuts): # This is the Hamiltonian from the Ashabb paper 
     #    Coupling_temp = 1
     #    for p in u:
@@ -119,7 +124,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         SU.append(unitary)
 
     #These are the coefficients we are optimizing
-    R = torch.rand([M,4*N], dtype=torch.double) *2*np.pi # Random initialization (between 0 and 2pi)
+    R = torch.rand([M,2*N], dtype=torch.double) *2*np.pi # Random initialization (between 0 and 2pi)
     R.requires_grad = True # set flag so we can backpropagate
 
     #Optimizer settings(can be changed & opttimized)
@@ -154,7 +159,8 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
             U_Exp = torch.tensor(np.kron(U_Exp,id),dtype=dt)#initializing unitary
         for m in range(0,M):#Product of pulses
             pulse_coef = R[m]
-            H1 = sum_pauli(pulse_coef[:N],sx) + sum_pauli(pulse_coef[N:2*N],sy) + sum_pauli(pulse_coef[2*N:3*N],sxx) + sum_pauli(pulse_coef[3*N:4*N],syy) 
+            #H1 = sum_pauli(pulse_coef[:N],sx) + sum_pauli(pulse_coef[N:2*N],sy) + sum_pauli(pulse_coef[2*N:3*N],sxx) + sum_pauli(pulse_coef[3*N:4*N],syy) 
+            H1 = sum_pauli(pulse_coef[:N],sx) + sum_pauli(pulse_coef[N:],sy) 
             U_Exp = torch.matmul(torch.matrix_exp(-1j*(H0+H1)*t/M),U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
@@ -192,21 +198,19 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         
         #Stopping Condition for a lack of change <- do pointer that there is no change for 100 iterations 
         curr_infidelity = infidelity_list[n]
-        if prev_infidelity == curr_infidelity:
+        if prev_infidelity == curr_infidelity and n != 0:
             change_count += 1
+        else:
+            change_count = 0
         if change_count == 100:
-            #print("Breaking due to lack of change")
-            #print("Infidelity is: " + str(curr_infidelity))
-            break
+           return infidelity_list.min().item()
         prev_infidelity = curr_infidelity
         if 1 - infidelity_list[n] >= 99.99: #Stopping condition for high fidelity iterations
-            #print("Too accurate" + str(infidelity_list[n]))
-            break
+            return infidelity_list.min().item()
     #print('The infidelity of the generated gate is: ' + str(infidelity_list.min().item()))
     #return R
     tmin = np.pi/4
 
     pulse_file_time = pulse_file + "_time" + str(t/tmin)+"_"
     np.savetxt(os.path.join(os.getcwd(),"Pulse_Sequences/"+pulse_file+"/" +pulse_file_time+".csv"),R.detach().numpy(),delimiter=",") 
-    
     return infidelity_list.min().item()

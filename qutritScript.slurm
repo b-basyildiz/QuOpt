@@ -16,4 +16,4 @@ source activate py7
 
 cd $SCRATCH
 ls > myfiles
-srun python fidelity_subQutrit.py 
+srun python Qutrit_ML.py 

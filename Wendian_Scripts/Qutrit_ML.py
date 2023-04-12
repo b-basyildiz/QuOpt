@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import shutil
 from fidelity_subQutrit import *
+import sys
 
 #Qutrit Subsystem Graph Generation 
 
@@ -18,15 +19,29 @@ Fidelities = []
 Times = []
 points = np.linspace(0,0.2*np.pi/4,20)
 points = np.append(points, np.linspace(0.3*np.pi/4,np.pi/4,10))
-iteration_count = 100
+iteration_count = 10000
+
+Pulse_file = "CNOT_Qutrit_Experimental_NoSecondDrive"
 
 #File Creation 
-Pulse_file = "CNOT_Qutrit_Experimental_couplingOn"
+try: #Making Data Folder
+    os.makedirs("Data")
+except:
+    pass
+try: #Making Figures Folder
+    os.makedirs("Figures")
+except:
+    pass
+try: #Making Pulse_Sequences Folder
+    os.makedirs("Pulse_Sequences")
+except:
+    pass
 try:
     os.makedirs("Pulse_Sequences/"+Pulse_file)
 except:
     shutil.rmtree("Pulse_Sequences/"+Pulse_file)
     os.makedirs("Pulse_Sequences/"+Pulse_file)
+    
 
 #Generating Points
 for t in points:
