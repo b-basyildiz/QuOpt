@@ -4,8 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import shutil
-from fidelity_subQutrit import *
-import sys
+from fidelity_subQutrit import Qutrit_ML
 
 #Qutrit Subsystem Graph Generation 
 
@@ -21,7 +20,7 @@ points = np.linspace(0,0.2*np.pi/4,20)
 points = np.append(points, np.linspace(0.3*np.pi/4,np.pi/4,10))
 iteration_count = 10000
 
-Pulse_file = "CNOT_Qutrit_Experimental_NoSecondDrive"
+Pulse_file = "CNOT_Qutrit_Experimental_NoSecondDrive2"
 
 #File Creation 
 try: #Making Data Folder
@@ -46,7 +45,7 @@ except:
 #Generating Points
 for t in points:
     Times.append(t/(np.pi/4))
-    Fidelities.append(1 - fidelity_subQutrit(J,[1,1],8,CNOT_qutrit,t,iteration_count,Pulse_file))
+    Fidelities.append(1 - Qutrit_ML(J,[1,1],8,CNOT_qutrit,t,iteration_count,Pulse_file))
 
 #Saving Fidelities
 np.savetxt(os.path.join(os.getcwd(),"Data",Pulse_file+".csv"),Fidelities,delimiter=",")
@@ -55,7 +54,7 @@ np.savetxt(os.path.join(os.getcwd(),"Data",Pulse_file+".csv"),Fidelities,delimit
 plt.plot(Times,Fidelities,'o-')
 plt.xlabel("T/Tmin")
 plt.ylabel("Fidelity")
-plt.title("CNOT Fidelity for Qutrit System with infinite drive")
+plt.title(str(Pulse_file))
 plt.grid(which='major', linestyle='-', linewidth='0.5')
 plt.grid(which='minor', linestyle='dotted', linewidth='0.5')
 plt.minorticks_on()

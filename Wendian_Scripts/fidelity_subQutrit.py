@@ -5,7 +5,7 @@ from itertools import product
 import os
 import random
 
-def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
+def Qutrit_ML(J,B,M,input_gate,t,N_iter,pulse_file):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -14,10 +14,10 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
     @author: Bora & Alex
 
 
-    DEF:This function is essentially the qubit optimization done by Alex & I in Joel's experiment. But now we have drives from the |0> -> |1> and |1> -> |2>. 
+    DESC: This function is essentially the qubit optimization done by Alex & I in Joel's experiment. But now we have drives from the |0> -> |1> and |1> -> |2>. 
     We still are generating 2-qubit gates, but the inclusion of qutrit drives minimizes the generation time. See PRA paper promising initial results.  
 
-    LAST_ALTER: g2 turned off, only single qubit drive remains (removed |2> drives and reduced parameter number)
+    UPDATE: Fixed Coupling and retesting removal of two state couping
     """
     #imports
 
@@ -25,21 +25,22 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
     g = 1
     maxFreq = 5*g
 
-    #Pauli Matricies in Qutrit space
+
+    #Paul Matrices in Qubtrit Space
+    sxq = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]]) 
+    syq = np.array([[0,-1j, 0],[1j,0, 0], [0, 0, 1]]) 
+    sxxq = np.array([[1,0,0],[0,0,1],[0,1,0]]) 
+    syyq = np.array([[1,0,0],[0,0,-1j],[0,1j,0]]) 
+
+    #Pauli Matricies in Qubit Subspace
     sx = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 0]]) 
     sy = np.array([[0,-1j, 0],[1j,0, 0], [0, 0, 0]]) 
     sz = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 0]]) 
-    id = np.array([[1, 0, 0],[0, 1, 0],[0, 0, 0]]) # note that the identity does not have a value in the |2> state. This is because we want our gates only to operate in the qubit space. 
+    id = np.array([[1, 0, 0],[0, 1, 0],[0, 0, 0]]) 
 
-    # Annhilation and Creation Operators (for PRA Hamiltonian)
-    annhilate = np.array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-    create = annhilate.T
-
-    # Drives for Qutrit transitions (Gell-Mann Matrices)
-    sxx = np.array([[0,0,0],[0,0,1],[0,1,0]]) #~X for 1->2 transition
-    syy = np.array([[0,0,0],[0,0,-1j],[0,1j,0]]) #~Y for 1->2 transition
     
     #Function definitions 
+
     def zero_mat(N):#Generates matrix of zeros
         zero_gate = np.array([[0,0,0],[0,0,0],[0,0,0]])
         init = zero_gate
@@ -48,10 +49,10 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         for i in range(0,N - 1):
             zero_gate = torch.tensor(np.kron(zero_gate,init))
         return zero_gate
+    
     def sum_pauli(coef, gate):#Sums Pauli gates with coefficients 
-        N = len(coef)#number of qubits
+        N = len(coef)
         total_pauli = zero_mat(N)
-        #Summing all Z gates
         for i in range(0,N):
             pauli_temp = 1
             for j in range(0,i):
@@ -65,51 +66,40 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
 
     #variable initializations
     N = len(B)
-    #torch.manual_seed(9)
     torch.manual_seed(random.randint(0,1000))
     dt = torch.cdouble # datatype and precision
     infidelity_list=torch.zeros([N_iter,1])
 
-    #J coefficients gathering (only if J is in N x N matrix, otherwise set J_coef=J) <- essentially flattens the array
+    #J coefficients gathering, essentially flattens the array
     J_coef = []
     for i in range(0,len(J) - 1):
         for j in range(0,len(J) - i - 1):
             J_coef.append(J[i,j].item())
 
-    #H0 generation
-    permuts = [1,1]
-    for i in range(2,N):
-        permuts.append(0)
-    permuts = list(set(permutations(permuts,N)))
-    permuts.sort()
-    permuts.reverse()#All permutations of coupling stored as bit arrays
+
+    #H0 Generation
     H0 = torch.tensor(zero_mat(N),dtype=torch.cdouble)
     eigen_energies = [0, 5.440, 10.681, 4.994, 10.433, 15.666, 9.832, 15.270, 20.506] # experimentally given by Ray's Group
-    #Diagonal energies of Hamiltonian
     for i,e in enumerate(eigen_energies):
         H0[i,i] = float(e)
 
     #Coupling terms in Hamiltonian (g1(|01><10| + h.c.) + g2(|12><21| + h.c.)
     g1 = g #What are the values fo g1 are g2? 
     g2 = 0
-    one_transition = np.outer(np.array([0,1,0,0,0,0,0,0,0]),np.array([0,0,0,1,0,0,0,0,0])) 
-    two_transition = np.outer(np.array([0,0,0,0,1,0,0,0,0]),np.array([0,0,0,0,0,0,0,1,0])) 
-    coupling = g1*(torch.tensor(one_transition + np.conjugate(one_transition).T)) + g2*(torch.tensor(two_transition + np.conjugate(two_transition).T))
-    #H0 = H0 + coupling
-    H0 = coupling
-    #for i,u in enumerate(permuts): # This is the Hamiltonian from the Ashabb paper 
-    #    Coupling_temp = 1
-    #    for p in u:
-    #        if p==1:
-    #            Coupling_temp = torch.tensor(np.kron(Coupling_temp,annhilate + create))
-    #        else:
-    #            Coupling_temp = torch.tensor(np.kron(Coupling_temp,id))
-    #    H0 = H0 + J_coef[i]*Coupling_temp
+    zero_state = np.array([1,0,0])
+    one_state = np.array([0,1,0])
+    two_state = np.array([0,0,1])
+    one_transition = np.kron(np.outer(zero_state,one_state),np.outer(one_state,zero_state))
+    one_transition = one_transition + one_transition.conj().T
+    two_transition = np.kron(np.outer(one_state,two_state),np.outer(two_state,one_state))
+    two_transition = two_transition + two_transition.conj().T
+    H0 = H0 + g1*one_transition + g2*two_transition
 
     #Unitary group generation
     SU = []
     pauli_int = [1,2,3,4]
     perms = list(product(pauli_int,repeat=N))#all permutations of paulis
+    #Paul Matrices only in the qubit space 
     for p in perms:#mapping integers to pauli 
         unitary = 1
         for pauli in p:
@@ -124,7 +114,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         SU.append(unitary)
 
     #These are the coefficients we are optimizing
-    R = torch.rand([M,2*N], dtype=torch.double) *2*np.pi # Random initialization (between 0 and 2pi)
+    R = torch.rand([M,4*N], dtype=torch.double) *2*np.pi # Random initialization (between 0 and 2pi)
     R.requires_grad = True # set flag so we can backpropagate
 
     #Optimizer settings(can be changed & opttimized)
@@ -159,8 +149,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
             U_Exp = torch.tensor(np.kron(U_Exp,id),dtype=dt)#initializing unitary
         for m in range(0,M):#Product of pulses
             pulse_coef = R[m]
-            #H1 = sum_pauli(pulse_coef[:N],sx) + sum_pauli(pulse_coef[N:2*N],sy) + sum_pauli(pulse_coef[2*N:3*N],sxx) + sum_pauli(pulse_coef[3*N:4*N],syy) 
-            H1 = sum_pauli(pulse_coef[:N],sx) + sum_pauli(pulse_coef[N:],sy) 
+            H1 = sum_pauli(pulse_coef[:N],sxq) + sum_pauli(pulse_coef[N:2*N],syq) + sum_pauli(pulse_coef[2*N:3*N],sxxq) + sum_pauli(pulse_coef[3*N:4*N],syyq) 
             U_Exp = torch.matmul(torch.matrix_exp(-1j*(H0+H1)*t/M),U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
@@ -178,7 +167,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         infidelity.backward()
 
         #Printing statement
-        #if (n+1)%100==0: 
+        #if (n+1)%50==0: 
         #    print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
 
         #optimizer 
@@ -196,7 +185,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
             R.data.sub_(lr*R.grad.data) # using data avoids overwriting tensor object
             R.grad.data.zero_()           # and it's respective grad info
         
-        #Stopping Condition for a lack of change <- do pointer that there is no change for 100 iterations 
+        #Stopping Condition for a lack of change  
         curr_infidelity = infidelity_list[n]
         if prev_infidelity == curr_infidelity and n != 0:
             change_count += 1
@@ -207,8 +196,7 @@ def fidelity_subQutrit(J,B,M,input_gate,t,N_iter,pulse_file):
         prev_infidelity = curr_infidelity
         if 1 - infidelity_list[n] >= 99.99: #Stopping condition for high fidelity iterations
             return infidelity_list.min().item()
-    #print('The infidelity of the generated gate is: ' + str(infidelity_list.min().item()))
-    #return R
+
     tmin = np.pi/4
 
     pulse_file_time = pulse_file + "_time" + str(t/tmin)+"_"
