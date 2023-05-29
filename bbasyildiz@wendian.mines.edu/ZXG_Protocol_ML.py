@@ -58,7 +58,7 @@ def fidelity_ml(M,input_gate,t,N_iter,g,rseed):
     # two_coupling = + np.kron(np.outer(zero_state,two_state),np.outer(two_state,zero_state))
     # two_coupling = two_coupling + two_coupling.conj().T
     # H0 = torch.tensor(g1*one_coupling + g2*two_coupling)
-    H0 = torch.tensor(np.kron(sx,sx) + np.kron(sxx,sxx))
+    H0 = torch.tensor(np.kron(sx,sx) + np.kron(sx,sx))
 
 
 

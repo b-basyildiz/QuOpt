@@ -1,9 +1,8 @@
 #!bin/bash 
 
-for i in "Qutrit_nop2" "Qutrit_nop"
+for i in "Qubit" "Qubit_gRoot2"
 do
-   #for j in "CNOT" "iSWAP" "SWAP"
-   for j in "CNOT" 
+   for j in "iSWAP" 
    do
         for k in {1..20}
         do

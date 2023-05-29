@@ -43,16 +43,16 @@ def fidelity_ml(M,target_gate,t,N_iter,g,rseed):
     infidelity_list=torch.zeros([N_iter,1])
 
     #H0 generation
-    # if g == 1:
-    #     print("Qubit ML")
-    # elif abs(g - np.sqrt(2)) < 0.0001:
-    #     print("Qubit ML R2")
-    # zero_state = array([1,0])
-    # one_state = array([0,1])
-    # one_coupling = kron(outer(zero_state,one_state),outer(one_state,zero_state))
-    # one_coupling = one_coupling + one_coupling.conj().T
-    # H0 = tensor(g*one_coupling)
-    H0 = tensor(kron(sx,sx))
+    # def qubitSubspace(gate):
+    #     gate = np.delete(gate,2,0)
+    #     gate = np.delete(gate,2,1)
+    #     return gate[:4,:4]
+    # H = np.zeros([3 ** 2, 3 ** 2])
+    # H[1,3] = 1
+    # H[2,3] = 1
+    # H0 = H + H.transpose()
+    # H0 = torch.tensor(g*qubitSubspace(H0))
+    H0 = tensor(g*kron(sx,sx))
 
 
     #Unitary group generation

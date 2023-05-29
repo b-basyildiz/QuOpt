@@ -6,12 +6,13 @@ import os
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 rs_count = 50
 iteration_count = 5000
-mainDir = "CNOT_Qubit"
+#mainDir = "iSWAP_Protocol"
 
 #Input from Control Manger
 mlType = str(sys.argv[1])
 gateType = str(sys.argv[2])
 t = float(sys.argv[3])/20 #20 is the number of points. Input is [0,..,20]
+mainDir = gateType + "_Protocol"
 
 #Static Parameters
 dt = torch.cdouble #data type 
@@ -20,14 +21,12 @@ g = None
 Fidelities = []
 Times = []
 fname = gateType + "_" + mlType
-#mainDir = "RandomSeed_Output"
-if mlType != "Qubit": mainDir = "NOP_Cont"
 
 #Picking Specific ML (condense all ML into a singular modal file later)
 if mlType == "Qubit" or mlType == "Qubit_gRoot2": from randomSeed_ML import fidelity_ml
 elif mlType == "Ashabb": from randomSeed_AML import fidelity_ml
 elif mlType == "ZXG_Protocol_Sub": from ZXG_subProtocol_ML import fidelity_ml
-elif mlType == "ZXG_Protocol_Full": from ZXG_Protocol_ML import fidelity_ml
+elif mlType == "Qutrit": from ZXG_Protocol_ML import fidelity_ml
 elif mlType == "Qubit_nop": from nop_QBML import fidelity_ml
 elif mlType == "Qutrit_nop": from nop_QTML import fidelity_ml
 elif mlType == "Qutrit_nop2": from nop_QTML2 import fidelity_ml
@@ -50,9 +49,12 @@ if mlType == "Qubit" or mlType == "Qubit_gRoot2" or mlType == "Qubit_nop":
     if mlType == "Qubit" or mlType == "Qubit_nop":
         g = 1
     elif mlType == "Qubit_gRoot2":
-        g = np.sqrt(2)
+        if gateType == "CNOT":
+            g = 3
+        else:
+            g = np.sqrt(2)
     else: raise Exception("Invalid Qubit ML Type")
-elif mlType == "Ashabb" or mlType == "ZXG_Protocol_Sub" or mlType == "ZXG_Protocol_Full" or mlType == "Qutrit_nop" or mlType == "Qutrit_nop2":
+elif mlType == "Ashabb" or mlType == "ZXG_Protocol_Sub" or mlType == "Qutrit" or mlType == "Qutrit_nop" or mlType == "Qutrit_nop2":
     if gateType == "CNOT": tgate = torch.tensor([[1,0,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0],[0,0,0,1,0,0,0,0,0],[0,0,0,0,0,1,0,0,0],[0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,1]],dtype=dt)
     elif gateType == "iSWAP": tgate = torch.tensor([[1,0,0,0,0,0,0,0,0],[0,0,0,1j,0,0,0,0,0],[0,0,1,0,0,0,0,0,0],[0,1j,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0],[0,0,0,0,0,1,0,0,0], [0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,1]],dtype=dt)
     elif gateType == "SWAP": tgate = torch.tensor([[1,0,0,0,0,0,0,0,0],[0,0,0,1,0,0,0,0,0],[0,0,1,0,0,0,0,0,0],[0,1,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0],[0,0,0,0,0,1,0,0,0], [0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,1]],dtype=dt)
@@ -80,7 +82,7 @@ except:
 #print(fname)
 
 
-#Random Seed averagging 
+#Random Seed averaging 
 max_fidelity = 0
 seeds = np.random.randint(0,100,size=rs_count)
 for s in seeds:
