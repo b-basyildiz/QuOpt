@@ -1,0 +1,670 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     23976,        662]
+NotebookOptionsPosition[     19603,        579]
+NotebookOutlinePosition[     19995,        595]
+CellTagsIndexPosition[     19952,        592]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Thesis Work ", "Title",
+ CellChangeTimes->{{3.8938862906444597`*^9, 
+  3.893886291974951*^9}},ExpressionUUID->"b914f129-5fc9-4b85-b425-\
+8291147d7f1d"],
+
+Cell["By Bora Basyildiz", "Text",
+ CellChangeTimes->{{3.896184745753983*^9, 
+  3.8961847488535147`*^9}},ExpressionUUID->"e81d77dd-c52f-4fb9-af3e-\
+e0e3a561d5a3"],
+
+Cell[CellGroupData[{
+
+Cell["06/20/23 Meeting", "Section",
+ CellChangeTimes->{{3.896184756062636*^9, 
+  3.896184766436574*^9}},ExpressionUUID->"3c572ba5-3c37-4d69-bdf0-\
+5739438b42ac"],
+
+Cell["\<\
+This week we will look at the operator norm of the Ashhab Coupling \
+Hamiltonian in hopes to derive an analytical proof for a qudit system \
+speed-limit. \
+\>", "Text",
+ CellChangeTimes->{{3.896184771341395*^9, 
+  3.8961848330823183`*^9}},ExpressionUUID->"4d94fee9-e51d-418d-98fd-\
+8196de53e9bc"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["06/13/23 Meeting ", "Section",
+ CellChangeTimes->{{3.895433495052348*^9, 
+  3.8954335020843277`*^9}},ExpressionUUID->"1bc726ad-dfaa-46e6-b5fa-\
+049d528708e1"],
+
+Cell[CellGroupData[{
+
+Cell["Analytical Protocol for 4 Coupling Protocol", "Subsection",
+ CellChangeTimes->{{3.89543350840665*^9, 3.895433511993554*^9}, {
+  3.895433581441112*^9, 3.895433584640044*^9}, {3.895433954959347*^9, 
+  3.89543398933342*^9}},ExpressionUUID->"63de46b6-1a07-4b28-a0be-\
+662577acad5b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"H", " ", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"0", "0", "0", "0", "1", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "1", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+      {"1", "0", "1", "0", "0", "0", "1", "0", "1"},
+      {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "1", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+      {"0", "0", "0", "0", "1", "0", "0", "0", "0"}
+     }], ")"}]}], ";", 
+  RowBox[{"qx", "=", 
+   RowBox[{"(", GridBox[{
+      {"0", "0", "1"},
+      {"0", "0", "0"},
+      {"1", "0", "0"}
+     }], ")"}]}], ";", " ", 
+  RowBox[{"qy", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"0", "0", 
+       RowBox[{"-", "\[ImaginaryI]"}]},
+      {"0", "0", "0"},
+      {"\[ImaginaryI]", "0", "0"}
+     }], ")"}]}], ";", 
+  RowBox[{"x", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"0", "1", "0"},
+      {"1", "0", "0"},
+      {"0", "0", "0"}
+     }], ")"}]}], ";", 
+  RowBox[{"psi", " ", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"1"},
+      {"0"},
+      {"0"},
+      {"0"},
+      {"0"},
+      {"0"},
+      {"0"},
+      {"0"},
+      {"0"}
+     }], ")"}]}], ";", 
+  RowBox[{"U1", "=", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "\[ImaginaryI]"}], "*", "qy", "*", 
+       FractionBox["\[Pi]", "4"]}], "]"}], ",", 
+     RowBox[{"IdentityMatrix", "[", "3", "]"}]}], "]"}]}], ";", 
+  RowBox[{"U2", "=", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{
+     RowBox[{"IdentityMatrix", "[", "3", "]"}], ",", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "\[ImaginaryI]"}], "*", "qy", "*", 
+       FractionBox["\[Pi]", "4"]}], "]"}]}], "]"}]}], ";", 
+  RowBox[{"X2", " ", "=", " ", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{
+     RowBox[{"IdentityMatrix", "[", "3", "]"}], ",", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "\[ImaginaryI]"}], "*", "x", "*", 
+       FractionBox[
+        RowBox[{"-", "\[Pi]"}], "2"]}], "]"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.895433991227996*^9, 3.895434247336751*^9}, {
+  3.8954347256380796`*^9, 3.895434786015831*^9}, {3.895758304567391*^9, 
+  3.895758319188197*^9}, {3.895760747849146*^9, 3.895760770363771*^9}, {
+  3.895760814225164*^9, 3.895760928905406*^9}, {3.895761131776566*^9, 
+  3.895761240543138*^9}},
+ CellLabel->"In[98]:=",ExpressionUUID->"6eafed8e-5e84-46e2-827c-4650d8a33434"],
+
+Cell["Apply X_2 on each side of the protocol ", "Text",
+ CellChangeTimes->{{3.895661730054636*^9, 
+  3.895661738491037*^9}},ExpressionUUID->"3e962ac3-0179-4cd6-9ca6-\
+a253f408320d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"MatrixExp", "[", 
+   RowBox[{
+    RowBox[{"-", "\[ImaginaryI]"}], "*", "qy", "*", 
+    FractionBox["\[Pi]", "4"]}], "]"}], "//", "MatrixForm"}]], "Input",
+ CellChangeTimes->{{3.895788191808866*^9, 3.895788204359498*^9}},
+ CellLabel->
+  "In[114]:=",ExpressionUUID->"a50e614e-03c0-4ebf-b593-e69da7885254"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {
+      FractionBox["1", 
+       SqrtBox["2"]], "0", 
+      RowBox[{"-", 
+       FractionBox["1", 
+        SqrtBox["2"]]}]},
+     {"0", "1", "0"},
+     {
+      FractionBox["1", 
+       SqrtBox["2"]], "0", 
+      FractionBox["1", 
+       SqrtBox["2"]]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.895788192638335*^9, 3.895788205502383*^9}},
+ CellLabel->
+  "Out[114]//MatrixForm=",ExpressionUUID->"829cfe73-3997-47a4-8e3c-\
+3d4a93b646fd"]
+}, Open  ]],
+
+Cell[BoxData[""], "Input",
+ CellChangeTimes->{{3.895434312803409*^9, 3.8954344444456987`*^9}, 
+   3.895434754803958*^9},
+ CellLabel->"In[55]:=",ExpressionUUID->"dab2211a-bb8e-4769-8b97-c555dd650721"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"U", " ", "=", " ", 
+   RowBox[{
+    RowBox[{"-", "1"}], "*", 
+    RowBox[{"X2", ".", 
+     RowBox[{"ConjugateTranspose", "[", "U1", "]"}], ".", 
+     RowBox[{"ConjugateTranspose", "[", "U2", "]"}], ".", 
+     RowBox[{"MatrixExp", "[", 
+      RowBox[{
+       RowBox[{"-", "\[ImaginaryI]"}], "*", 
+       FractionBox["\[Pi]", "4"], "*", "H"}], "]"}], ".", "U2", ".", "U1", 
+     ".", "X2"}]}]}], ";", 
+  RowBox[{"U", "//", "MatrixForm"}]}]], "Input",
+ CellChangeTimes->{{3.895434422751494*^9, 3.8954344317292147`*^9}, {
+  3.8954347635406513`*^9, 3.895434880700091*^9}, {3.8954357073114357`*^9, 
+  3.895435763885524*^9}, {3.895436203514619*^9, 3.895436221995159*^9}, {
+  3.895661282744955*^9, 3.8956612937613153`*^9}, {3.89566149845219*^9, 
+  3.895661506960737*^9}, {3.895760784286813*^9, 3.89576083599129*^9}, {
+  3.895760915765441*^9, 3.8957609264600487`*^9}, {3.895761203951767*^9, 
+  3.895761253150846*^9}},
+ CellLabel->
+  "In[100]:=",ExpressionUUID->"5d08a3b1-e159-4b06-add7-e7d6c22665bc"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", 
+      RowBox[{"-", "\[ImaginaryI]"}], "0", "0", "0", "0", "0"},
+     {"0", "0", 
+      RowBox[{"-", "1"}], "0", "0", "0", "0", "0", "0"},
+     {"0", 
+      RowBox[{"-", "\[ImaginaryI]"}], "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "1", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", 
+      RowBox[{"-", "1"}], "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "1", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "1", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", 
+      RowBox[{"-", "1"}]}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.895760833424033*^9, 3.895760931073367*^9}, {
+  3.895761174725501*^9, 3.8957612537866507`*^9}},
+ CellLabel->
+  "Out[100]//MatrixForm=",ExpressionUUID->"169fbd72-23eb-482c-bc6b-\
+f13bdcbdc544"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ConjugateTranspose", "[", "U", "]"}], "//", 
+  "MatrixForm"}]], "Input",
+ CellChangeTimes->{{3.895661298438355*^9, 3.895661309064987*^9}},
+ CellLabel->"In[57]:=",ExpressionUUID->"39bc02a8-9d30-4e97-914b-f7a0fa26fa57"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"0", "0", "0", "0", "\[ImaginaryI]", "0", "0", "0", "0"},
+     {"0", "1", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "1", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "1", "0", "0", "0", "0", "0"},
+     {"\[ImaginaryI]", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "1", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "1", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "1", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "1"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.8956613063503723`*^9, 3.895661309356552*^9}, 
+   3.895760777458005*^9},
+ CellLabel->
+  "Out[57]//MatrixForm=",ExpressionUUID->"9158210d-8480-496c-8f14-\
+ab1dbf812dc6"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["05/25/23 Meeting ", "Section",
+ CellChangeTimes->{{3.893886303370339*^9, 
+  3.893886308530315*^9}},ExpressionUUID->"bebbd396-1bc1-4163-868a-\
+1235c8ddae67"],
+
+Cell[CellGroupData[{
+
+Cell["Fixing the HPC Error", "Subsection",
+ CellChangeTimes->{{3.893886972435738*^9, 
+  3.8938869795505943`*^9}},ExpressionUUID->"2ccbbd09-f767-4d7d-a0eb-\
+85a4cbdc832a"],
+
+Cell["\<\
+The error from the HPC was a small one but was having a significant effect. \
+While I was specifying 1 CPU with 1 node, there was a line that was \
+\[OpenCurlyQuote]#SBATCH --exclusive.\[CloseCurlyQuote] This means that I am \
+the only one using the cores on the node that I specified (there are 36 cores \
+in one node). Hence my code is using one core in one node while allocating \
+space for all other 35 cores, leading to inefficiency. This is quite \
+frustrating as the \[OpenCurlyQuote]#SBATCH --exclusive\[CloseCurlyQuote] is \
+used in all the HPC examples and  recommended scripts. Thus I wish the HPC \
+team specified exactly what this line did, and how it should be used. \
+However, I have my access back and that\[CloseCurlyQuote]s all that really \
+matters. \
+\>", "Text",
+ CellChangeTimes->{{3.893886980618593*^9, 3.8938870127475452`*^9}, {
+  3.89388708016765*^9, 
+  3.893887277822426*^9}},ExpressionUUID->"62f0d26e-2572-4ce6-a11a-\
+d302258551f1"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Number Operator for Qubits ", "Subsection",
+ CellChangeTimes->{{3.8938863143926067`*^9, 
+  3.893886326337492*^9}},ExpressionUUID->"962ce2ce-7b4f-4257-a907-\
+58558b4d5722"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"n", "=", 
+   RowBox[{"(", GridBox[{
+      {"0", "0"},
+      {"0", "1"}
+     }], ")"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.8938863287732353`*^9, 3.893886356080285*^9}, {
+  3.893886392686393*^9, 3.8938863981298513`*^9}, {3.893886468448594*^9, 
+  3.893886508296735*^9}},
+ CellLabel->"In[25]:=",ExpressionUUID->"ee588d5d-e7cb-47bd-ba7b-2b60a1615a6c"],
+
+Cell["\<\
+This above operator is the number operator for a qubit system. Note that it \
+is diagonal, and has entries 0 and 1 for the qubit number (on the row). Now \
+using this for a coupling Hamiltonian, we have \
+\>", "Text",
+ CellChangeTimes->{{3.89388635308689*^9, 
+  3.893886430835638*^9}},ExpressionUUID->"838802f6-882a-4fc8-9dd0-\
+e349c4095f96"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"H0", " ", "=", " ", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{"n", ",", "n"}], "]"}]}], ";", 
+  RowBox[{"H0", "//", "MatrixForm"}]}]], "Input",
+ CellChangeTimes->{{3.8938864350908413`*^9, 3.893886452458232*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"7eb7d14f-9aa5-456e-904d-04867de3a155"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"0", "0", "0", "0"},
+     {"0", "0", "0", "0"},
+     {"0", "0", "0", "0"},
+     {"0", "0", "0", "1"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.89388645274716*^9, 3.893886462351355*^9}, 
+   3.893886511042736*^9, {3.893948015927672*^9, 3.8939480393490953`*^9}},
+ CellLabel->
+  "Out[26]//MatrixForm=",ExpressionUUID->"6fd090f6-23bf-45d9-b046-\
+9793a9f414e9"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Eigenvalues", "[", "H0", "]"}]], "Input",
+ CellChangeTimes->{{3.8939480031635942`*^9, 3.893948010496372*^9}},
+ CellLabel->"In[27]:=",ExpressionUUID->"19ec60f0-46a5-4541-8236-0a5ea0376278"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}]], "Output",
+ CellChangeTimes->{{3.893948020608526*^9, 3.893948039355482*^9}},
+ CellLabel->"Out[27]=",ExpressionUUID->"957595ea-4598-46c9-b90b-6a50c1ebc3fd"]
+}, Open  ]],
+
+Cell[TextData[{
+ "Now we will use this as the coupling Hamiltonian for a qubit system, \
+testing it for the CNOT gate. The next question is, what is the minimum time \
+for the CNOT gate given this coupling matrix. This was given by Prof. Gong as \
+",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["T", "min"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "41323589-5b71-4c80-af6f-b57df0d8cb85"],
+ "= \[Pi]. I need to look into the Cirac & Vidal paper to see why this is the \
+case .\n\nHowever, we will now extend this to the qutrit case and see if \
+there is a speedup. Redefining our number operator for the qutrit system, we \
+have"
+}], "Text",
+ CellChangeTimes->{{3.893886520771121*^9, 3.8938866255669947`*^9}, {
+  3.893886808847386*^9, 
+  3.893886829587923*^9}},ExpressionUUID->"75b9057d-12ba-4237-9ac9-\
+e75459d8b91a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"n", " ", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"0", "0", "0"},
+      {"0", "1", "0"},
+      {"0", "0", "2"}
+     }], ")"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.893886630626178*^9, 3.893886678312495*^9}},
+ CellLabel->"In[28]:=",ExpressionUUID->"f1fb4b92-8525-4388-9004-50cdfea3ccc5"],
+
+Cell["Now for our coupling Hamiltonian, we have ", "Text",
+ CellChangeTimes->{{3.893886680845522*^9, 
+  3.8938866859742002`*^9}},ExpressionUUID->"ab15a13c-63ce-435a-8ddd-\
+adcac09b8435"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"H0", " ", "=", " ", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{"n", ",", "n"}], "]"}]}], ";", 
+  RowBox[{"H0", "//", "MatrixForm"}]}]], "Input",
+ CellChangeTimes->{{3.893886688237884*^9, 3.89388669786514*^9}},
+ CellLabel->"In[29]:=",ExpressionUUID->"540fb2d2-2d26-4a10-8bf0-cc524d8d0974"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "1", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "2", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "2", "0"},
+     {"0", "0", "0", "0", "0", "0", "0", "0", "4"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.89388669813201*^9, 3.8938867018494043`*^9}, 
+   3.893947887791629*^9, {3.8939480206336517`*^9, 3.893948039383198*^9}},
+ CellLabel->
+  "Out[29]//MatrixForm=",ExpressionUUID->"f9a3c9b7-dfd0-4512-a605-\
+c5cec70005ec"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Eigenvalues", "[", "H0", "]"}]], "Input",
+ CellLabel->"In[30]:=",ExpressionUUID->"9982e738-d9c2-407c-835d-e554402726bf"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "4", ",", "2", ",", "2", ",", "1", ",", "0", ",", "0", ",", "0", ",", "0", 
+   ",", "0"}], "}"}]], "Output",
+ CellChangeTimes->{3.8939480394057207`*^9},
+ CellLabel->"Out[30]=",ExpressionUUID->"9bbc692c-3e23-408d-9c20-69052997b104"]
+}, Open  ]],
+
+Cell[TextData[{
+ "The speed limit for a CNOT gate with this coupling matrix is an open \
+research question, but we will compare it to the qubit case with ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["T", "min"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "0137af9b-ebb0-4118-89bd-b94f36ee0d9c"],
+ "= \[Pi]. "
+}], "Text",
+ CellChangeTimes->{{3.893886783502037*^9, 
+  3.8938868250603037`*^9}},ExpressionUUID->"32e0170b-0fdf-4f43-873c-\
+e157848df881"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Even comparison to Ashabb Hamiltonian", "Subsection",
+ CellChangeTimes->{{3.8939453467171307`*^9, 
+  3.893945368655161*^9}},ExpressionUUID->"0273e1d5-1efd-49ba-a989-\
+efa88ee428db"],
+
+Cell["\<\
+Previously the flip-flop Hamiltonian was used to compare to the Ashabb Qutrit \
+system. The correct coupling to compare to the Ashabb system is to use the XX \
+coupling, which is\
+\>", "Text",
+ CellChangeTimes->{{3.893945371013969*^9, 
+  3.893945421243216*^9}},ExpressionUUID->"a5cc8bf9-0cac-4ce2-b23c-\
+3378207b46ae"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"X", " ", "=", " ", 
+   RowBox[{"(", GridBox[{
+      {"0", "1"},
+      {"1", "0"}
+     }], ")"}]}], ";", " ", 
+  RowBox[{"H0", "=", " ", 
+   RowBox[{"KroneckerProduct", "[", 
+    RowBox[{"X", ",", "X"}], "]"}]}], ";", " ", 
+  RowBox[{"H0", "//", "MatrixForm"}]}]], "Input",
+ CellChangeTimes->{{3.893945422197721*^9, 3.89394546460495*^9}},
+ CellLabel->"In[16]:=",ExpressionUUID->"d530ef32-1186-4855-b0d9-ec48d5d4243d"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"0", "0", "0", "1"},
+     {"0", "0", "1", "0"},
+     {"0", "1", "0", "0"},
+     {"1", "0", "0", "0"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.89394546511222*^9},
+ CellLabel->
+  "Out[16]//MatrixForm=",ExpressionUUID->"be907dcb-8662-4a9a-949f-\
+8aed4a5970b4"]
+}, Open  ]],
+
+Cell[BoxData[""], "Input",
+ CellChangeTimes->{{3.8954342839065037`*^9, 
+  3.895434287270218*^9}},ExpressionUUID->"625b9a94-c5bb-407f-b44a-\
+fddfb016b2e9"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{Full, Full},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (July 9, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"3b74af5c-ee90-4c83-9ca8-f2708152cf76"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 157, 3, 98, "Title",ExpressionUUID->"b914f129-5fc9-4b85-b425-8291147d7f1d"],
+Cell[740, 27, 161, 3, 35, "Text",ExpressionUUID->"e81d77dd-c52f-4fb9-af3e-e0e3a561d5a3"],
+Cell[CellGroupData[{
+Cell[926, 34, 161, 3, 67, "Section",ExpressionUUID->"3c572ba5-3c37-4d69-bdf0-5739438b42ac"],
+Cell[1090, 39, 306, 7, 35, "Text",ExpressionUUID->"4d94fee9-e51d-418d-98fd-8196de53e9bc"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1433, 51, 164, 3, 67, "Section",ExpressionUUID->"1bc726ad-dfaa-46e6-b5fa-049d528708e1"],
+Cell[CellGroupData[{
+Cell[1622, 58, 284, 4, 54, "Subsection",ExpressionUUID->"63de46b6-1a07-4b28-a0be-662577acad5b"],
+Cell[1909, 64, 2560, 75, 580, "Input",ExpressionUUID->"6eafed8e-5e84-46e2-827c-4650d8a33434"],
+Cell[4472, 141, 181, 3, 35, "Text",ExpressionUUID->"3e962ac3-0179-4cd6-9ca6-a253f408320d"],
+Cell[CellGroupData[{
+Cell[4678, 148, 338, 8, 44, "Input",ExpressionUUID->"a50e614e-03c0-4ebf-b593-e69da7885254"],
+Cell[5019, 158, 869, 29, 96, "Output",ExpressionUUID->"829cfe73-3997-47a4-8e3c-3d4a93b646fd"]
+}, Open  ]],
+Cell[5903, 190, 199, 3, 30, "Input",ExpressionUUID->"dab2211a-bb8e-4769-8b97-c555dd650721"],
+Cell[CellGroupData[{
+Cell[6127, 197, 1026, 22, 44, "Input",ExpressionUUID->"5d08a3b1-e159-4b06-add7-e7d6c22665bc"],
+Cell[7156, 221, 1264, 32, 178, "Output",ExpressionUUID->"169fbd72-23eb-482c-bc6b-f13bdcbdc544"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8457, 258, 252, 5, 30, "Input",ExpressionUUID->"39bc02a8-9d30-4e97-914b-f7a0fa26fa57"],
+Cell[8712, 265, 1130, 27, 178, "Output",ExpressionUUID->"9158210d-8480-496c-8f14-ab1dbf812dc6"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9903, 299, 162, 3, 67, "Section",ExpressionUUID->"bebbd396-1bc1-4163-868a-1235c8ddae67"],
+Cell[CellGroupData[{
+Cell[10090, 306, 170, 3, 54, "Subsection",ExpressionUUID->"2ccbbd09-f767-4d7d-a0eb-85a4cbdc832a"],
+Cell[10263, 311, 969, 16, 81, "Text",ExpressionUUID->"62f0d26e-2572-4ce6-a11a-d302258551f1"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11269, 332, 177, 3, 54, "Subsection",ExpressionUUID->"962ce2ce-7b4f-4257-a907-58558b4d5722"],
+Cell[11449, 337, 387, 10, 45, "Input",ExpressionUUID->"ee588d5d-e7cb-47bd-ba7b-2b60a1615a6c"],
+Cell[11839, 349, 352, 7, 35, "Text",ExpressionUUID->"838802f6-882a-4fc8-9dd0-e349c4095f96"],
+Cell[CellGroupData[{
+Cell[12216, 360, 333, 7, 30, "Input",ExpressionUUID->"7eb7d14f-9aa5-456e-904d-04867de3a155"],
+Cell[12552, 369, 791, 22, 94, "Output",ExpressionUUID->"6fd090f6-23bf-45d9-b046-9793a9f414e9"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13380, 396, 212, 3, 30, "Input",ExpressionUUID->"19ec60f0-46a5-4541-8236-0a5ea0376278"],
+Cell[13595, 401, 238, 4, 34, "Output",ExpressionUUID->"957595ea-4598-46c9-b90b-6a50c1ebc3fd"]
+}, Open  ]],
+Cell[13848, 408, 843, 18, 104, "Text",ExpressionUUID->"75b9057d-12ba-4237-9ac9-e75459d8b91a"],
+Cell[14694, 428, 328, 9, 61, "Input",ExpressionUUID->"f1fb4b92-8525-4388-9004-50cdfea3ccc5"],
+Cell[15025, 439, 186, 3, 35, "Text",ExpressionUUID->"ab15a13c-63ce-435a-8ddd-adcac09b8435"],
+Cell[CellGroupData[{
+Cell[15236, 446, 330, 7, 30, "Input",ExpressionUUID->"540fb2d2-2d26-4a10-8bf0-cc524d8d0974"],
+Cell[15569, 455, 1153, 27, 178, "Output",ExpressionUUID->"f9a3c9b7-dfd0-4512-a605-c5cec70005ec"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[16759, 487, 144, 2, 30, "Input",ExpressionUUID->"9982e738-d9c2-407c-835d-e554402726bf"],
+Cell[16906, 491, 273, 6, 34, "Output",ExpressionUUID->"9bbc692c-3e23-408d-9c20-69052997b104"]
+}, Open  ]],
+Cell[17194, 500, 473, 12, 35, "Text",ExpressionUUID->"32e0170b-0fdf-4f43-873c-e157848df881"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17704, 517, 187, 3, 54, "Subsection",ExpressionUUID->"0273e1d5-1efd-49ba-a989-efa88ee428db"],
+Cell[17894, 522, 328, 7, 35, "Text",ExpressionUUID->"a5cc8bf9-0cac-4ce2-b23c-3378207b46ae"],
+Cell[CellGroupData[{
+Cell[18247, 533, 451, 12, 45, "Input",ExpressionUUID->"d530ef32-1186-4855-b0d9-ec48d5d4243d"],
+Cell[18701, 547, 693, 21, 94, "Output",ExpressionUUID->"be907dcb-8662-4a9a-949f-8aed4a5970b4"]
+}, Open  ]],
+Cell[19409, 571, 154, 3, 30, "Input",ExpressionUUID->"625b9a94-c5bb-407f-b44a-fddfb016b2e9"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
