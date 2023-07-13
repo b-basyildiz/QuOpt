@@ -1,13 +1,11 @@
-scp /Users/borabasyildiz/Documents/Thesis/Qutrit_ML/Wendian_Scripts/fidelity_subQutrit.py bbasyildiz@wendian.mines.edu:~/scratch
-
-scp /Users/borabasyildiz/Documents/Thesis/Qutrit_ML/Wendian_Scripts/Qutrit_ML.py bbasyildiz@wendian.mines.edu:~/scratch
-
 module load apps/python3/2020.02
 
 ssh bbasyildiz@wendian.mines.edu
 
 Nomadic$vail111991
 
-scp -r bbasyildiz@wendian.mines.edu:~/scratch/Figures /Users/borabasyildiz/Desktop
+scp -r bbasyildiz@wendian.mines.edu:~/scratch/ML_Output '/Users/borabasyildiz/Documents/Thesis/Qutrit_ML'
 
 squeue -u $USER | awk '{print $1}' | tail -n+2 | xargs scancel
+
+scp '/Users/borabasyildiz/Documents/Thesis/Qutrit_ML/Wendian_Scripts/Universal_Gates/fullControl.py' bbasyildiz@wendian.mines.edu:~/scratch

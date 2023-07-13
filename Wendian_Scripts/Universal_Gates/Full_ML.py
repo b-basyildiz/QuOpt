@@ -5,7 +5,7 @@ import torch
 from itertools import product
 import numpy as np
 
-def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives):
+def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -54,8 +54,8 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives):
             pauli_temp = torch.tensor(np.kron(pauli_temp,gate))
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
-            #total_pauli = total_pauli + maxFreq*torch.cos(coef[i])*pauli_temp
-            total_pauli = total_pauli + coef[i]*pauli_temp
+            if maxDriveStrength == -1: total_pauli = total_pauli + coef[i]*pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
+            else: total_pauli = total_pauli + maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
     
     def gen_SU():
