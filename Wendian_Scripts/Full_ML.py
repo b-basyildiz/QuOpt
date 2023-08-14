@@ -1,11 +1,12 @@
 #Imports are here too to export block to Wendian script
-from numpy import array,zeros,kron
-from torch import matmul,trace,matrix_exp,tensor,manual_seed
+from numpy import array,zeros,kron,exp,diag,concatenate
+from torch import matmul,trace,matrix_exp,tensor,manual_seed,flip
 import torch
 from itertools import product
 import numpy as np
+from helperFuncs import *
 
-def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
+def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,ctVal,stag):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -17,35 +18,30 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
     DESC: This function does both qubit and qutrit optimizations for a given random seed and 
           coupling matrix. 
     """
-    #Variable Initializations
+
+
+    #Modeling Type
+    ctBool= True
+    if crossTalk == "False": ctBool = False
+    if leakage: #for modeling leakage
+        quditDrives = drives[1]
+        anharm = drives[2]
+        drives = drives[0]
+        anharmVal = float(anharm[-1,-1])
+
+    #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
     level = len(drives[0])
     manual_seed(rseed)
+    #torch.set_default_dtype(torch.cdouble)
     dt = torch.cdouble
     infidelity_list=torch.zeros([N_iter,1])
     id = np.eye(level)
     H0 = tensor(H0,dtype=dt) #if H0 is numpy array, convert to torch tensor 
     input_gate = tensor(input_gate,dtype=dt)
-    Diagonal = False
-
-
-    #Diagonal Entry calculation
-    if torch.all(H0 == 0):
-        dentries = tensor(np.random.rand(5),dtype=dt)*2*np.pi
-        dentries.requires_grad = True
-        temp_vec = tensor([0,0,1,0])
-        catvec = torch.cat((temp_vec, torch.cos(dentries)), dim=0)
-        H0 = np.zeros([3 ** 2, 3 ** 2])
-        H0 = torch.tensor(H0)
-        H0[2,2] = 1
-        for i in range(5):
-            H0[3 ** 2 - i-1,3 ** 2 - i-1] = 1
-        H0 = torch.mul(H0,catvec)
-        Diagonal = True
-
 
     #Sums Pauli gates with coefficients 
-    def sum_pauli(coef, gate):
+    def sum_pauli(coef, gate,tm=0,aval=0):
         total_pauli = torch.tensor(zeros([level ** N, level ** N]))
         for i in range(0,N):
             pauli_temp = 1
@@ -54,8 +50,9 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
             pauli_temp = torch.tensor(np.kron(pauli_temp,gate))
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
-            if maxDriveStrength == -1: total_pauli = total_pauli + coef[i]*pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
-            else: total_pauli = total_pauli + maxDriveStrength*torch.cos(coef[i])*pauli_temp
+            phase = tensor(exp((-1) ** (i+1) * (stag+aval)*tm))  #time dependent phase, only non-zero for cross talk modeling 
+            if maxDriveStrength == -1: total_pauli = total_pauli + phase*coef[i]*pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
+            else: total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
     
     def gen_SU():
@@ -63,27 +60,21 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
         pauli_int = [1,2,3,4]
         perms = list(product(pauli_int,repeat=N))#all permutations of paulis
 
-        #Paul Matrices only in the qubit space 
-        if level == 2:
-            sx = array([[0, 1], [1, 0]])
-            sy = array([[0,-1j],[1j,0]])
-            sz = array([[1, 0], [0, -1]])
-            id = array([[1,0],[0,1]])
-        elif level == 3 :
-            sx = array([[0, 1, 0], [1, 0, 0], [0, 0, 0]]) 
-            sy = array([[0,-1j, 0],[1j,0, 0], [0, 0, 0]]) 
-            sz = array([[1, 0, 0], [0, -1, 0], [0, 0, 0]]) 
-            id = array([[1, 0, 0],[0, 1, 0],[0, 0, 0]]) #note that id has to redefined as it is non-unitary in the SU(2) subgroup of qutrits. This will not override the parent id variable.
-        else: raise Exception("Incorrect qudit level! (either 2 or 3)")
+        sxqb = genDrive(level,1,"x")
+        syqb = genDrive(level,1,"y")
+        idqb = zeros((level, level))
+        idqb[0,0] = 1  
+        idqb[1,1] = 1
+        szqb = diag(concatenate((array([1,-1]),array((level-2)*[0]))))
 
         #Making Pauli Basis
         for p in perms:
                 unitary = 1
                 for pauli in p:
-                    if pauli == 1: unitary = tensor(kron(unitary,sx),dtype=dt)
-                    elif pauli == 2: unitary = tensor(kron(unitary,sy),dtype=dt)
-                    elif pauli == 3: unitary = tensor(kron(unitary,sz),dtype=dt)
-                    elif pauli == 4: unitary = tensor(kron(unitary,id),dtype=dt)
+                    if pauli == 1: unitary = tensor(kron(unitary,sxqb),dtype=dt)
+                    elif pauli == 2: unitary = tensor(kron(unitary,syqb),dtype=dt)
+                    elif pauli == 3: unitary = tensor(kron(unitary,idqb),dtype=dt)
+                    elif pauli == 4: unitary = tensor(kron(unitary,szqb),dtype=dt)
                 SU.append(unitary)
         return SU
 
@@ -107,6 +98,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
     for n in range(0,N_iter):
         #Creating Drive Hamilontian
         U_Exp = 1
+        segCt = 0
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
         for m in range(0,M):#Product of pulses
@@ -114,7 +106,29 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
             H1 = 0
             for i,d in enumerate(drives):
                 H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-            U_Exp = matmul(matrix_exp(-1j*(H0+H1)*t/M),U_Exp)
+                if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
+            if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+            if ctBool:
+                if crossTalk == "disc":
+                    for mct in range(0,ctVal):
+                        H1mct = H1
+                        for i,d in enumerate(drives):
+                            tct = (segCt*t)/(ctVal*M)
+                            H1mct = H1mct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,tct)  
+                            if leakage: H1mct = H1mct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i% len(quditDrives))],tct,anharmVal)  
+                        segCt += 1
+                        U_Exp = matmul(matrix_exp(-1j*(H0+H1mct)*tct),U_Exp)
+                elif crossTalk == "ode":
+                    def Ht(t):
+                        H1t = H1
+                        for i,d in enumerate(drives):
+                            H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t)  
+                            if leakage: H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i% len(quditDrives))],t,anharmVal)  
+                        return H0 + H1t
+                    U_Exp = RK4(m/M*t,(m+1)/M*t,U_Exp,ctVal,dUdt,Ht)
+                    U_Exp = normU(U_Exp)
+                else: raise Exception("Incorrect way to model Cross Talk. Either ode or disc(rete).")
+            else: U_Exp = matmul(matrix_exp(-1j*(H0+H1)*t/M),U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0
@@ -139,7 +153,11 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength):
         scheduler.step(infidelity)
         optimizer.zero_grad()
 
-        if 1 - infidelity_list[n] >= 99.99: #Stopping condition for high fidelity iterations
-            return infidelity_list.min().item()
-    if not Diagonal: return [1 - infidelity_list.min().item(),R.detach().numpy()]
-    else: return [1 - infidelity_list.min().item(),R.detach().numpy(),dentries.detach().numpy()]
+        # if fidelity.detach() >= 0.9999:
+        #     print("made it to the end 1")
+        #     return [1 - infidelity_list.min().item(),R.detach().numpy()]
+    # for row in U_Exp.detach().numpy():
+    #     for val in row:
+    #         print(round(abs(val),1),end=" ")
+    #     print()
+    return [1 - infidelity_list.min().item(),R.detach().numpy()]
