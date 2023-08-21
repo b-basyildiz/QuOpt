@@ -74,89 +74,7 @@ elif gateType == "iTwoPhonon":
     tmin = np.pi/2
 
 #Coupling Workflow
-if couplingType == "XX":
-    sx = genDrive(level,1,"x")
-    H0 = kron(sx,sx) 
-elif couplingType == "XXX":
-    sx = array([[0, 1, 0], [1, 0, 0], [0, 0, 0]]) 
-    sxx = array([[0,0,0],[0,0,1],[0,1,0]])
-    H0 = kron(sx,sx) + kron(sxx,sxx)
-elif couplingType == "ZZ":
-    if level == 2:
-        sz = array([[1,0],[0,-1]])
-        id = array([[1,0],[0,1]])
-    elif level == 3:
-        sz = array([[1,0,0],[0,-1,0],[0,0,0]])
-        id = array([[1,0,0],[0,1,0],[0,0,1]])
-    H0 = kron(sz,id) + kron(id,sz) + kron(sz,sz)
-elif couplingType == "Ashhab":
-    annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-    create = annhilate.T
-    H0 = kron(annhilate + create,annhilate + create)
-elif couplingType == "AshhUnit":
-    annhilate = array([[0,1,0],[0,0,1],[0,0,0]])
-    create = annhilate.T
-    H0 = kron(annhilate + create,annhilate + create)
-# elif couplingType == "AshhabHopp":
-#     annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-#     create = annhilate.T
-#     H0 = kron(annhilate,create) + kron(create,annhilate)
-# elif couplingType == "AshhabLabFrame":
-#     #Couplings Terms
-#     annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-#     create = annhilate.T
-#     H0 = kron(annhilate + create,annhilate + create)
-#     #Diagonal Entries 
-#     diagEntries = [0, 5.440, 10.681, 4.994, 10.433, 15.666, 9.832, 15.270, 20.506]
-#     for i,d in enumerate(diagEntries):
-#         H0[i,i] = d
-# elif couplingType == "CnotProtocol":
-#     H = np.zeros([3 ** 2, 3 ** 2])
-#     H[3,4] = 1
-#     H[3,5] = 1
-#     H0 = H + H.transpose()
-#     tmin = np.pi/2
-# elif couplingType == "iSwapProtocol":
-#     H = np.zeros([3 ** 2, 3 ** 2])
-#     H[1,3] = 1
-#     H[2,3] = 1
-#     H0 = H + H.transpose()
-elif couplingType == "SpeedUp":
-    H0 = couplHGen(couplingType,level)
-    # H0 = np.zeros([3 ** 2, 3 ** 2])
-    # H0[0,4] = 1
-    # H0[2,4] = np.sqrt(2)
-    # H0[6,4] = np.sqrt(2)
-    # H0[8,4] = 2
-    # H0 = H0 + H0.transpose()
-# elif couplingType[:8] == "AnalyNeg":
-#     vals = [1,-1] * 3
-#     negList = list(permutations(vals,4))
-#     perm = int(couplingType[8:])
-#     negs = negList[perm]
-#     H0 = np.zeros([3 ** 2, 3 ** 2])
-
-#     H0[0,4] = negs[0]*1
-#     H0[2,4] = negs[1]*sqrt(2)
-#     H0[6,4] = negs[2]*sqrt(2)
-#     H0[8,4] = negs[3]*2
-
-#     H0 = H0 + H0.transpose()
-#     couplingType = couplingType[:8]
-# elif couplingType == "AllCouplings":
-#     H0 = np.zeros([3 ** 2, 3 ** 2])
-#     for i in range(9):
-#         if i != 4: H0[i,4] = 1
-#     H0 = H0 + H0.transpose()
-# elif couplingType == "Diagonal":
-#     H0 = np.zeros([3 ** 2, 3 ** 2])
-#     Diagonal = True
-# elif couplingType == "AllCouplingsDiag":
-#     H0 = np.ones([level ** 2, level ** 2])
-#     for i in range(level ** 2):
-#         H0[i,i] = 0
-else: raise Exception("Incorrect Coupling Type. (XX, Ashabb, AshhabOnes, AshhabHopp, AshhabbLabFrame, CnotProtocol, iSwapProtocol, AnalyticalSpeedUp, AllCouplings, Diagonal, AllCouplingsDiag)")
-H0 = g*H0
+H0 = g*genCouplMat(couplingType,level)
 
 #Drives workflow
 if drivesType == "all":
@@ -193,10 +111,13 @@ elif drivesType == "leakage":
             tempDrives.append(genDrive(level,l,"y"))
 
     #anharm = anharmVal*array([[0, 0, 0], [0, 0, 0], [0, 0, 1]]) 
-    anharmVals = array([anharmonicity*(i+1) for i in range(level-2)])
+    # anharmVals = array([anharmonicity*(i+1) for i in range(level-2)])
+    # anharm = zeros((level,level))
+    # for l in range(2,level):
+    #     anharm[-1*(l-1),-1*(l-1)] = anharmVals[::-1][l-2]
+
     anharm = zeros((level,level))
-    for l in range(2,level):
-        anharm[-1*(l-1),-1*(l-1)] = anharmVals[::-1][l-2]
+    anharm[-1,-1] = anharmonicity
 
     drives = [tempDrives,tempLDrives,anharm]
 else: raise Exception("Incorrect amount of drives (all, qtd, yd, twoPhonAll, twoPhonQtd, leakage)")

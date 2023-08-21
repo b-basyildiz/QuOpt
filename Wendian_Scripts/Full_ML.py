@@ -32,6 +32,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
     level = len(drives[0])
+    rseed = 1 #fixed for cross talk testing
     manual_seed(rseed)
     #torch.set_default_dtype(torch.cdouble)
     dt = torch.cdouble

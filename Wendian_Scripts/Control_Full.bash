@@ -1,12 +1,12 @@
 #!/bin/bash
-quditType="Qutrit" #Qubit, Qutrit, 
-gateType="iSWAP" #CNOT, iSWAP, SWAP, iTwoPhonon
-couplingType="SpeedUp" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
+quditType="Qubit" #Qubit, Qutrit, 
+gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
+couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
 segmentNum=1
 g=1
-drivesType="leakage" #all, qtd, yd, twoPhonAll, twoPhonQtd, leakage
+drivesType="all" #all, qtd, yd, twoPhonAll, twoPhonQtd, leakage
 anharmonicity=5 #only used if larger than qubit system
-crossTalk="False" #models Cross Talk (CT), False for not CT, ode[h] for ODE solver, disc[Mct] for discrete segments 
+crossTalk="ode0.01" #models Cross Talk (CT), False for not CT, ode[h] for ODE solver, disc[Mct] for discrete segments 
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 randomSeedCount=1
 points=1
