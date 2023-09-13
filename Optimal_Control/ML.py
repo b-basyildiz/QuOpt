@@ -6,7 +6,7 @@ from itertools import product
 import numpy as np
 from helperFuncs import *
 
-def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,ctVal,stag):
+def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -18,7 +18,6 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     DESC: This function does both qubit and qutrit optimizations for a given random seed and 
           coupling matrix. 
     """
-
 
     #Modeling Type
     ctBool= True
@@ -32,7 +31,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
     level = len(drives[0])
-    rseed = 1 #fixed for cross talk testing
+    #rseed = 1 #fixed for cross talk testing
     manual_seed(rseed)
     #torch.set_default_dtype(torch.cdouble)
     dt = torch.cdouble
@@ -41,8 +40,9 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     H0 = tensor(H0,dtype=dt) #if H0 is numpy array, convert to torch tensor 
     input_gate = tensor(input_gate,dtype=dt)
 
+
     #Sums Pauli gates with coefficients 
-    def sum_pauli(coef, gate,tm=0,aval=0):
+    def sum_pauli(coef, gate,tm=0):
         total_pauli = torch.tensor(zeros([level ** N, level ** N]))
         for i in range(0,N):
             pauli_temp = 1
@@ -51,7 +51,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
             pauli_temp = torch.tensor(np.kron(pauli_temp,gate))
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
-            phase = tensor(exp((-1) ** (i+1) * (stag+aval)*tm))  #time dependent phase, only non-zero for cross talk modeling 
+            phase = tensor(exp((-1) ** (i+1) * 1j*stag*tm))  #time dependent phase, only non-zero for cross talk modeling 
             if maxDriveStrength == -1: total_pauli = total_pauli + phase*coef[i]*pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
             else: total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
@@ -95,13 +95,15 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     optimizer = torch.optim.SGD([R], lr = 0.3, momentum=0.99, nesterov=True)
     scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',min_lr=0.03, factor=0.3, patience= 20)
 
-    # Generating time evolution and optimizing 
+    # Generating time evolution and optimizing
+
     for n in range(0,N_iter):
         #Creating Drive Hamilontian
         U_Exp = 1
         segCt = 0
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
+
         for m in range(0,M):#Product of pulses
             pulse_coef = R[m]
             H1 = 0
@@ -109,27 +111,26 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
                 H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
                 if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
             if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+            H = H0 + H1
             if ctBool:
-                if crossTalk == "disc":
-                    for mct in range(0,ctVal):
-                        H1mct = H1
-                        for i,d in enumerate(drives):
-                            tct = (segCt*t)/(ctVal*M)
-                            H1mct = H1mct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,tct)  
-                            if leakage: H1mct = H1mct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i% len(quditDrives))],tct,anharmVal)  
-                        segCt += 1
-                        U_Exp = matmul(matrix_exp(-1j*(H0+H1mct)*tct),U_Exp)
-                elif crossTalk == "ode":
-                    def Ht(t):
-                        H1t = H1
-                        for i,d in enumerate(drives):
-                            H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t)  
-                            if leakage: H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i% len(quditDrives))],t,anharmVal)  
-                        return H0 + H1t
-                    U_Exp = RK4(m/M*t,(m+1)/M*t,U_Exp,ctVal,dUdt,Ht)
-                    U_Exp = normU(U_Exp)
-                else: raise Exception("Incorrect way to model Cross Talk. Either ode or disc(rete).")
-            else: U_Exp = matmul(matrix_exp(-1j*(H0+H1)*t/M),U_Exp)
+                def Ht(tin):
+                    H1t = torch.zeros((len(H),len(H)))
+                    for i,d in enumerate(drives):
+                        H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,tin)  #Cross talk drives with time dependet phases and fliped coefficients. 
+                    H1t = H1t + H1t.conj().T # Hermitian Conjugate
+                    return H + H1t
+                #htemp = h*t/M
+                if crossTalk == "RK2": U_Exp = normU(RK2(m/M*t,(m+1)/M*t,U_Exp,h,dUdt,Ht))
+                elif crossTalk == "SV2": U_Exp = SV2(m/M*t,(m+1)/M*t,U_Exp,h,Ht)
+                elif crossTalk == "SRK2": U_Exp = SRK2(m/M*t,(m+1)/M*t,U_Exp,h,Ht)
+                else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
+                #U_ExpCT = normU(U_ExpCT)
+                #U_Exp = (matmul(U_ExpCT,U_Exp)) # Matrix evolution
+            else: 
+                #normPrint(U_Exp)
+                U_Exp = matmul(matrix_exp(-1j*(H)*t/M),U_Exp)
+                #normPrint((U_Exp.detach().numpy()))
+            #print(U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0
@@ -147,7 +148,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
         infidelity.backward(retain_graph=True)
 
         #Printing statement
-        #if (n+1)%100==0: print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
+        #if (n+1)%1==0: print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
 
         #optimizer 
         optimizer.step()

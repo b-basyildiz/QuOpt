@@ -15,22 +15,21 @@ segmentCount = int(sys.argv[4])
 drivesType = str(sys.argv[5]) #all, qutrits, y
 anharmonicity = float(sys.argv[6])
 crossTalk = str(sys.argv[7])
-g = float(sys.argv[8])#coupling strength
-stag = float(sys.argv[9])#staggering of two qubits
-rsCount = int(sys.argv[10])#random seed count
-tNum = int(sys.argv[11])#number of points
-iterationCount = int(sys.argv[12])#number of iterations
-maxDriveStrength = int(sys.argv[13])
-maxTime = float(sys.argv[14]) #maximum time (T/Tmin)
-t = float(sys.argv[15])/tNum # Input is [0,..,number of points]
+h = float(sys.argv[8])
+g = float(sys.argv[9])#coupling strength
+stag = float(sys.argv[10])#staggering of two qubits
+rsCount = int(sys.argv[11])#random seed count
+tNum = int(sys.argv[12])#number of points
+iterationCount = int(sys.argv[13])#number of iterations
+maxDriveStrength = int(sys.argv[14])
+maxTime = float(sys.argv[15]) #maximum time (T/Tmin)
+t = float(sys.argv[16])/tNum # Input is [0,..,number of points]
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False
 leakage = False
 #mainDir = "ML_Output"
 mainDir = "Data"
-ctVal = 0
-
 
 #Static Parameters
 Fidelities = []
@@ -127,17 +126,21 @@ fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCoun
 if drivesType == "leakage": fname = fname + str(anharmonicity)
 fname = fname + "_g" + str(g) + "_maxT" + str(maxTime)
 if maxDriveStrength != -1: fname = fname + "_maxD" + str(maxDriveStrength)
-if crossTalk != "False": fname = fname + "_CT" + str(crossTalk) + "_stag" + str(stag)
+if crossTalk != "False": fname = fname + "_" + str(crossTalk) + "_h" + str(h) + "_stag" + str(stag)
 
-#Cross Talk Parsing 
-if crossTalk != "False":
-    if crossTalk[:3] == "ode":
-        ctVal = float(crossTalk[3:])
-        crossTalk = "ode"
-    elif crossTalk[:4] == "disc":
-        ctVal = int(crossTalk[4:])
-        crossTalk = "disc"
-    else: raise Exception("Incorrect way to model Cross Talk. Either ode or disc(rete).")
+# #Cross Talk Parsing 
+# if crossTalk != "False":
+#     if crossTalk[:3] == "RK2":
+#         if crossTalk[3] == "N":
+#             ctVal = float(crossTalk[4:])
+#             crossTalk = "odeN"
+#         else:
+#             ctVal = float(crossTalk[3:])
+#             crossTalk = "ode"
+#     elif crossTalk[:4] == "disc":
+#         ctVal = int(crossTalk[4:])
+#         crossTalk = "disc"
+#     else: raise Exception("Incorrect way to model Cross Talk. Either ode or disc(rete).")
 
 #Directory Creation 
 try: #All files are stored under their gateType
@@ -150,10 +153,16 @@ if leakage:
     except:
         pass
 else:
-    try:
-        mainDir = os.path.join(mainDir,"Closed_System")
-    except:
-        pass
+    if crossTalk != "False":
+        try: 
+            mainDir = os.path.join(mainDir,"Cross_Talk")
+        except:
+            pass
+    else:
+        try:
+            mainDir = os.path.join(mainDir,"Closed_System")
+        except:
+            pass
 try: #Each gate type has weights for a given qudit and coupling
     mainDir = os.path.join(mainDir, couplingType)
     os.makedirs(mainDir)
@@ -197,7 +206,7 @@ MCT = "False"
 for s in seeds:
     #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
     #else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
-    [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,ctVal,stag)
+    [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag)
     if print_statements:print("The fidelity for seed " + str(s) + " for time t=" + str(t) + " is: " + str(fidelity))
     if fidelity > max_fidelity:
         max_fidelity = fidelity
