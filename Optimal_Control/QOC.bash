@@ -1,25 +1,34 @@
 #!/bin/bash
 quditType="Qubit" #Qubit, Qutrit, 
 gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
+
 couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
-segmentNum=1
+segmentCount=2
 g=1
+
 drivesType="all" #all, qtd, yd, twoPhonAll, twoPhonQtd, leakage
 anharmonicity=5 #only used if larger than qubit system
+
+crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
-crossTalk="False" #models Cross Talk (CT), False for not CT, RK2[h] for RK2 solver, SV2[h] for Störmer-Verlet solver
+
+ode="RK2" #RK2 or SRK2 
 h=0.001 # step size for cross talk 
-randomSeedCount=1
-points=1
-iterationCount=1000
+
+ContPulse="False"
 maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
+
 maxTime=1
+points=1
+
+randomSeedCount=1
+iterationCount=1000
 
 # Loop for the specified number of iterations
 for ((i=1; i<=points; i++))
 do
-    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentNum $drivesType $anharmonicity $crossTalk $g $staggering $randomSeedCount $points $iterationCount $maxDriveStrength $maxTime $i
-    python ControlFlow.py $quditType $gateType $couplingType $segmentNum $drivesType $anharmonicity $crossTalk $h $g $staggering $randomSeedCount $points $iterationCount $maxDriveStrength $maxTime $i
+    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $maxTime $points $randomSeedCount $iterationCount $i
+    python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $maxTime $points $randomSeedCount $iterationCount $i
     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
 Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
 Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "

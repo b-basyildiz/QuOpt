@@ -10,20 +10,30 @@ from helperFuncs import *
 #Input from Control Manger
 quditType = str(sys.argv[1])
 gateType = str(sys.argv[2])
+
 couplingType = str(sys.argv[3])
 segmentCount = int(sys.argv[4])
-drivesType = str(sys.argv[5]) #all, qutrits, y
-anharmonicity = float(sys.argv[6])
-crossTalk = str(sys.argv[7])
-h = float(sys.argv[8])
-g = float(sys.argv[9])#coupling strength
-stag = float(sys.argv[10])#staggering of two qubits
-rsCount = int(sys.argv[11])#random seed count
-tNum = int(sys.argv[12])#number of points
-iterationCount = int(sys.argv[13])#number of iterations
-maxDriveStrength = int(sys.argv[14])
-maxTime = float(sys.argv[15]) #maximum time (T/Tmin)
-t = float(sys.argv[16])/tNum # Input is [0,..,number of points]
+g = float(sys.argv[5])#coupling strength
+
+drivesType = str(sys.argv[6]) #all, qutrits, y
+anharmonicity = float(sys.argv[7])
+
+crossTalk = str(sys.argv[8])
+staggering = float(sys.argv[9])#staggering of two qubits
+
+ode = str(sys.argv[10])
+h = float(sys.argv[11])
+
+ContPulse = str(sys.argv[12])
+maxDriveStrength = int(sys.argv[13])
+
+maxTime = float(sys.argv[14]) #maximum time (T/Tmin)
+points = int(sys.argv[15])#number of points
+
+randomSeedCount = int(sys.argv[16])#random seed count
+iterationCount = int(sys.argv[17])#number of iterations
+
+t = float(sys.argv[18])/points # Input is [0,..,number of points]
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False
@@ -126,7 +136,8 @@ fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCoun
 if drivesType == "leakage": fname = fname + str(anharmonicity)
 fname = fname + "_g" + str(g) + "_maxT" + str(maxTime)
 if maxDriveStrength != -1: fname = fname + "_maxD" + str(maxDriveStrength)
-if crossTalk != "False": fname = fname + "_" + str(crossTalk) + "_h" + str(h) + "_stag" + str(stag)
+if crossTalk != "False": fname = fname + "_" + str(ode) + "_h" + str(h) + "_stag" + str(staggering)
+if ContPulse != "False": fname = fname + "_Cont" + str(ode) 
 
 # #Cross Talk Parsing 
 # if crossTalk != "False":
@@ -201,12 +212,12 @@ except:
 
 #Random Seed averaging 
 max_fidelity = 0
-seeds = np.random.randint(0,100,size=rsCount)
+seeds = np.random.randint(0,100,size=randomSeedCount)
 MCT = "False"
 for s in seeds:
     #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
     #else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
-    [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag)
+    [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,h,staggering,ode,ContPulse)
     if print_statements:print("The fidelity for seed " + str(s) + " for time t=" + str(t) + " is: " + str(fidelity))
     if fidelity > max_fidelity:
         max_fidelity = fidelity

@@ -6,7 +6,7 @@ from itertools import product
 import numpy as np
 from helperFuncs import *
 
-def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag):
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag,ode,ContPulse):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -20,8 +20,13 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     """
 
     #Modeling Type
-    ctBool= True
+    ctBool= True # Cross Talk
     if crossTalk == "False": ctBool = False
+
+    ContBool = True #Continuous Pulses
+    if ContPulse == "False": ContBool = False
+
+
     if leakage: #for modeling leakage
         quditDrives = drives[1]
         anharm = drives[2]
@@ -42,7 +47,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
 
 
     #Sums Pauli gates with coefficients 
-    def sum_pauli(coef, gate,tm=0):
+    def sum_pauli(coef, gate,t=0):
         total_pauli = torch.tensor(zeros([level ** N, level ** N]))
         for i in range(0,N):
             pauli_temp = 1
@@ -51,9 +56,16 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
             pauli_temp = torch.tensor(np.kron(pauli_temp,gate))
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
-            phase = tensor(exp((-1) ** (i+1) * 1j*stag*tm))  #time dependent phase, only non-zero for cross talk modeling 
-            if maxDriveStrength == -1: total_pauli = total_pauli + phase*coef[i]*pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
-            else: total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
+
+            if ctBool: phase = tensor(exp((-1) ** (i+1) * 1j*stag*t))  #time dependent phase, only non-zero for cross talk modeling 
+            else: phase = tensor(1,dtype=dt)
+
+            if maxDriveStrength == -1: 
+                if ContBool: total_pauli = total_pauli + phase*coef[i]* ((np.sin(np.pi * t * M / tmin)) ** 2) * pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
+                else: total_pauli = total_pauli + phase*coef[i]*pauli_temp
+            else: 
+                if ContBool: total_pauli = total_pauli + phase*(maxDriveStrength*torch.cos(coef[i])) * tensor((np.sin(np.pi * t * M / tmin)) ** 2) *pauli_temp
+                else : total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
     
     def gen_SU():
@@ -100,18 +112,27 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
     for n in range(0,N_iter):
         #Creating Drive Hamilontian
         U_Exp = 1
-        segCt = 0
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
         for m in range(0,M):#Product of pulses
             pulse_coef = R[m]
-            H1 = 0
-            for i,d in enumerate(drives):
-                H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-                if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
-            if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
-            H = H0 + H1
+            if ContBool: #Continuous (sin^2(x)) pulses
+                def contH1(t):
+                    H1 = 0
+                    for i,d in enumerate(drives):
+                        H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
+                        if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
+                    if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
+                    return H0 + H1
+            else: #Square Pulses
+                H1 = 0
+                for i,d in enumerate(drives):
+                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
+                    if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
+                if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+                H = H0 + H1
+
             if ctBool:
                 def Ht(tin):
                     H1t = torch.zeros((len(H),len(H)))
@@ -120,15 +141,19 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
                     H1t = H1t + H1t.conj().T # Hermitian Conjugate
                     return H + H1t
                 #htemp = h*t/M
-                if crossTalk == "RK2": U_Exp = normU(RK2(m/M*t,(m+1)/M*t,U_Exp,h,dUdt,Ht))
-                elif crossTalk == "SV2": U_Exp = SV2(m/M*t,(m+1)/M*t,U_Exp,h,Ht)
-                elif crossTalk == "SRK2": U_Exp = SRK2(m/M*t,(m+1)/M*t,U_Exp,h,Ht)
+                if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
+                elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
                 else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
                 #U_ExpCT = normU(U_ExpCT)
                 #U_Exp = (matmul(U_ExpCT,U_Exp)) # Matrix evolution
             else: 
                 #normPrint(U_Exp)
-                U_Exp = matmul(matrix_exp(-1j*(H)*t/M),U_Exp)
+                if ContBool:
+                    if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
+                    elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
+                else:
+                    U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
+
                 #normPrint((U_Exp.detach().numpy()))
             #print(U_Exp)
 
@@ -148,7 +173,7 @@ def fidelity_ml(M,input_gate,t,N_iter,rseed,H0,drives,maxDriveStrength,leakage,c
         infidelity.backward(retain_graph=True)
 
         #Printing statement
-        #if (n+1)%1==0: print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
+        if (n+1)%1==0: print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
 
         #optimizer 
         optimizer.step()
