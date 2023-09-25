@@ -3,37 +3,43 @@ quditType="Qubit" #Qubit, Qutrit,
 gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
 
 couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
-segmentCount=2
-g=1
-
 drivesType="all" #all, qtd, yd, twoPhonAll, twoPhonQtd, leakage
-anharmonicity=5 #only used if larger than qubit system
+maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
 
 crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
+ContPulse="False" #whether or not to have continuous pulse shapes
+
+anharmonicity=5 #only used if larger than qubit system
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="RK2" #RK2 or SRK2 
 h=0.001 # step size for cross talk 
 
-ContPulse="False"
-maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
+segmentCount=1
+g=1
 
-maxTime=1
-points=1
+minTime=0.9
+maxTime=1.2
+points=4
 
-randomSeedCount=1
+randomSeedCount=2
 iterationCount=1000
 
 # Loop for the specified number of iterations
-for ((i=1; i<=points; i++))
+for ((i=0; i<points; i++))
 do
-    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $maxTime $points $randomSeedCount $iterationCount $i
-    python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $maxTime $points $randomSeedCount $iterationCount $i
-    : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
-Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
-Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "
-Max Drive Strength: "$maxDriveStrength"\nMaximum Time: "$maxTime"\nPoint Number: "$i "\n" '
+    for ((j=0; j<randomSeedCount; j++))
+    do
+        sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $minTime $maxTime $points $iterationCount $i
+    #     python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $minTime $maxTime $points $iterationCount $i &
+    #     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
+    # Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
+    # Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "
+    # Max Drive Strength: "$maxDriveStrength"\nMaximum Time: "$maxTime"\nPoint Number: "$i "\n" '
+    done 
 done
+
+wait
 
 #DESC: 
 #  Drive Types: 

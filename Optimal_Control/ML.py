@@ -47,7 +47,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
 
 
     #Sums Pauli gates with coefficients 
-    def sum_pauli(coef, gate,t=0):
+    def sum_pauli(coef, gate,t=0,phaseDiff=0):
         total_pauli = torch.tensor(zeros([level ** N, level ** N]))
         for i in range(0,N):
             pauli_temp = 1
@@ -57,8 +57,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
 
-            if ctBool: phase = tensor(exp((-1) ** (i+1) * 1j*stag*t))  #time dependent phase, only non-zero for cross talk modeling 
-            else: phase = tensor(1,dtype=dt)
+            phase = tensor(exp((-1) ** (i+1) * 1j*phaseDiff*t))  #time dependent phase, only non-zero for cross talk modeling 
 
             if maxDriveStrength == -1: 
                 if ContBool: total_pauli = total_pauli + phase*coef[i]* ((np.sin(np.pi * t * M / tmin)) ** 2) * pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
@@ -134,12 +133,14 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
                 H = H0 + H1
 
             if ctBool:
-                def Ht(tin):
-                    H1t = torch.zeros((len(H),len(H)))
+                def Ht(t):
+                    H1t = torch.zeros((len(H0),len(H0)))
                     for i,d in enumerate(drives):
-                        H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,tin)  #Cross talk drives with time dependet phases and fliped coefficients. 
+                        H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
+                        if leakage:  H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,anharmVal+stag) 
                     H1t = H1t + H1t.conj().T # Hermitian Conjugate
-                    return H + H1t
+                    if ContBool: return contH1(t) + H1t
+                    else: return H + H1t
                 #htemp = h*t/M
                 if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
@@ -173,7 +174,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
         infidelity.backward(retain_graph=True)
 
         #Printing statement
-        if (n+1)%1==0: print('Itertation ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Infidelity: ', str(infidelity.item()))
+        #if (n+1)%100==0: print("RS: " + str(rseed) + '. Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
 
         #optimizer 
         optimizer.step()

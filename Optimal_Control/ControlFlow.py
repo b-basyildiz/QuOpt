@@ -1,11 +1,12 @@
 import sys
 import numpy as np 
-from numpy import array,kron,zeros
+from numpy import zeros
 import os
 from ML import fidelity_ml
-from itertools import permutations
-from random import randint
 from helperFuncs import *
+import pandas as pd
+from filelock import FileLock
+import time
 
 #Input from Control Manger
 quditType = str(sys.argv[1])
@@ -27,13 +28,15 @@ h = float(sys.argv[11])
 ContPulse = str(sys.argv[12])
 maxDriveStrength = int(sys.argv[13])
 
-maxTime = float(sys.argv[14]) #maximum time (T/Tmin)
-points = int(sys.argv[15])#number of points
+minTime = float(sys.argv[14])
+maxTime = float(sys.argv[15]) #maximum time (T/Tmin)
+points = int(sys.argv[16])#number of points
 
-randomSeedCount = int(sys.argv[16])#random seed count
+#randomSeedCount = int(sys.argv[17])#random seed count
 iterationCount = int(sys.argv[17])#number of iterations
 
-t = float(sys.argv[18])/points # Input is [0,..,number of points]
+#t = float(sys.argv[19])/points # Input is [1,..,number of points]
+index = int(sys.argv[18])
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False
@@ -111,7 +114,7 @@ elif drivesType == "leakage":
     tempDrives = []
     tempLDrives = []
 
-    for l in range(1,level): #something is wrong here
+    for l in range(1,level): 
         if l == level - 1:
             tempLDrives.append(genDrive(level,l,"x"))
             tempLDrives.append(genDrive(level,l,"y"))
@@ -131,27 +134,31 @@ elif drivesType == "leakage":
     drives = [tempDrives,tempLDrives,anharm]
 else: raise Exception("Incorrect amount of drives (all, qtd, yd, twoPhonAll, twoPhonQtd, leakage)")
 
+# #Drives for single phonon transitions 
+# for l in range(1,level):
+#     drives.append(genDrive(level,l,"x"))
+#     drives.append(genDrive(level,l,"y"))
+
+# if leakage:
+#     ldrives = []
+#     for l in range(1,level): 
+#         if l == level - 1:
+#             ldrives.append(genDrive(level,l,"x"))
+#             ldrives.append(genDrive(level,l,"y"))
+
+#     anharm = zeros((level,level))
+#     anharm[-1,-1] = anharmonicity
+
+#     drives = [drives,ldrives,anharm]
+
+
 #File creation
 fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCount)+ "_" + drivesType 
 if drivesType == "leakage": fname = fname + str(anharmonicity)
 fname = fname + "_g" + str(g) + "_maxT" + str(maxTime)
 if maxDriveStrength != -1: fname = fname + "_maxD" + str(maxDriveStrength)
-if crossTalk != "False": fname = fname + "_" + str(ode) + "_h" + str(h) + "_stag" + str(staggering)
+if crossTalk != "False": fname = fname + "_CTh" + str(h) + "_stag" + str(staggering)
 if ContPulse != "False": fname = fname + "_Cont" + str(ode) 
-
-# #Cross Talk Parsing 
-# if crossTalk != "False":
-#     if crossTalk[:3] == "RK2":
-#         if crossTalk[3] == "N":
-#             ctVal = float(crossTalk[4:])
-#             crossTalk = "odeN"
-#         else:
-#             ctVal = float(crossTalk[3:])
-#             crossTalk = "ode"
-#     elif crossTalk[:4] == "disc":
-#         ctVal = int(crossTalk[4:])
-#         crossTalk = "disc"
-#     else: raise Exception("Incorrect way to model Cross Talk. Either ode or disc(rete).")
 
 #Directory Creation 
 try: #All files are stored under their gateType
@@ -211,26 +218,66 @@ except:
 # print("Time: " + str(t))
 
 #Random Seed averaging 
-max_fidelity = 0
-seeds = np.random.randint(0,100,size=randomSeedCount)
-MCT = "False"
-for s in seeds:
-    #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
-    #else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
-    [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,h,staggering,ode,ContPulse)
-    if print_statements:print("The fidelity for seed " + str(s) + " for time t=" + str(t) + " is: " + str(fidelity))
-    if fidelity > max_fidelity:
-        max_fidelity = fidelity
-        fWname = "Weights_t" + str(round(t*maxTime,2)) + ".csv"
-        #fWname = fname + "_Wt" + str(round(t*maxTime,2)) + ".csv"
-        fWname = os.path.join(gDir, fWname)
-        np.savetxt(fWname,W,delimiter=",")
-out_arr = np.array([[max_fidelity,round(t*maxTime,2)]]) #File output 
-#fname = os.path.join(mainDir, fname + ".csv")
-fname = os.path.join(fDir, fname + ".csv")
-#fname = os.path.join(fDir, "Fidelities.csv")
-if print_statements:print("The maximum fidelity for time t=" + str(round(t*maxTime,2)) + " is: " + str(max_fidelity),end="\n\n")
-with open(fname, 'a') as file:
-    np.savetxt(file,out_arr,delimiter=",")
+#max_fidelity = 0
+#seeds = np.random.randint(0,100,size=randomSeedCount)
+seed = np.random.randint(0,100)
+times = np.linspace(minTime,maxTime,points)
+t = times[index]
 
+# for s in seeds:
+#     #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
+#     #else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
+#     [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,s,H0,drives,maxDriveStrength,leakage,crossTalk,h,staggering,ode,ContPulse)
+#     if print_statements:print("The fidelity for seed " + str(s) + " for time t=" + str(t) + " is: " + str(fidelity))
+#     if fidelity > max_fidelity:
+#         max_fidelity = fidelity
+#         fWname = "Weights_t" + str(round(t*maxTime,2)) + ".csv"
+#         #fWname = fname + "_Wt" + str(round(t*maxTime,2)) + ".csv"
+#         fWname = os.path.join(gDir, fWname)
+#         np.savetxt(fWname,W,delimiter=",")
+# out_arr = np.array([[max_fidelity,round(t*maxTime,2)]]) #File output 
+# #fname = os.path.join(mainDir, fname + ".csv")
+# fname = os.path.join(fDir, fname + ".csv")
+# #fname = os.path.join(fDir, "Fidelities.csv")
+# if print_statements:print("The maximum fidelity for time t=" + str(round(t*maxTime,2)) + " is: " + str(max_fidelity),end="\n\n")
+# with open(fname, 'a') as file:
+#     np.savetxt(file,out_arr,delimiter=",")
+
+
+#if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
+#else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
+[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,seed,H0,drives,maxDriveStrength,leakage,crossTalk,h,staggering,ode,ContPulse)
+fname = os.path.join(fDir, fname + ".csv")
+lock = FileLock(fname + ".lock")
+
+def write():
+    out_arr = np.array([[fidelity,round(t,2)]]) #File output 
+    with open(fname, 'a') as file:
+        np.savetxt(file,out_arr,delimiter=",")
+    lock.release()
+    try:
+        os.remove(fname + ".lock")
+    except:
+        pass
+    exit()
+#Writing to csv
+lock.acquire()
+try: #if the file has been made or not 
+    fidels = pd.read_csv(fname,names=["fidelity","time"])
+except:
+    write()
+if fidels["time"].isin([t]).any(): #fidelity for time has been previous caluclated
+    tempFid = float(fidels[fidels["time"] == t]["fidelity"])
+    if fidelity > tempFid: #if our fidelity is greater than the previous fidelity
+        fIndex = fidels[fidels["time"] == t].index.to_numpy()[0] #What row our fidelity is at in the file
+        fidels.iloc[fIndex,0] = fidelity
+        fidels.to_csv(fname,index=False,header=False) #overwritting the previous file
+    lock.release()
+    try:
+        os.remove(fname + ".lock")
+    except:
+        pass
+    exit()
+else: #fidelity for time has not been written to
+    write()
 
