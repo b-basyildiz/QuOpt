@@ -6,7 +6,7 @@ from itertools import product
 import numpy as np
 from helperFuncs import *
 
-def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakage,crossTalk,h,stag,ode,ContPulse):
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,crossTalk,h,stag,ode,ContPulse):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -27,7 +27,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
     if ContPulse == "False": ContBool = False
 
 
-    if leakage: #for modeling leakage
+    if lbool: #for modeling leakage
         quditDrives = drives[1]
         anharm = drives[2]
         drives = drives[0]
@@ -121,15 +121,17 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
                     H1 = 0
                     for i,d in enumerate(drives):
                         H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
-                        if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
-                    if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
+                        if lbool:  
+                            if i >= level -2:
+                                H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
+                    if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
                     return H0 + H1
             else: #Square Pulses
                 H1 = 0
                 for i,d in enumerate(drives):
                     H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-                    if leakage:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
-                if leakage: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+                    if lbool:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
+                if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
                 H = H0 + H1
 
             if ctBool:
@@ -137,7 +139,9 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
                     H1t = torch.zeros((len(H0),len(H0)))
                     for i,d in enumerate(drives):
                         H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
-                        if leakage:  H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,anharmVal+stag) 
+                        if lbool:  
+                            if i >= level -2:
+                                H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
                     H1t = H1t + H1t.conj().T # Hermitian Conjugate
                     if ContBool: return contH1(t) + H1t
                     else: return H + H1t
@@ -175,6 +179,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,leakag
 
         #Printing statement
         #if (n+1)%100==0: print("RS: " + str(rseed) + '. Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
+        if (n+1)%1==0: print('Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
 
         #optimizer 
         optimizer.step()

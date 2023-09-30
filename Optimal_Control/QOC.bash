@@ -1,37 +1,36 @@
 #!/bin/bash
-quditType="Qubit" #Qubit, Qutrit, 
+quditType="Qutrit" #Qubit, Qutrit, 
 gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
 
 couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
-drivesType="all" #all, qtd, yd, twoPhonAll, twoPhonQtd, leakage
 maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
 
-crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
-ContPulse="False" #whether or not to have continuous pulse shapes
+crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
+contPulse="True" #whether or not to have continuous pulse shapes
+leakage="True"
 
 anharmonicity=5 #only used if larger than qubit system
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="RK2" #RK2 or SRK2 
-h=0.001 # step size for cross talk 
+h=0.01 # step size for cross talk 
 
-segmentCount=1
+segmentCount=16
 g=1
-
-minTime=0.9
+minTime=1.0
 maxTime=1.2
-points=4
+points=1
 
-randomSeedCount=2
-iterationCount=1000
+randomSeedCount=1
+iterationCount=1
 
 # Loop for the specified number of iterations
 for ((i=0; i<points; i++))
 do
     for ((j=0; j<randomSeedCount; j++))
     do
-        sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $minTime $maxTime $points $iterationCount $i
-    #     python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $drivesType $anharmonicity $crossTalk $staggering $ode $h $ContPulse $maxDriveStrength $minTime $maxTime $points $iterationCount $i &
+        #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $i
+        python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $i &
     #     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
     # Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
     # Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "
@@ -39,8 +38,7 @@ do
     done 
 done
 
-wait
-
+wait 
 #DESC: 
 #  Drive Types: 
 #    - all: both |0> <-> |1> & |1> <-> |2> drives
