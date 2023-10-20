@@ -34,8 +34,11 @@ points = int(sys.argv[16])#number of points
 #randomSeedCount = int(sys.argv[17])#random seed count
 iterationCount = int(sys.argv[17])#number of iterations
 
+#Optimzer type
+optimizer=str(sys.argv[18])
+
 #t = float(sys.argv[19])/points # Input is [1,..,number of points]
-index = int(sys.argv[18])
+index = int(sys.argv[19])
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False
@@ -155,12 +158,13 @@ if leakage == "True":
 
 
 #File creation
-fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCount) 
+fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCount) + "_" + optimizer
 if leakage == "True": fname = fname + "_leakage"+ str(anharmonicity)
 fname = fname + "_g" + str(g) + "_maxT" + str(maxTime)
 if maxDriveStrength != -1: fname = fname + "_maxD" + str(maxDriveStrength)
 if crossTalk != "False": fname = fname + "_CTh" + str(h) + "_stag" + str(staggering)
 if ContPulse != "False": fname = fname + "_Cont" + str(ode) 
+fname = fname + "_it" + str(iterationCount)
 
 #Directory Creation 
 try: #All files are stored under their gateType
@@ -255,7 +259,7 @@ t = times[index]
 lbool = False
 if leakage == "True":
     lbool = True
-[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,seed,H0,drives,maxDriveStrength,lbool,crossTalk,h,staggering,ode,ContPulse)
+[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,seed,H0,drives,maxDriveStrength,lbool,crossTalk,h,anharmonicity,staggering,ode,ContPulse,optimizer)
 
 fname = os.path.join(fDir, fname + ".csv")
 fWname = "Weights_t" + str(round(t*maxTime,2)) + ".csv"

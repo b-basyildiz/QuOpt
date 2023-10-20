@@ -6,7 +6,7 @@ from itertools import product
 import numpy as np
 from helperFuncs import *
 
-def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,crossTalk,h,stag,ode,ContPulse):
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,crossTalk,h,anharmVal,stag,ode,ContPulse,optimizer):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -31,7 +31,10 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         quditDrives = drives[1]
         anharm = drives[2]
         drives = drives[0]
-        anharmVal = float(anharm[-1,-1])
+        #anharmVal = float(anharm[-1,-1])
+
+    CTLBool = False
+    if lbool and ctBool: CTBool = True
 
     #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
@@ -57,15 +60,26 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
             for j in range(i+1,N):
                 pauli_temp = torch.tensor(np.kron(pauli_temp,id))
 
+
             phase = tensor(exp((-1) ** (i+1) * 1j*phaseDiff*t))  #time dependent phase, only non-zero for cross talk modeling 
 
-            if maxDriveStrength == -1: 
+            if CTLBool:
+                total_pauli = total_pauli + coef[i]*pauli_temp
+            elif maxDriveStrength == -1: 
                 if ContBool: total_pauli = total_pauli + phase*coef[i]* ((np.sin(np.pi * t * M / tmin)) ** 2) * pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
                 else: total_pauli = total_pauli + phase*coef[i]*pauli_temp
             else: 
                 if ContBool: total_pauli = total_pauli + phase*(maxDriveStrength*torch.cos(coef[i])) * tensor((np.sin(np.pi * t * M / tmin)) ** 2) *pauli_temp
                 else : total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
+    
+    #Used for qutrit CTL modeling
+    def cp(t,coef1,coef2,phase=0):
+        c = tensor(maxDriveStrength/np.sqrt(2)) *( torch.cos(coef1) + 1j * torch.cos(coef2))
+        p = tensor(np.exp(1j*phase*t)) #LOL USER ERROR (I AM CONFIDENT THAT THIS CAN WORK, it is just user errors leading to divergence)
+        #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2) restart pulse envelope function 
+        #return c*p*shape
+        return c*p
     
     def gen_SU():
         SU = []
@@ -101,66 +115,111 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     
 
     #PyTorch Parameter Optimization 
-    R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
-    R.requires_grad = True # set flag so we can backpropagate
-    optimizer = torch.optim.SGD([R], lr = 0.3, momentum=0.99, nesterov=True)
-    scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',min_lr=0.03, factor=0.3, patience= 20)
+    if level == 4 and CTBool:
+        R = torch.rand([M,8], dtype=torch.double) *2*np.pi
+        R.requires_grad = True # set flag so we can backpropagate
+    else:
+        R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
+        R.requires_grad = True # set flag so we can backpropagate
+
+    if optimizer == "SGD":
+        optimizer = torch.optim.SGD([R], lr = 0.3, momentum=0.99, nesterov=True)
+        scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',min_lr=0.03, factor=0.3, patience= 20)
+    elif optimizer == "ADAM":
+        optimizer = torch.optim.Adam([R], lr = 0.3)
+        scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',min_lr=0.03, factor=0.3, patience= 20)
+    elif optimizer == "CosineLR":
+        optimizer = torch.optim.SGD([R], lr = 0.3, momentum=0.99, nesterov=True)
+        scheduler=torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max=50)
 
     # Generating time evolution and optimizing
-
     for n in range(0,N_iter):
         #Creating Drive Hamilontian
         U_Exp = 1
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
-        for m in range(0,M):#Product of pulses
-            pulse_coef = R[m]
-            if ContBool: #Continuous (sin^2(x)) pulses
-                def contH1(t):
+        if level == 4 and CTBool:
+            for m in range(M):
+                pc = R[m]
+                def CTL_H(t):
+                    HD = torch.zeros((4,4),dtype=dt)
+                    HD[2,2] = anharmVal
+                    HD[3,3] = 2*anharmVal
+                    H1 = HD.clone()
+                    H2 = HD.clone()
+
+                    #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
+                    if ContPulse == "True":
+                        shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
+                        D1 = shape*(cp(t,pc[0],pc[4]) + cp(t,pc[1],pc[5],anharmVal) + cp(t,pc[2],pc[6],stag) + cp(t,pc[3],pc[7],stag + anharmVal))
+                        D2 = shape*(cp(t,pc[1],pc[5]) + cp(t,pc[3],pc[7],anharmVal) + cp(t,pc[0],pc[4],-1*stag) + cp(t,pc[2],pc[6],-1*stag + anharmVal))
+                    else:
+                        D1 = cp(t,pc[0],pc[4]) + cp(t,pc[1],pc[5],anharmVal) + cp(t,pc[2],pc[6],stag) + cp(t,pc[3],pc[7],stag + anharmVal)
+                        D2 = cp(t,pc[1],pc[5]) + cp(t,pc[3],pc[7],anharmVal) + cp(t,pc[0],pc[4],-1*stag) + cp(t,pc[2],pc[6],-1*stag + anharmVal)
+
+                    for i in range(len(HD)-1):
+                        H1[i,i+1] = D1
+                        H1[i+1,i] = D1.conj()
+
+                        H2[i,i+1] = D2
+                        H2[i+1,i] = D2.conj()
+                    return H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
+                if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,CTL_H))
+                elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
+                else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
+                        
+
+            #Here we need to define a two drives for each qudit. These two drives will be X and Y variants 
+            # that include the cross-talk, leakage, drives, and internal inteference. 
+        else:
+            for m in range(0,M):#Product of pulses
+                pulse_coef = R[m]
+                if ContBool: #Continuous (sin^2(x)) pulses
+                    def contH1(t):
+                        H1 = 0
+                        for i,d in enumerate(drives):
+                            H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
+                            if lbool:  
+                                if i >= level -2:
+                                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
+                        if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
+                        return H0 + H1
+                else: #Square Pulses
                     H1 = 0
                     for i,d in enumerate(drives):
-                        H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
-                        if lbool:  
-                            if i >= level -2:
-                                H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
-                    if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
-                    return H0 + H1
-            else: #Square Pulses
-                H1 = 0
-                for i,d in enumerate(drives):
-                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-                    if lbool:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
-                if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
-                H = H0 + H1
+                        H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
+                        if lbool:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
+                    if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+                    H = H0 + H1
 
-            if ctBool:
-                def Ht(t):
-                    H1t = torch.zeros((len(H0),len(H0)))
-                    for i,d in enumerate(drives):
-                        H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
-                        if lbool:  
-                            if i >= level -2:
-                                H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
-                    H1t = H1t + H1t.conj().T # Hermitian Conjugate
-                    if ContBool: return contH1(t) + H1t
-                    else: return H + H1t
-                #htemp = h*t/M
-                if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
-                elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
-                else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
-                #U_ExpCT = normU(U_ExpCT)
-                #U_Exp = (matmul(U_ExpCT,U_Exp)) # Matrix evolution
-            else: 
-                #normPrint(U_Exp)
-                if ContBool:
-                    if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
-                    elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
-                else:
-                    U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
+                if ctBool:
+                    def Ht(t):
+                        H1t = torch.zeros((len(H0),len(H0)))
+                        for i,d in enumerate(drives):
+                            H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
+                            if lbool:  
+                                if i >= level -2:
+                                    H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
+                        H1t = H1t + H1t.conj().T # Hermitian Conjugate
+                        if ContBool: return contH1(t) + H1t
+                        else: return H + H1t
+                    #htemp = h*t/M
+                    if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
+                    elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
+                    else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
+                    #U_ExpCT = normU(U_ExpCT)
+                    #U_Exp = (matmul(U_ExpCT,U_Exp)) # Matrix evolution
+                else: 
+                    #normPrint(U_Exp)
+                    if ContBool:
+                        if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
+                        elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
+                    else:
+                        U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
 
-                #normPrint((U_Exp.detach().numpy()))
-            #print(U_Exp)
+                    #normPrint((U_Exp.detach().numpy()))
+                #print(U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0

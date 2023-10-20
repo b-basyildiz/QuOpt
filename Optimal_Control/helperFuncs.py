@@ -287,7 +287,6 @@ def couplHGen(ctype,l):
     OUTPUT: Coupling Matrix (numpy) \n
 
     AUTHOR: Bora Basyildiz
-    
     '''
     H0 = zeros((l ** 2,l ** 2))
     if ctype == "SpeedUp":
@@ -379,3 +378,24 @@ def genCouplMat(couplingType, level):
             H0[i,i] = 0
     else: raise Exception("Incorrect Coupling Type. (XX, Ashabb, AshhabOnes, AshhabHopp, AshhabbLabFrame, CnotProtocol, iSwapProtocol, AnalyticalSpeedUp, AllCouplings, Diagonal, AllCouplingsDiag)")
     return H0
+
+# def cp(t,coef,mDS,M,tmin,phase=0):
+#     '''
+#     DESC: Generates continuous pulse based on parameters and phase
+
+#     PARAMS: 
+#         - t: time
+#         - coef: torch coefficient
+#         - phase: time dependent phase
+#         - mDS: maximum drive strength
+#         - M: total pulse segment count
+#         - tmin: Speed limit for given numerics
+
+#     OUTPUT: Function for time-dependent pulse segment
+
+#     AUTHOR: Bora Basyildiz
+#     '''
+#     c = mDS*torch.cos(coef)
+#     p = tensor(1j*phase*t)
+#     shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
+#     return c*p*shape
