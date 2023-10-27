@@ -158,7 +158,7 @@ if leakage == "True":
 
 
 #File creation
-fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCount) + "_" + optimizer
+fname = quditType + "_" + gateType + "_" + couplingType + "_M" + str(segmentCount) + "_" + optimizer + "_" + ode
 if leakage == "True": fname = fname + "_leakage"+ str(anharmonicity)
 fname = fname + "_g" + str(g) + "_maxT" + str(maxTime)
 if maxDriveStrength != -1: fname = fname + "_maxD" + str(maxDriveStrength)
@@ -230,9 +230,13 @@ except:
 #Random Seed averaging 
 #max_fidelity = 0
 #seeds = np.random.randint(0,100,size=randomSeedCount)
-seed = np.random.randint(0,100)
-times = np.linspace(minTime,maxTime,points)
-t = times[index]
+if points != -1:
+    seed = np.random.randint(0,100)
+    times = np.linspace(minTime,maxTime,points)
+    t = times[index]
+else:
+    seed = 1
+    t = maxTime
 
 # for s in seeds:
 #     #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
