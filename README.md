@@ -1,7 +1,5 @@
 # QuditML
 
-<a href="url"><img src="Images/QCTRL.png" align="center" height="350" width="350" ></a>
-
 <div align="center">
   <img src="Images/QCTRL.png" alt="Image Description">
 </div>
