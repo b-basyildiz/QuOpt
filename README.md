@@ -16,7 +16,7 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 5. All set to run! 
 
 ## Use
-
+To run our Optimal Control Protocol, while in the local environment open QOC.bash through `vim QOC.bash`
 
 ## Examples
 foo
