@@ -16,7 +16,34 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 5. All set to run! 
 
 ## Use
-To run our Optimal Control Protocol, while in the local environment open QOC.bash through `vim QOC.bash`
+To run our Optimal Control Protocol, while in the local environment move to the Optimal_Control directory and open QOC.bash through `vim QOC.bash`, and this will look like
+```vim
+quditType="Qubit" #Qubit, Qutrit, 
+gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
+
+couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
+maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
+
+crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
+contPulse="False" #whether or not to have continuous pulse shapes
+leakage="False"
+
+anharmonicity=5 #only used if larger than qubit system
+staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
+
+ode="SRK2" #RK2 or SRK2 
+h=0.005 # step size for cross talk 
+
+segmentCount=8
+g=1
+minTime=1.0
+maxTime=1.2
+points=1
+
+randomSeedCount=-1
+iterationCount=5000
+optimizer="SGD"
+```
 
 ## Examples
 foo
