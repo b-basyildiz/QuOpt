@@ -19,14 +19,14 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 To run our Optimal Control Protocol, while in the local environment move to the Optimal_Control directory and open QOC.bash through `vim QOC.bash`, and this will look like
 ```vim
 quditType="Qubit" 
-gateType="CNOT" #CNOT, iSWAP, SWAP
+gateType="CNOT" 
 
-couplingType="XX" #XX, ZZ, SpeedUp
-maxDriveStrength=20 #natural number for capped max frequency, -1 for uncapped drive frequency
+couplingType="XX"
+maxDriveStrength=20
 
-crossTalk="True" #models Cross Talk (CT), "False" for not CT, "True" for CT
-contPulse="False" #models continuous pulse shapes with sin^2(x) pulses, similar input to CT
-leakage="False" #models leakage to a higher energy state, similar input to CT
+crossTalk="True" 
+contPulse="False"
+leakage="False"
 
 anharmonicity=5 #detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits. 
 staggering=15 #staggering between of the two qudits (in units of coupling strength)
