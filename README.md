@@ -19,30 +19,30 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 To run our Optimal Control Protocol, while in the local environment move to the Optimal_Control directory and open QOC.bash through `vim QOC.bash`, and this will look like
 ```vim
 quditType="Qubit" #Qubit, Qutrit, 
-gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
+gateType="CNOT" #CNOT, iSWAP, SWAP
 
-couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
-maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
+couplingType="XX" #XX, ZZ, SpeedUp
+maxDriveStrength=20 #natural number for capped max frequency, -1 for uncapped drive frequency
 
-crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
-contPulse="False" #whether or not to have continuous pulse shapes
-leakage="False"
+crossTalk="True" #models Cross Talk (CT), "False" for not CT, "True" for CT
+contPulse="False" #models continuous pulse shapes with sin^2(x) pulses, similar input to CT
+leakage="False" #models leakage to a higher energy state, similar input to CT
 
-anharmonicity=5 #only used if larger than qubit system
-staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
+anharmonicity=5 #detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits. 
+staggering=15 #staggering between of the two qudits (in units of coupling strength)
 
-ode="SRK2" #RK2 or SRK2 
-h=0.005 # step size for cross talk 
+ode="SRK2" #RK2 (Runge-Kutta Second Order) or SRK2 (Symplectic Runge-Kutta Second Order)
+h=0.005 # Step size for ODE solver
 
-segmentCount=8
-g=1
-minTime=1.0
-maxTime=1.2
-points=1
+segmentCount=8 #segment count
+g=1 #coupling strength
+minTime=1.0 #minimum time to generate gate in point spread
+maxTime=1.2 #maximum time to generate gate in point spread
+points=1 #number of points in spread
 
-randomSeedCount=-1
-iterationCount=5000
-optimizer="SGD"
+randomSeedCount=-1 #amount of random seeds to run in parallel (-1 for a fixed seed)
+iterationCount=5000 #number of iterations for optimizer 
+optimizer="SGD" #Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
 ```
 
 ## Examples
