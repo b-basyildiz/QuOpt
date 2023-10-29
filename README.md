@@ -45,8 +45,15 @@ iterationCount=5000 #number of iterations for optimizer
 optimizer="SGD" #Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
 ```
 
+Here is a description for each parameter with their respective input values in *italtics*:
+- `quditType`: number of energy levels in system (*Qubit* for 2 level system, *Qutrit* for 3 level system)
+
+
+
+Once the above parameters are set, run `bash QOC.bash` in the local terminal and the output will be saved in a created folder called `Data`. This folder will contain subfolders based on what type of model is chosen (ClosedSystem, Leakage, CrossTalk, and CTL) for each model respectively, and the output will also contain folders called `Fidelities`, where the maximum fidelity for a given time is stored, and `Weights`, where the pulse parameters to generate a given gate are stored. 
+
 ## Examples
-foo
+Here we will detial 
 
 ## Credits 
 foo
