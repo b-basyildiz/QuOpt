@@ -18,7 +18,7 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 ## Use
 To run our Optimal Control Protocol, while in the local environment move to the Optimal_Control directory and open QOC.bash through `vim QOC.bash`, and this will look like
 ```vim
-quditType="Qubit" #Qubit, Qutrit, 
+quditType="Qubit" 
 gateType="CNOT" #CNOT, iSWAP, SWAP
 
 couplingType="XX" #XX, ZZ, SpeedUp
@@ -45,8 +45,21 @@ iterationCount=5000 #number of iterations for optimizer
 optimizer="SGD" #Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
 ```
 
-Here is a description for each parameter with their respective input values in *italtics*:
-- `quditType`: number of energy levels in system (*Qubit* for 2 level system, *Qutrit* for 3 level system)
+Here is a description for each parameter with their respective input values in *italics*:
+- `quditType`: number of energy levels in system (*Qubit* for 2-level system, *Qutrit* for 3-level system)
+- `gateType`: target gate (EX: *CNOT*, *iSWAP*, etc.)
+
+- `couplingType`: coupling type between qudits (EX: *XX*, *ZZ*, etc.)
+- `maxDriveStrength`: maximum strength of single qudit drives. In units of coupling strength, and input *-1* for uncapped drive strength
+  
+- `crossTalk`: Boolean. *"True"* to incorporate cross-talk into system. *"False"* otherwise.
+- `contPulse`: Boolean. *"True"* to have continuous pulse shapes (sin^2(x)) into model. *"False"* otherwise. Pulse shape can be altered
+- `leakage`: Boolean. *"True"* to have leakage to a higher energy level incorporated into system. *"False"* otherwise.
+
+- `ode`: Numerical ODE solver for time-dependent systems. (Either *RK2* or *SRK2*)
+- `h`: 
+
+For more info on the availible parameters, see `helperFuncs.py`. 
 
 
 
