@@ -84,7 +84,7 @@ We will detail specific examples to illustrate the codebase.
 ### Qubit Example
 Here we will do an optimization for a CNOT gate in 8 segments with XX coupling for a qubit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QB_EX.bash`. Please run this script within the environment containing the `.py` optimization files. 
 
-  <img src="Images/CNOT_8.png" alt="Image Description" width="400" height="400">
+  <img src="Images/CNOT_8.png" alt="Image Description" width="600" height="300">
 
 ### Qutrit Example 
 
