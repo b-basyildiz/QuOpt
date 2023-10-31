@@ -89,6 +89,8 @@ Here we will do an optimization for a CNOT gate in 8 segments with XX coupling f
 ### Qutrit Example 
 Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QT_EX.bash`. 
 
+ <img src="Images/QT_16.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
+
 ### CTL Example 
 
 ## Credits 
