@@ -28,21 +28,21 @@ crossTalk="True"
 contPulse="False"
 leakage="False"
 
-anharmonicity=5 #detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits. 
-staggering=15 #staggering between of the two qudits (in units of coupling strength)
+anharmonicity=5 
+staggering=15
 
-ode="SRK2" #RK2 (Runge-Kutta Second Order) or SRK2 (Symplectic Runge-Kutta Second Order)
-h=0.005 # Step size for ODE solver
+ode="SRK2" 
+h=0.005 
 
-segmentCount=8 #segment count
-g=1 #coupling strength
-minTime=1.0 #minimum time to generate gate in point spread
-maxTime=1.2 #maximum time to generate gate in point spread
-points=1 #number of points in spread
+segmentCount=8
+g=1 
+minTime=1.0 
+maxTime=1.2
+points=1
 
-randomSeedCount=-1 #amount of random seeds to run in parallel (-1 for a fixed seed)
-iterationCount=5000 #number of iterations for optimizer 
-optimizer="SGD" #Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
+randomSeedCount=-1 
+iterationCount=5000 
+optimizer="SGD" 
 ```
 
 Here is a description for each parameter with their respective input values in *italics*:
@@ -56,8 +56,21 @@ Here is a description for each parameter with their respective input values in *
 - `contPulse`: Boolean. *"True"* to have continuous pulse shapes (sin^2(x)) into model. *"False"* otherwise. Pulse shape can be altered
 - `leakage`: Boolean. *"True"* to have leakage to a higher energy level incorporated into system. *"False"* otherwise.
 
+- `anharmonicity`: detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits.
+- `staggering`: staggering between two qudits (in units of coupling strength)
+
 - `ode`: Numerical ODE solver for time-dependent systems. (Either *RK2* or *SRK2*)
-- `h`: 
+- `h`: Step size for ODE Solver.
+
+- `segmentCount`: Number of microwave pulse segments applied in given time.
+- `g`: coupling strength.
+- `minTime`: minimum time to generate gate in point spread
+- `maxTime`: maximum time to generate gate in point spread
+- `points`: number of points in spread
+
+- `randomSeedCount`: amount of random seeds to run in parallel (-1 for a fixed seed)
+- `iterationCount`: number of iterations for optimizer
+- `optimizer`: Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
 
 For more info on the availible parameters, see `helperFuncs.py`. 
 
