@@ -94,6 +94,8 @@ Here we will do an optimization for a iSWAP gate in 16 segments with our paramet
 ### CTL Example 
 Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with cross-talk, leakage, and continuous pulses. To run this example, see the bash script in the `Optimal_Control/Examples/CTL_EX.bash`. 
 
+<img src="Images/CTL.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
+
 ## Credits 
 The codebase was written and developed by Bora Basyildiz.  
 
