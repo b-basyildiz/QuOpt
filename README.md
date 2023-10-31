@@ -1,7 +1,7 @@
 # QuditML
 
 <div align="center">
-  <img src="Images/QCTRL2.png" alt="Image Description">
+  <img src="Images/QCTRL.png" alt="Image Description">
 </div>
 
 
@@ -84,11 +84,10 @@ We will detail specific examples to illustrate the codebase.
 ### Qubit Example
 Here we will do an optimization for a CNOT gate in 8 segments with XX coupling for a qubit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QB_EX.bash`. Please run this script within the environment containing the `.py` optimization files. 
 
-<div align="center">
-  <img src="Images/CNOT_8.png" alt="Image Description">
-</div>
+  <img src="Images/CNOT_8.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
 
 ### Qutrit Example 
+Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QT_EX.bash`. 
 
 ### CTL Example 
 
@@ -97,4 +96,5 @@ The codebase was written and developed by Bora Basyildiz.
 
 ## References
 Applications and development of the codebase are detailed in the following paper. 
-1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation. 
+1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation.
+2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong, "Implementing two-qubit gates at the quantum speed limit", arXiv preprint [arXiv:2206.07716](https://arxiv.org/pdf/2206.07716.pdf), 2022
