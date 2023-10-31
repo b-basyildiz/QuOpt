@@ -28,15 +28,15 @@ optimizer="SGD"
 # Loop for the specified number of iterations
 if [ $((randomSeedCount)) -eq -1 ]
 then 
-    sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
-    #python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+    python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
 else
     for ((i=0; i<points; i++))
     do
         for ((j=0; j<randomSeedCount; j++))
         do
-            sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i
-            #python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
+            #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i
+            python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
         #     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
         # Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
         # Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "
@@ -45,7 +45,7 @@ else
     done
 fi
 
-wait 
+#wait 
 #DESC: 
 #  Drive Types: 
 #    - all: both |0> <-> |1> & |1> <-> |2> drives
