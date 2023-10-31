@@ -87,6 +87,7 @@ Here we will do an optimization for a CNOT gate in 8 segments with XX coupling f
   <img src="Images/CNOT_8.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
 
 ### Qutrit Example 
+Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QT_EX.bash`. 
 
 ### CTL Example 
 
@@ -95,4 +96,5 @@ The codebase was written and developed by Bora Basyildiz.
 
 ## References
 Applications and development of the codebase are detailed in the following paper. 
-1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation. 
+1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation.
+2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong  - arXiv preprint arXiv:2206.07716, 2022
