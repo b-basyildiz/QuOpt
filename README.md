@@ -82,7 +82,8 @@ Once the above parameters are set, run `bash QOC.bash` in the local terminal and
 Here we will detial 
 
 ## Credits 
-foo
+The codebase was written and developed by Bora Basyildiz.  
 
 ## References
-foo
+Applications and development of the codebase are detailed in the following paper. 
+1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation. 
