@@ -97,4 +97,4 @@ The codebase was written and developed by Bora Basyildiz.
 ## References
 Applications and development of the codebase are detailed in the following paper. 
 1. B. Basyildiz, C. Jameson, R. Simmonds, Z.X. Gong, "Speed Optimized Two-Qubit Gates in a Two-Qutrit System", In preperation.
-2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong  - arXiv preprint arXiv:2206.07716, 2022
+2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong  - arXiv preprint [arXiv:2206.07716](https://arxiv.org/pdf/2206.07716.pdf), 2022
