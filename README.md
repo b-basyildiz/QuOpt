@@ -1,7 +1,7 @@
 # QuditML
 
 <div align="center">
-  <img src="Images/QCTRL2.png" alt="Image Description">
+  <img src="Images/QCTRL.png" alt="Image Description">
 </div>
 
 
