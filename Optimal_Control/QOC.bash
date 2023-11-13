@@ -1,8 +1,8 @@
 #!/bin/bash
-quditType="Qubit" #Qubit, Qutrit, 
-gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon
+quditType="Quatrit" #Qubit, Qutrit, 
+gateType="iSWAP" #CNOT, iSWAP, SWAP, iTwoPhonon
 
-couplingType="XX" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
+couplingType="SpeedUp" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
 maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
 
 crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
@@ -17,12 +17,12 @@ h=0.005 # step size for cross talk
 
 segmentCount=8
 g=1
-minTime=1.0
-maxTime=1.2
+minTime=0.9
+maxTime=1.0
 points=1
 
-randomSeedCount=-1
-iterationCount=5000
+randomSeedCount=1
+iterationCount=1
 optimizer="SGD"
 
 # Loop for the specified number of iterations

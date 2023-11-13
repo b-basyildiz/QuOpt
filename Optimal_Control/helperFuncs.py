@@ -114,12 +114,9 @@ def RK2(t0, tf, U0, h, dUdt, H):
     t = t0
 
     for i in range(n):
-        #k1 = dUdt(t, U, H)
-        #k2 = dUdt(t + 0.5*h, U + 0.5*k1, H)
         k1 = dUdt(t, U, H)
         k2 = dUdt(t + 0.5*h, U + 0.5*h*k1, H)
 
-        #U = U + h/6 * (k1 + 2*k2)
         U = U + h*k2
         t = t + h
     return U
@@ -146,11 +143,18 @@ def SRK2(t0, tf, U0, h, H):
     n = ceil((tf-t0)/h)
     U = U0
     t = t0
-    I = tensor(np.eye(len(U)))
+    if isinstance(U0,torch.Tensor):
+        I = tensor(np.eye(len(U)))
+    else:
+        I = np.eye(len(U))
 
     for i in range(n):
-        k1 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.25*h), -1j*H(t+0.25*h) @ U)
-        k2 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.75*h), -1j*H(t+ 0.75*h) @ U - 1j*0.5*h*H(t+0.75*h) @ k1)
+        if isinstance(U0,torch.Tensor):
+            k1 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.25*h), -1j*H(t+0.25*h) @ U)
+            k2 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.75*h), -1j*H(t+ 0.75*h) @ U - 1j*0.5*h*H(t+0.75*h) @ k1)
+        else:
+            k1 = scipy.linalg.solve(I + 1j*h*0.25*H(t + 0.25*h), -1j*H(t+0.25*h) @ U)
+            k2 = scipy.linalg.solve(I + 1j*h*0.25*H(t + 0.75*h), -1j*H(t+ 0.75*h) @ U - 1j*0.5*h*H(t+0.75*h) @ k1)
 
         U = U + 0.5*h*(k1 + k2)
         t = t + h
@@ -379,23 +383,5 @@ def genCouplMat(couplingType, level):
     else: raise Exception("Incorrect Coupling Type. (XX, Ashabb, AshhabOnes, AshhabHopp, AshhabbLabFrame, CnotProtocol, iSwapProtocol, AnalyticalSpeedUp, AllCouplings, Diagonal, AllCouplingsDiag)")
     return H0
 
-# def cp(t,coef,mDS,M,tmin,phase=0):
-#     '''
-#     DESC: Generates continuous pulse based on parameters and phase
 
-#     PARAMS: 
-#         - t: time
-#         - coef: torch coefficient
-#         - phase: time dependent phase
-#         - mDS: maximum drive strength
-#         - M: total pulse segment count
-#         - tmin: Speed limit for given numerics
-
-#     OUTPUT: Function for time-dependent pulse segment
-
-#     AUTHOR: Bora Basyildiz
-#     '''
-#     c = mDS*torch.cos(coef)
-#     p = tensor(1j*phase*t)
-#     shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
-#     return c*p*shape
+# Add section for eState occupation 

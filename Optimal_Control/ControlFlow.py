@@ -57,6 +57,7 @@ tmin = None
 tempQuditType= quditType.lower()
 if tempQuditType == "qubit": level = 2
 elif tempQuditType == "qutrit": level = 3
+elif tempQuditType == "quatrit": level = 4
 else: raise Exception("Incorrect qudit. Either qubit, qutrit, qubit(leakage), or qutrit(leakage)")
 
 if leakage == "True": #leakge models the system with an additional energy level. 
@@ -261,12 +262,17 @@ else:
 #if not Diagonal:[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage) #3 segments, given time *tmin, 5000 iterations, s random seed
 #else: [fidelity,W,dentries] = fidelity_ml(segmentCount,tgate,t*tmin*maxTime,iterationCount,s,H0,drives,maxDriveStrength,leakage)
 lbool = False
+# for row in H0:
+#     for val in row:
+#         print(val, end=", ")
+#     print("")
+   
 if leakage == "True":
     lbool = True
 [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,seed,H0,drives,maxDriveStrength,lbool,crossTalk,h,anharmonicity,staggering,ode,ContPulse,optimizer)
 
 fname = os.path.join(fDir, fname + ".csv")
-fWname = "Weights_t" + str(round(t*maxTime,2)) + ".csv"
+fWname = "Weights_t" + str(round(t,2)) + ".csv"
 fWname = os.path.join(gDir, fWname)
 
 flock = FileLock(fname + ".lock")

@@ -12,7 +12,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     """
     Created on Mon Aug 16 4:33 2021
 
-    @author: Bora & Alex
+    @author: Bora 
 
 
     DESC: This function does both qubit and qutrit optimizations for a given random seed and 
@@ -34,15 +34,12 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         #anharmVal = float(anharm[-1,-1])
 
     CTLBool = False
-    if lbool and ctBool: CTBool = True
+    if lbool and ctBool: CTLBool = True
 
     #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
     level = len(drives[0])
-    #rseed = 1 #fixed for cross talk testing
-    print(rseed)
     manual_seed(rseed)
-    #torch.set_default_dtype(torch.cdouble)
     dt = torch.cdouble
     infidelity_list=torch.zeros([N_iter,1])
     id = np.eye(level)
@@ -77,9 +74,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     #Used for qutrit CTL modeling
     def cp(t,coef1,coef2,phase=0):
         c = tensor(maxDriveStrength/np.sqrt(2)) *( torch.cos(coef1) + 1j * torch.cos(coef2))
-        p = tensor(np.exp(1j*phase*t)) #LOL USER ERROR (I AM CONFIDENT THAT THIS CAN WORK, it is just user errors leading to divergence)
-        #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2) restart pulse envelope function 
-        #return c*p*shape
+        p = tensor(np.exp(1j*phase*t)) 
         return c*p
     
     def gen_SU():
@@ -116,7 +111,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     
 
     #PyTorch Parameter Optimization 
-    if level == 4 and CTBool:
+    if level >= 4 and CTLBool:
         R = torch.rand([M,8], dtype=torch.double) *2*np.pi
         R.requires_grad = True # set flag so we can backpropagate
     else:
@@ -140,17 +135,16 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
-        if level == 4 and CTBool:
+        if level >= 4 and CTLBool:
             for m in range(M):
                 pc = R[m]
                 def CTL_H(t):
-                    HD = torch.zeros((4,4),dtype=dt)
-                    HD[2,2] = anharmVal
-                    HD[3,3] = 2*anharmVal
+                    HD = torch.zeros((level,level),dtype=dt)
+                    for mul,l in enumerate(range(1,level)):
+                        HD[l,l] = mul*anharmVal
                     H1 = HD.clone()
                     H2 = HD.clone()
 
-                    #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
                     if ContPulse == "True":
                         shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
                         D1 = shape*(cp(t,pc[0],pc[4]) + cp(t,pc[1],pc[5],anharmVal) + cp(t,pc[2],pc[6],stag) + cp(t,pc[3],pc[7],stag + anharmVal))
@@ -205,22 +199,15 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         H1t = H1t + H1t.conj().T # Hermitian Conjugate
                         if ContBool: return contH1(t) + H1t
                         else: return H + H1t
-                    #htemp = h*t/M
                     if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
                     elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
                     else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
-                    #U_ExpCT = normU(U_ExpCT)
-                    #U_Exp = (matmul(U_ExpCT,U_Exp)) # Matrix evolution
                 else: 
-                    #normPrint(U_Exp)
                     if ContBool:
                         if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
                         elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
                     else:
                         U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
-
-                    #normPrint((U_Exp.detach().numpy()))
-                #print(U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0
@@ -238,7 +225,6 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         infidelity.backward(retain_graph=True)
 
         #Printing statement
-        #if (n+1)%100==0: print("RS: " + str(rseed) + '. Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
         if (n+1)%1==0: print('Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
 
         #optimizer 
@@ -246,11 +232,4 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         scheduler.step(infidelity)
         optimizer.zero_grad()
 
-        # if fidelity.detach() >= 0.9999:
-        #     print("made it to the end 1")
-        #     return [1 - infidelity_list.min().item(),R.detach().numpy()]
-    # for row in U_Exp.detach().numpy():
-    #     for val in row:
-    #         print(round(abs(val),1),end=" ")
-    #     print()
     return [1 - infidelity_list.min().item(),R.detach().numpy()]
