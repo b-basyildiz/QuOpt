@@ -1,8 +1,4 @@
-# QuditML
-
-<div align="center">
-  <img src="Images/QCTRL.png" alt="Image Description">
-</div>
+# QuOpt
 
 
 ## Description
@@ -11,7 +7,7 @@ The speed of elementary quantum gates, particularly two-qubit gates, ultimately 
 ## Setup
 1. Install a Python environment with version 3.7 and pip.
 2. Make sure a version of Bash is installed on machine. 
-3. Install GitHub repository on local machine. Ex(Linux/Unix): `git install https://github.com/b-basyildiz/QCTRL.git`
+3. Install GitHub repository on local machine. Ex(Linux/Unix): `git install https://github.com/b-basyildiz/QuOpt.git`
 4. Install required packages through `pip install requirements.txt` while in local environment.
 5. All set to run! 
 
