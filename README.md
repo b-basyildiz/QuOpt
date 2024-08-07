@@ -97,4 +97,4 @@ The codebase was written and developed by Bora Basyildiz.
 ## References
 Applications and development of the codebase are detailed in the following paper. 
 1. B. Basyildiz, C. Jameson, Z.X. Gong, "Speed limits of two-qubit gates with qudits", arXiv preprint [arXiv:2312.09218](https://arxiv.org/pdf/2312.09218), 2023
-2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong, "Implementing two-qubit gates at the quantum speed limit", [Physical Review Research 5 (4)]([https://journals.aps.org/prresearch/pdf/10.1103/PhysRevResearch.5.043194](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.5.043194), 2023
+2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong, "Implementing two-qubit gates at the quantum speed limit", [Physical Review Research 5 (4)](https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.5.043194), 2023
