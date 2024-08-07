@@ -5,13 +5,14 @@ OUTPUTS: N/A
 AUTHOR: Bora Basyildiz
 '''
 #Imports
-from numpy import zeros, array, kron
+from numpy import zeros, array, kron, ones
 import numpy as np
 from torch import tensor, matmul, cdouble, trace, sqrt
 from itertools import permutations
 import torch 
 from math import ceil
 import scipy
+import matplotlib.pyplot as plt
 
 #Function definitions
 def genDrive(d, dTrans,type):
@@ -68,6 +69,12 @@ def gateGen(gateType,l):
             else: G[i,i] = 1
     elif gateType == "iSWAP":
         G[1,l] = 1j
+        G = G + G.T
+        for i in range(len(G)):
+            if i != 1 and i != l:
+                G[i,i] = 1
+    elif gateType == "NiSWAP":
+        G[1,l] = -1j
         G = G + G.T
         for i in range(len(G)):
             if i != 1 and i != l:
@@ -150,6 +157,10 @@ def SRK2(t0, tf, U0, h, H):
 
     for i in range(n):
         if isinstance(U0,torch.Tensor):
+            # print("Torch tensor SRK2")
+            # print(len(U))
+            # print(len(-1j*H(t+0.25*h)))
+            # print(len(torch.matmul(-1j*H(t+0.25*h),U)))
             k1 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.25*h), -1j*H(t+0.25*h) @ U)
             k2 = torch.linalg.solve(I + 1j*h*0.25*H(t + 0.75*h), -1j*H(t+ 0.75*h) @ U - 1j*0.5*h*H(t+0.75*h) @ k1)
         else:
@@ -384,4 +395,268 @@ def genCouplMat(couplingType, level):
     return H0
 
 
-# Add section for eState occupation 
+# # Add section for eState occupation 
+# def CTL_StateOcc(M,cType,maxDStr,level,tmin,R,anharmVal,stag,plot):
+#     #Params
+#     N = 2
+#     id = np.eye(level)
+#     h = 0.005
+#     '''
+#     temp
+    
+#     '''
+#     def stateProj(eLevel,maxLevel,output=False):
+#         '''
+#         DESC: Creates a state with indexes only on a Hilbert SubSpace. \n
+
+#         PARAMS: 
+#             - eLevel: Energy level SubSpace of interest. 
+#             - maxLevel: Total energy level of the Hilbert Space. 
+#             - output: Boolean for printing statement. \n
+
+#         OUTPUT: Vector with nonzero indexes on the given subspace. \n
+
+#         AUTHOR: Bora Basyildiz. 
+#         '''
+#         psi = ones(maxLevel+1)
+#         psi[eLevel] = 2
+#         psi = kron(psi,psi)
+#         psi = (psi != 1).astype(int)
+#         for i in range(len(psi)): # This is to ensure no population of higher energy states
+#             if i > eLevel*(maxLevel+1) + eLevel: psi[i] = 0
+#         #psi = psi/sqrt(sum(psi))
+#         if output == True:
+#             for i in range(maxLevel+1):
+#                 for j in range(maxLevel+1):
+#                     print("|" + str(i) + str(j) + ">: " + str(psi[(maxLevel+1)*i + j]))
+#         return psi
+
+#     def vecSpaceGen(arr):
+#         '''
+#         DESC: Generates set of basis vectors for a given subspace. \n
+
+#         PARAMS: 
+#             - arr: Vector with non-zero entries on subspace elements (output from stateProj). \n
+
+#         OUTPUT: Basis Vectors of Hilbert Subspace. 
+
+#         AUTHOR: Bora Basyildiz 
+        
+#         '''
+#         vecs = []
+#         for i,val in enumerate(arr):
+#             if val != 0:
+#                 tempArr = zeros((len(arr)))
+#                 tempArr[i] = 1
+#                 vecs.append(tempArr)
+#         return vecs
+
+#     def cpNP(t,coef1,coef2,phase=0):
+#             c = (maxDStr/np.sqrt(2)) *( np.cos(coef1) + 1j * np.cos(coef2))
+#             p = (np.exp(1j*phase*t)) #LOL USER ERROR (I AM CONFIDENT THAT THIS CAN WORK, it is just user errors leading to divergence)
+#             #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2) restart pulse envelope function 
+#             #return c*p*shape
+#             return c*p
+#     # Help function for Probabilty Calculation
+#     def spaceOcc(U,state,stateVecs):
+#         occVal = 0
+#         for stateVec in stateVecs:
+#             occVal += (abs(stateVec.conj().T @ U @ state)) ** 2
+#         return occVal
+
+#     #Coupling Hamiltonian 
+#     U_Exp = 1
+#     H0 = genCouplMat(cType,level)
+
+#     #SubSpace Occupation Variables 
+#     l = level - 1
+#     qbArr = stateProj(1,l) + stateProj(0,l)
+#     qbStates = vecSpaceGen(qbArr)
+#     qbOccVals = []
+
+#     qtArr = stateProj(2,l)
+#     qtStates = vecSpaceGen(qtArr)
+#     qtOccVals = []
+
+#     qttArr = stateProj(3,l)
+#     qttStates = vecSpaceGen(qttArr)
+#     qttOccVals = []
+
+
+#     #Generating Unitary
+#     U_Exp = 1
+#     for i in range(0,N):
+#         U_Exp = np.kron(U_Exp,id) #initializing unitary
+    
+#     qbOccup = 0
+#     qtOccup = 0 
+#     qttOccup = 0
+#     for state in qbStates: 
+#         qbOccup += spaceOcc(U_Exp,state,qbStates)
+#         qtOccup += spaceOcc(U_Exp,state,qtStates)
+#         qttOccup += spaceOcc(U_Exp,state,qttStates)
+#     qbOccVals.append(qbOccup/len(qbStates))
+#     qtOccVals.append(qtOccup/len(qtStates))
+#     qttOccVals.append(qttOccup/len(qttStates))
+
+#     for m in range(M):
+#         pc = R[m]
+#         def CTL_H(t):
+#             HD = np.zeros((4,4),dtype='complex')
+#             HD[2,2] = anharmVal
+#             HD[3,3] = 2*anharmVal
+#             H1 = np.copy(HD,order='K')
+#             H2 = np.copy(HD,order='K')
+
+#             #shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
+#             D1 = cpNP(t,pc[0],pc[4]) + cpNP(t,pc[1],pc[5],anharmVal) + cpNP(t,pc[2],pc[6],stag) + cpNP(t,pc[3],pc[7],stag + anharmVal)
+#             D2 = cpNP(t,pc[1],pc[5]) + cpNP(t,pc[3],pc[7],anharmVal) + cpNP(t,pc[0],pc[4],-1*stag) + cpNP(t,pc[2],pc[6],-1*stag + anharmVal)
+
+#             for i in range(len(HD)-1):
+#                 H1[i,i+1] = D1
+#                 H1[i+1,i] = D1.conj()
+
+#                 H2[i,i+1] = D2
+#                 H2[i+1,i] = D2.conj()
+#             return H0 + np.kron(H1,id) + np.kron(id,H2)
+#         U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
+    
+#         qbOccup = 0
+#         qtOccup = 0 
+#         qttOccup = 0
+#         for state in qbStates: 
+#             qbOccup += spaceOcc(U_Exp,state,qbStates)
+#             qtOccup += spaceOcc(U_Exp,state,qtStates)
+#             qttOccup += spaceOcc(U_Exp,state,qttStates)
+#         qbOccVals.append(qbOccup/len(qbStates))
+#         qtOccVals.append(qtOccup/len(qbStates))
+#         qttOccVals.append(qttOccup/len(qbStates))
+
+#     if plot == True:
+#         plt.plot(qbOccVals)
+#         plt.plot(qtOccVals)
+#         plt.plot(qttOccVals)
+#         plt.xlabel('$M$',fontsize=16)
+#         plt.ylabel('$P$',fontsize=16)
+#         plt.grid(which='major', linestyle='-', linewidth='0.5')
+#         plt.grid(which='minor', linestyle='dotted', linewidth='0.5')
+#         plt.minorticks_on()
+#         plt.legend(["QS","QT","QTT"])
+#     return [qbOccVals,qtOccVals,qttOccVals]
+
+def stateProj(eLevel,maxLevel,output=False):
+    '''
+    DESC: Creates a state with indexes only on a Hilbert SubSpace. \n
+
+    PARAMS: 
+        - eLevel: Energy level SubSpace of interest. 
+        - maxLevel: Total energy level of the Hilbert Space. 
+        - output: Boolean for printing statement. \n
+
+    OUTPUT: Vector with nonzero indexes on the given subspace. \n
+
+    AUTHOR: Bora Basyildiz. 
+    '''
+    psi = torch.ones(maxLevel+1)
+    psi[eLevel] = 2
+    psi = torch.kron(psi,psi)
+    psi = (psi != 1).int()
+    #print(psi)
+    for i in range(len(psi)): # This is to ensure no population of higher energy states
+        if i > eLevel*(maxLevel+1) + eLevel: psi[i] = 0
+    #psi = psi/sqrt(sum(psi))
+    if output == True:
+        for i in range(maxLevel+1):
+            for j in range(maxLevel+1):
+                print("|" + str(i) + str(j) + ">: " + str(psi[(maxLevel+1)*i + j]))
+    return psi
+
+def vecSpaceGen(arr):
+    '''
+    DESC: Generates set of basis vectors for a given subspace. \n
+
+    PARAMS: 
+        - arr: Vector with non-zero entries on subspace elements (output from stateProj). \n
+
+    OUTPUT: Basis Vectors of Hilbert Subspace. 
+
+    AUTHOR: Bora Basyildiz 
+    
+    '''
+    dt = torch.cdouble
+    vecs = []
+    for i,val in enumerate(arr):
+        if val != 0:
+            tempArr = zeros((len(arr)))
+            tempArr[i] = 1
+            vecs.append(tempArr)
+    return torch.tensor(vecs,dtype=dt)
+
+# Help function for Probabilty Calculation
+def spaceOcc(U,state,stateVecs):
+    occVal = 0
+    for stateVec in stateVecs:
+        occVal += (abs(stateVec.conj().T @ U @ state)) ** 2
+    return occVal
+
+# helper function to calculate maximum value of a numpy array of torch tensors 
+def torchMax(list):
+    maxTorchVal = list[0]
+    for val in list:
+        if val > maxTorchVal:
+            maxTorchVal = val
+    return maxTorchVal
+
+def HC(t,Evec):#continuous coupling Hamiltonian
+        #g = 0.005 # coupling strength in terms of GHz
+        E_00 = Evec[0] #verbose way of defing this. Meant to illustrate what the energy levels are in Evec. 
+        E_10 = Evec[1]
+        E_01 = Evec[2]
+        E_11 = Evec[3]
+        E_02 = Evec[4]
+        E_20 = Evec[5]
+        E_22 = Evec[6]
+        # E_00 = 0 #experimentally defined values 
+        # E_10 = 4.994/g
+        # E_01 = 5.440/g
+        # E_11 = 10.433/g
+        # E_02 = 10.681/g
+        # E_20 = 9.832/g
+        # E_22 = 20.506/g
+
+        omega1 = E_00 - E_11
+        omega2 = E_02 - E_11
+        omega3 = E_20 - E_11
+        omega4 = E_22 - E_11
+
+        #second quantization operators 
+        a1 = np.array([[0,np.exp(-1j*(E_00 - E_10)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_10 - E_20)*t)],[0,0,0]])
+        a2 = np.array([[0,np.exp(-1j*(E_00 - E_01)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_01 - E_02)*t)],[0,0,0]])
+        resonantP = 2*(np.cos(omega1*t) + np.cos(omega2*t) + np.cos(omega3*t) + np.cos(omega4*t))
+        H0 = np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T))
+        # Hreturn = resonantP*H0
+        # if isinstance(Evec,torch.Tensor):
+        #     Hreturn = torch.tensor(Hreturn)
+        # return Hreturn
+        return resonantP*H0
+
+def genEvec(anharm1,anharm2,stag,g):
+        E10 = 5
+        E01 = E10 + stag*g
+        E11 = E10 + E01
+        E20 = 2*E10 + anharm1*g
+        E02 = 2*E01 + anharm2*g
+        E22 = E20 + E02
+        return np.array([0,E10,E01,E11,E20,E02,E22])
+
+def printMat(M): #Prints how matrices in more readible fashion
+    precision = 2
+    for row in M:
+        for val in row:
+            startstr= " "
+            endstr = "+"
+            if np.real(val) < 0: startstr = "-"
+            if np.imag(val) <0: endstr = "-"
+            print(startstr + f"{abs(round(np.real(val),precision)):.{precision}f}",end=endstr) 
+            print(f"{abs(round(np.imag(val),precision)):.{precision}f}",end="i,")
+        print()

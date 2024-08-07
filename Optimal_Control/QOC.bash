@@ -1,42 +1,45 @@
 #!/bin/bash
-quditType="Quatrit" #Qubit, Qutrit, 
+quditType="Qutrit" #Qubit, Qutrit, 
 gateType="iSWAP" #CNOT, iSWAP, SWAP, iTwoPhonon
 
-couplingType="SpeedUp" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp
-maxDriveStrength=20 #natural number for capped max frequency, -1 for unlimited drive frequency
+couplingType="ContH" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp, ContH
+maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
-crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
+crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
 leakage="False"
+minizeLeakage="False" #whether or not to penalize higher energy states 
 
-anharmonicity=5 #only used if larger than qubit system
+anharmonicity=10 #only used if larger than qubit system
+anharmonicityType=1 #scaling of anharmonicity (1: linear, 2:polynomial, ...)
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="SRK2" #RK2 or SRK2 
-h=0.005 # step size for cross talk 
+h=0.0001 # step size for cross talk 
+alpha=0.5 # Tuning parameter for leakage minimization 
 
-segmentCount=8
+segmentCount=40
 g=1
-minTime=0.9
-maxTime=1.0
+minTime=0.4
+maxTime=0.4
 points=1
 
 randomSeedCount=1
-iterationCount=1
+iterationCount=2000
 optimizer="SGD"
 
 # Loop for the specified number of iterations
 if [ $((randomSeedCount)) -eq -1 ]
 then 
-    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
-    python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+    #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+    python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
 else
     for ((i=0; i<points; i++))
     do
         for ((j=0; j<randomSeedCount; j++))
         do
-            #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i
-            python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $contPulse $leakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
+            #sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
+            python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
         #     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
         # Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
         # Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "

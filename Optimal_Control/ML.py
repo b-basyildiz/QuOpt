@@ -5,8 +5,11 @@ import torch
 from itertools import product
 import numpy as np
 from helperFuncs import *
+import warnings
 
-def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,crossTalk,h,anharmVal,stag,ode,ContPulse,optimizer):
+warnings.filterwarnings("ignore")
+
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -31,10 +34,24 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         quditDrives = drives[1]
         anharm = drives[2]
         drives = drives[0]
-        #anharmVal = float(anharm[-1,-1])
+        anharmVal = float(anharm[-1,-1])
 
     CTLBool = False
     if lbool and ctBool: CTLBool = True
+
+    mlbool = False
+    if minLeak == "True":
+        mlbool = True
+
+    ContHBool = False
+    try: 
+        temp = H0(1)
+        ContHBool = True
+    except:
+        pass
+
+
+
 
     #Variable Initializations 
     N = 2 #This code is only working for 2 qudits. Adapt to N qudits in the future
@@ -43,9 +60,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     dt = torch.cdouble
     infidelity_list=torch.zeros([N_iter,1])
     id = np.eye(level)
-    H0 = tensor(H0,dtype=dt) #if H0 is numpy array, convert to torch tensor 
+    if not ContHBool: H0 = tensor(H0,dtype=dt) #if H0 is numpy array, convert to torch tensor 
     input_gate = tensor(input_gate,dtype=dt)
-
 
     #Sums Pauli gates with coefficients 
     def sum_pauli(coef, gate,t=0,phaseDiff=0):
@@ -61,9 +77,9 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
 
             phase = tensor(exp((-1) ** (i+1) * 1j*phaseDiff*t))  #time dependent phase, only non-zero for cross talk modeling 
 
-            if CTLBool:
-                total_pauli = total_pauli + coef[i]*pauli_temp
-            elif maxDriveStrength == -1: 
+            # if CTLBool:
+            #     total_pauli = total_pauli + coef[i]*pauli_temp
+            if maxDriveStrength == -1: 
                 if ContBool: total_pauli = total_pauli + phase*coef[i]* ((np.sin(np.pi * t * M / tmin)) ** 2) * pauli_temp #if maxDriveStrength = -1, then we have unlimited drive strength
                 else: total_pauli = total_pauli + phase*coef[i]*pauli_temp
             else: 
@@ -103,8 +119,9 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     #Error checking
     if np.shape(input_gate.detach().numpy()) != (level ** N, level ** N):
         raise Exception("Incorret Target Gate size")
-    if np.shape(H0.detach().numpy()) != (level ** N, level ** N):
-        raise Exception("Incorret Coupling Matrix size")
+    if not ContHBool:
+        if np.shape(H0.detach().numpy()) != (level ** N, level ** N):
+            raise Exception("Incorret Coupling Matrix size")
     for d in drives:
         if np.shape(d)[0] != np.shape(d)[1]: raise Exception("Incorrect drive dimensions. Must be square.")
         if np.shape(d)[0] != level: raise Exception("All drives must the qudit size.")
@@ -118,6 +135,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
         R.requires_grad = True # set flag so we can backpropagate
 
+    # Supports common optimizers 
     if optimizer == "SGD":
         optimizer = torch.optim.SGD([R], lr = 0.3, momentum=0.99, nesterov=True)
         scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min',min_lr=0.03, factor=0.3, patience= 20)
@@ -135,13 +153,32 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
-        if level >= 4 and CTLBool:
+        if level >= 4 and CTLBool: #Cross talk and leakage 
+            if mlbool: 
+                #Initializing higher energy state occupancy values
+                l = level - 1
+                qttArr = stateProj(3,l)
+                qttStates = vecSpaceGen(qttArr)
+                qttOccVals = []
+                
+                #Qubit States
+                qbArr = stateProj(1,l) + stateProj(0,l)
+                qbStates = vecSpaceGen(qbArr)
+
+                #Initial occupancy of higher energy state
+                qttOccup = 0
+                for state in qbStates: 
+                    qttOccup += spaceOcc(U_Exp,state,qttStates)
+                qttOccVals.append(qttOccup/len(qbStates))
             for m in range(M):
                 pc = R[m]
                 def CTL_H(t):
                     HD = torch.zeros((level,level),dtype=dt)
                     for mul,l in enumerate(range(1,level)):
-                        HD[l,l] = mul*anharmVal
+                        if mul == 1:
+                            HD[l,l] = anharmVal
+                        else:
+                            HD[l,l] = (mul*anharmVal)
                     H1 = HD.clone()
                     H2 = HD.clone()
 
@@ -159,12 +196,21 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
 
                         H2[i,i+1] = D2
                         H2[i+1,i] = D2.conj()
+                    
                     return H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
+                #print("Generated Time Dependent Hamiltonian")
                 if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,CTL_H))
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
                 else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
-                        
 
+                #print("Evolved using SRK2")
+
+                if mlbool: #Calculating higher energy state occupancy
+                    qttOccup = 0
+                    for state in qbStates: 
+                        qttOccup += spaceOcc(U_Exp,state,qttStates)
+                    qttOccVals.append(qttOccup/len(qbStates))
+                        
             #Here we need to define a two drives for each qudit. These two drives will be X and Y variants 
             # that include the cross-talk, leakage, drives, and internal inteference. 
         else:
@@ -176,17 +222,23 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         for i,d in enumerate(drives):
                             H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
                             if lbool:  
-                                if i >= level -2:
-                                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t) 
+                                H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i],t) 
                         if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
-                        return H0 + H1
+                        if ContHBool: return torch.tensor(H0(t)) + H1
+                        else: return H0 + H1
                 else: #Square Pulses
                     H1 = 0
                     for i,d in enumerate(drives):
                         H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-                        if lbool:  H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))]) 
-                    if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm)
-                    H = H0 + H1
+                        if lbool:  
+                            H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i]) 
+                    if lbool: 
+                        #H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+                        H1 = H1 + tensor(kron(id,anharm) + kron(anharm,id))
+                    elif ContHBool:
+                            contH1 = lambda t: torch.tensor(H0(t)) + H1
+                    else:
+                        H = H0 + H1
 
                 if ctBool:
                     def Ht(t):
@@ -194,8 +246,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         for i,d in enumerate(drives):
                             H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
                             if lbool:  
-                                if i >= level -2:
-                                    H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[(i % len(quditDrives))],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
+                                H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[i],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
                         H1t = H1t + H1t.conj().T # Hermitian Conjugate
                         if ContBool: return contH1(t) + H1t
                         else: return H + H1t
@@ -203,7 +254,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                     elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
                     else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
                 else: 
-                    if ContBool:
+                    if ContBool or ContHBool:
                         if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
                         elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
                     else:
@@ -222,7 +273,17 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         fidelity = abs(fidelity + d*d)/(d*d*(d+1))    
         infidelity = 1 - fidelity
         infidelity_list[n] = infidelity.detach()
-        infidelity.backward(retain_graph=True)
+        if mlbool:
+            #minimization type: let's start with average let alpha = 0.2
+            mean = 0
+            for qt in qttOccVals:
+                mean += qt
+            mean /= len(qttOccVals)
+            max = torchMax(qttOccVals)
+            cost = infidelity + alpha*(mean + max)
+            cost.backward(retain_graph=True)
+        else:
+            infidelity.backward(retain_graph=True)
 
         #Printing statement
         if (n+1)%1==0: print('Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
