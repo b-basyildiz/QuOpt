@@ -1,4 +1,3 @@
-# QuOpt
 <div align="center">
   <img src="Images/QuOpt2.png" style="width:50%;">
 </div>
