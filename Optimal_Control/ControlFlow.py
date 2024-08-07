@@ -24,23 +24,23 @@ ode = str(sys.argv[9])
 h = float(sys.argv[10])
 alpha = float(sys.argv[11])
 
-ContPulse = str(sys.argv[13])
-leakage = str(sys.argv[14]) #all, qutrits, y
-minLeak = str(sys.argv[15])
-maxDriveStrength = int(sys.argv[16])
+ContPulse = str(sys.argv[12])
+leakage = str(sys.argv[13]) #all, qutrits, y
+minLeak = str(sys.argv[14])
+maxDriveStrength = int(sys.argv[15])
 
-minTime = float(sys.argv[17])
-maxTime = float(sys.argv[18]) #maximum time (T/Tmin)
-points = int(sys.argv[19])#number of points
+minTime = float(sys.argv[16])
+maxTime = float(sys.argv[17]) #maximum time (T/Tmin)
+points = int(sys.argv[18])#number of points
 
 #randomSeedCount = int(sys.argv[17])#random seed count
-iterationCount = int(sys.argv[20])#number of iterations
+iterationCount = int(sys.argv[19])#number of iterations
 
 #Optimzer type
-optimizer=str(sys.argv[21])
+optimizer=str(sys.argv[20])
 
 #t = float(sys.argv[19])/points # Input is [1,..,number of points]
-index = int(sys.argv[22])
+index = int(sys.argv[21])
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False

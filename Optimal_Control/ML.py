@@ -87,7 +87,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                 else : total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
     
-    #Used for qutrit CTL modeling
+    #Continuous pulses for qutrit Cross-Talk-Leakage (CTL) modeling
     def cp(t,coef1,coef2,phase=0):
         c = tensor(maxDriveStrength/np.sqrt(2)) *( torch.cos(coef1) + 1j * torch.cos(coef2))
         p = tensor(np.exp(1j*phase*t)) 
@@ -153,7 +153,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
-        if level >= 4 and CTLBool: #Cross talk and leakage 
+        if level >= 4 and CTLBool: #Cross talk leakage modeling 
             if mlbool: 
                 #Initializing higher energy state occupancy values
                 l = level - 1
@@ -198,12 +198,10 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         H2[i+1,i] = D2.conj()
                     
                     return H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
-                #print("Generated Time Dependent Hamiltonian")
+
                 if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,CTL_H))
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
                 else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
-
-                #print("Evolved using SRK2")
 
                 if mlbool: #Calculating higher energy state occupancy
                     qttOccup = 0
@@ -213,7 +211,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         
             #Here we need to define a two drives for each qudit. These two drives will be X and Y variants 
             # that include the cross-talk, leakage, drives, and internal inteference. 
-        else:
+        else: #Non cross-talk leakage modeling 
             for m in range(0,M):#Product of pulses
                 pulse_coef = R[m]
                 if ContBool: #Continuous (sin^2(x)) pulses
