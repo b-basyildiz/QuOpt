@@ -39,11 +39,13 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     CTLBool = False
     if lbool and ctBool: CTLBool = True
 
+    #ml stands for minimize leakage.
     mlbool = False
     if minLeak == "True":
         mlbool = True
 
     ContHBool = False
+    # Tests if coupling Hamiltonian is time dependent or independent
     try: 
         temp = H0(1)
         ContHBool = True
@@ -212,18 +214,23 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
             #Here we need to define a two drives for each qudit. These two drives will be X and Y variants 
             # that include the cross-talk, leakage, drives, and internal inteference. 
         else: #Non cross-talk leakage modeling 
-            for m in range(0,M):#Product of pulses
+            # Here we will build our Hamiltonian into three parts. 
+            # 1. Create a product of pulses to optimize on. These may be continuous or square 
+            # 2. Create our coupling Hamiltonian. This may be time independent or dependent 
+            # 3. Add Cross-Talk pulses if necessary
+            timeDepen = False #time dependent bool
+            for m in range(0,M):#1. Product of pulses
                 pulse_coef = R[m]
                 if ContBool: #Continuous (sin^2(x)) pulses
-                    def contH1(t):
-                        H1 = 0
+                    timeDepen = True
+                    def H1(t):
+                        HD = 0
                         for i,d in enumerate(drives):
-                            H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
+                            HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
                             if lbool:  
-                                H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i],t) 
-                        if lbool: H1 = H1 + sum_pauli(tensor([1]*N),anharm,t)
-                        if ContHBool: return torch.tensor(H0(t)) + H1
-                        else: return H0 + H1
+                                HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i],t) 
+                        if lbool: HD = HD + sum_pauli(tensor([1]*N),anharm,t)
+                        return HD
                 else: #Square Pulses
                     H1 = 0
                     for i,d in enumerate(drives):
@@ -231,32 +238,37 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         if lbool:  
                             H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i]) 
                     if lbool: 
-                        #H1 = H1 + sum_pauli(tensor([1]*N),anharm)
+                        #H1 = H1 + sum_pauli(tensor([1]*N),anharm) # different way to account for leakage 
                         H1 = H1 + tensor(kron(id,anharm) + kron(anharm,id))
-                    elif ContHBool:
-                            contH1 = lambda t: torch.tensor(H0(t)) + H1
-                    else:
-                        H = H0 + H1
+                
 
                 if ctBool:
-                    def Ht(t):
-                        H1t = torch.zeros((len(H0),len(H0)))
+                    def H1ct(t):
+                        HDct = torch.zeros((len(H0),len(H0)))
                         for i,d in enumerate(drives):
-                            H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependet phases and fliped coefficients. 
+                            HDct = HDct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependent phases and fliped coefficients. 
                             if lbool:  
-                                H1t = H1t + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[i],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
-                        H1t = H1t + H1t.conj().T # Hermitian Conjugate
-                        if ContBool: return contH1(t) + H1t
-                        else: return H + H1t
-                    if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,Ht))
-                    elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,Ht)
-                    else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
-                else: 
-                    if ContBool or ContHBool:
-                        if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,contH1))
-                        elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,contH1)
-                    else:
-                        U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
+                                HDct = HDct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[i],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
+                        HDct = HDct + HDct.conj().T # Hermitian Conjugate
+                        return HDct
+                    if timeDepen: H1 = lambda t: H1(t) + H1ct(t)
+                    else: 
+                        timeDepen = True
+                        H1 = lambda t: H1 + H1ct(t)
+                if timeDepen or ContHBool:
+                    # Adding static Hamiltonian
+                    if ContHBool and timeDepen: H = lambda t: H0(t) + H1(t)
+                    elif not ContHBool and timeDepen : H = lambda t: H0 + H1(t)
+                    elif ContHBool and not timeDepen: H = lambda t: torch.tensor(H0(t)) + H1
+
+                    # Time dependent evolution
+                    if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,H))
+                    elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,H)
+
+                else:
+                    #Time independent Evolution 
+                    H = H0 + H1
+                    U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
 
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0

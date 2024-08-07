@@ -12,8 +12,8 @@
 #Load Anaconda Module 
 module load anaconda
 
-#Activate Conda Environment, python 3.7.9
-conda activate OptCntrl
+#Activate Conda Environment, should be python 3.7.9
+conda activate $22
 
 # Running respective job 
 python ControlFlow.py $1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13 $14 $15 $16 $17 $18 $19 $20 $21 
