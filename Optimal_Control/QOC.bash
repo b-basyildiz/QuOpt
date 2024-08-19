@@ -8,10 +8,9 @@ maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited d
 crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
 leakage="False"
-minizeLeakage="False" #whether or not to penalize higher energy states 
+minimizeLeakage="False" #whether or not to penalize higher energy states 
 
 anharmonicity=10 #only used if larger than qubit system
-anharmonicityType=1 #scaling of anharmonicity (1: linear, 2:polynomial, ...)
 staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="SRK2" #RK2 or SRK2 
@@ -29,14 +28,13 @@ iterationCount=1
 optimizer="SGD"
 
 HPC="False" #HPC or local bool. If local, make 'False'
-CondaEnvName="OptCntrl" #Environment name on HPC
 
 # Loop for the specified number of iterations
 if [ $((randomSeedCount)) -eq -1 ]; then #This is for a fixed seed
     if [ "$HPC" = "True" ]; then 
-        sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+        sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
     elif [ "$HPC" = "False" ]; then
-        python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
+        python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $randomSeedCount $iterationCount $optimizer $randomSeedCount 
     else 
         echo "Incorrect computing location. Either HPC or local machine."
         exit
@@ -47,9 +45,9 @@ else #This is for random seeds
         for ((j=0; j<randomSeedCount; j++))
         do
             if [ "$HPC" = "True" ]; then 
-                sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $CondaEnvName
+                sbatch HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i
             elif [ "$HPC" = "False" ]; then
-                python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
+                python ControlFlow.py $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i 
             else 
             echo "Incorrect computing location. Either HPC or local machine."
             exit
