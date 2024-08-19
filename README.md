@@ -24,12 +24,14 @@ maxDriveStrength=20
 crossTalk="True" 
 contPulse="False"
 leakage="False"
+minimizeLeakage="False"
 
 anharmonicity=5 
 staggering=15
 
 ode="SRK2" 
-h=0.005 
+h=0.005
+alpha=0.5
 
 segmentCount=8
 g=1 
@@ -39,7 +41,9 @@ points=1
 
 randomSeedCount=-1 
 iterationCount=5000 
-optimizer="SGD" 
+optimizer="SGD"
+
+HPC="False"
 ```
 
 Here is a description for each parameter with their respective input values in *italics*:
@@ -52,12 +56,14 @@ Here is a description for each parameter with their respective input values in *
 - `crossTalk`: Boolean. *"True"* to incorporate cross-talk into system. *"False"* otherwise.
 - `contPulse`: Boolean. *"True"* to have continuous pulse shapes (sin^2(x)) into model. *"False"* otherwise. Pulse shape can be altered
 - `leakage`: Boolean. *"True"* to have leakage to a higher energy level incorporated into system. *"False"* otherwise.
+- `minimizeLeakage`: Boolean. *True* to have higher energy state populations to be minimized. *False* otherwise. 
 
-- `anharmonicity`: detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits.
+- `anharmonicity`: detuning of energy states (in units of the coupling strength). Anharmonicity is the same for both qudits. *This will be changed in the future such that each qudit will have its own anharmonicity parameter.*
 - `staggering`: staggering between two qudits (in units of coupling strength)
 
 - `ode`: Numerical ODE solver for time-dependent systems. (Either *RK2* or *SRK2*)
 - `h`: Step size for ODE Solver.
+- `alpha`: tuned parameter for minimizing higher energy state populations. Higher weight leads to stronger supression of higher energy state populations and vice versa. 
 
 - `segmentCount`: Number of microwave pulse segments applied in given time.
 - `g`: coupling strength.
@@ -68,6 +74,8 @@ Here is a description for each parameter with their respective input values in *
 - `randomSeedCount`: amount of random seeds to run in parallel (-1 for a fixed seed)
 - `iterationCount`: number of iterations for optimizer
 - `optimizer`: Optimizer used to tune parameters (SGD: Stochastic Gradient Descent, ADAM, and others (see helpFuncs.py))
+
+- `HPC`: Boolean. *True* to integrate with high performance computers, essentially runs protocol through slurm files. *False* to run locally or in native python environments.
 
 For more info on the availible parameters, see `helperFuncs.py`. 
 
