@@ -69,6 +69,14 @@ Here we will do an optimization for a iSWAP gate in 16 segments with our paramet
 
 <img src="Images/CTL.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
 
+## Credits 
+The codebase was written and developed by Bora Basyildiz.  
+
+## References
+Applications and development of the codebase are detailed in the following paper. 
+1. B. Basyildiz, C. Jameson, Z.X. Gong, "Speed limits of two-qubit gates with qudits", arXiv preprint [arXiv:2312.09218](https://arxiv.org/pdf/2312.09218), 2023
+2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong, "Implementing two-qubit gates at the quantum speed limit", [Physical Review Research 5 (4)](https://arxiv.org/pdf/2206.07716), 2023
+
 ## Parameter Values
 Here is a description for each parameter with their respective input values in *italics*:
 - `quditType`: number of energy levels in system (*Qubit* for 2-level system, *Qutrit* for 3-level system)
@@ -102,11 +110,3 @@ Here is a description for each parameter with their respective input values in *
 - `HPC`: Boolean. *True* to integrate with high performance computers, essentially runs protocol through slurm files. *False* to run locally or in native python environments.
 
 For more info on the availible parameters, see `helperFuncs.py`. 
-
-## Credits 
-The codebase was written and developed by Bora Basyildiz.  
-
-## References
-Applications and development of the codebase are detailed in the following paper. 
-1. B. Basyildiz, C. Jameson, Z.X. Gong, "Speed limits of two-qubit gates with qudits", arXiv preprint [arXiv:2312.09218](https://arxiv.org/pdf/2312.09218), 2023
-2. J Howard, A Lidiak, C Jameson, B Basyildiz, K Clark, T. Zhao, M. Bal, J. Long, D. Pappas, M. Singh, Z.X. Gong, "Implementing two-qubit gates at the quantum speed limit", [Physical Review Research 5 (4)](https://arxiv.org/pdf/2206.07716), 2023
