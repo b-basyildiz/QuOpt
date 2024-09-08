@@ -47,7 +47,29 @@ optimizer="SGD"
 
 HPC="False"
 ```
+For a description of each parameter and their acceptable values, please see section *Parameter Values*. 
 
+Once the above parameters are set, run `bash QOC.bash` in the local terminal and the output will be saved in a created folder called `Data`. This folder will contain subfolders based on what type of model is chosen (ClosedSystem, Leakage, CrossTalk, and CTL) for each model respectively, and the output will also contain folders called `Fidelities`, where the maximum fidelity for a given time is stored, and `Weights`, where the pulse parameters to generate a given gate are stored. 
+
+## Examples
+We will detail specific examples to illustrate the codebase. 
+
+### Qubit Example
+Here we will do an optimization for a CNOT gate in 8 segments with XX coupling for a qubit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QB_EX.bash`. Please run this script within the environment containing the `.py` optimization files. 
+
+  <img src="Images/CNOT_8.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
+
+### Qutrit Example 
+Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QT_EX.bash`. 
+
+ <img src="Images/QT_16.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
+
+### CTL Example 
+Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with cross-talk, leakage, and continuous pulses. To run this example, see the bash script in the `Optimal_Control/Examples/CTL_EX.bash`. 
+
+<img src="Images/CTL.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
+
+## Parameter Values
 Here is a description for each parameter with their respective input values in *italics*:
 - `quditType`: number of energy levels in system (*Qubit* for 2-level system, *Qutrit* for 3-level system)
 - `gateType`: target gate (EX: *CNOT*, *iSWAP*, etc.)
@@ -80,28 +102,6 @@ Here is a description for each parameter with their respective input values in *
 - `HPC`: Boolean. *True* to integrate with high performance computers, essentially runs protocol through slurm files. *False* to run locally or in native python environments.
 
 For more info on the availible parameters, see `helperFuncs.py`. 
-
-
-
-Once the above parameters are set, run `bash QOC.bash` in the local terminal and the output will be saved in a created folder called `Data`. This folder will contain subfolders based on what type of model is chosen (ClosedSystem, Leakage, CrossTalk, and CTL) for each model respectively, and the output will also contain folders called `Fidelities`, where the maximum fidelity for a given time is stored, and `Weights`, where the pulse parameters to generate a given gate are stored. 
-
-## Examples
-We will detail specific examples to illustrate the codebase. 
-
-### Qubit Example
-Here we will do an optimization for a CNOT gate in 8 segments with XX coupling for a qubit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QB_EX.bash`. Please run this script within the environment containing the `.py` optimization files. 
-
-  <img src="Images/CNOT_8.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
-
-### Qutrit Example 
-Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with no error sources. To run this example, see the bash script in the `Optimal_Control/Examples/QT_EX.bash`. 
-
- <img src="Images/QT_16.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
-
-### CTL Example 
-Here we will do an optimization for a iSWAP gate in 16 segments with our parametric coupling for a qutrit system with cross-talk, leakage, and continuous pulses. To run this example, see the bash script in the `Optimal_Control/Examples/CTL_EX.bash`. 
-
-<img src="Images/CTL.png" alt="Optimization for qubit CNOT gate" width="400" height="300">
 
 ## Credits 
 The codebase was written and developed by Bora Basyildiz.  
