@@ -607,47 +607,153 @@ def torchMax(list):
             maxTorchVal = val
     return maxTorchVal
 
-def HC(t,Evec):#continuous coupling Hamiltonian
-        #g = 0.005 # coupling strength in terms of GHz
-        E_00 = Evec[0] #verbose way of defing this. Meant to illustrate what the energy levels are in Evec. 
-        E_10 = Evec[1]
-        E_01 = Evec[2]
-        E_11 = Evec[3]
-        E_02 = Evec[4]
-        E_20 = Evec[5]
-        E_22 = Evec[6]
-        # E_00 = 0 #experimentally defined values 
-        # E_10 = 4.994/g
-        # E_01 = 5.440/g
-        # E_11 = 10.433/g
-        # E_02 = 10.681/g
-        # E_20 = 9.832/g
-        # E_22 = 20.506/g
+def HC(t,Evec,l):
+    n = l + 1 #number of energy levels, l is the highest energy level
+    a1 = []
+    a2 = []
+    Evec1 = Evec[0] # split Evec into two components, then have cross components 
+    Evec2 = Evec[1]
+    Evec3 = Evec[2]
+    for i in range(1,n):
+        tempArr1 = []
+        tempArr2 = []
+        for j in range(i): tempArr1.append(0)
+        for j in range(i): tempArr2.append(0)
 
-        omega1 = E_00 - E_11
-        omega2 = E_02 - E_11
-        omega3 = E_20 - E_11
-        omega4 = E_22 - E_11
+        tempArr1.append(np.sqrt(i)*np.exp(-1j*(Evec1[i-1] - Evec1[i])*t))
+        tempArr2.append(np.sqrt(i)*np.exp(-1j*(Evec2[i-1] - Evec2[i])*t))
+        for j in range(n-1-i):
+            tempArr1.append(0)
+            tempArr2.append(0)
+        a1.append(tempArr1)
+        a2.append(tempArr2)
+    a1.append([0 for i in range(n)])
+    a2.append([0 for i in range(n)])
 
-        #second quantization operators 
-        a1 = np.array([[0,np.exp(-1j*(E_00 - E_10)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_10 - E_20)*t)],[0,0,0]])
-        a2 = np.array([[0,np.exp(-1j*(E_00 - E_01)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_01 - E_02)*t)],[0,0,0]])
-        resonantP = 2*(np.cos(omega1*t) + np.cos(omega2*t) + np.cos(omega3*t) + np.cos(omega4*t))
-        H0 = np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T))
-        # Hreturn = resonantP*H0
-        # if isinstance(Evec,torch.Tensor):
-        #     Hreturn = torch.tensor(Hreturn)
-        # return Hreturn
-        return resonantP*H0
+    a1 = np.array(a1)
+    a2 = np.array(a2)
 
-def genEvec(anharm1,anharm2,stag,g):
-        E10 = 5
-        E01 = E10 + stag*g
-        E11 = E10 + E01
-        E20 = 2*E10 + anharm1*g
-        E02 = 2*E01 + anharm2*g
-        E22 = E20 + E02
-        return np.array([0,E10,E01,E11,E20,E02,E22])
+    resonant = 2*(np.cos((0-Evec3[0])*t) + np.cos((Evec2[2]-Evec3[0])*t) + np.cos((Evec1[2]-Evec3[0])*t) + np.cos((Evec3[1]-Evec3[0])*t))
+    return resonant*(np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T)))
+
+# def HC(t,Evec,l):#continuous coupling Hamiltonian (stinky code, fix)
+#         #g = 0.005 # coupling strength in terms of GHz
+#         E_00 = Evec[0] #verbose way of defing this. Meant to illustrate what the energy levels are in Evec. 
+#         E_10 = Evec[1]
+#         E_01 = Evec[2]
+#         E_11 = Evec[3]
+#         E_02 = Evec[4]
+#         E_20 = Evec[5]
+#         E_22 = Evec[6]
+#         E_30 = Evec[7]
+#         E_03 = Evec[8]
+#         # E_00 = 0 #experimentally defined values 
+#         # E_10 = 4.994/g
+#         # E_01 = 5.440/g
+#         # E_11 = 10.433/g
+#         # E_02 = 10.681/g
+#         # E_20 = 9.832/g
+#         # E_22 = 20.506/g
+
+#         omega1 = E_00 - E_11
+#         omega2 = E_02 - E_11
+#         omega3 = E_20 - E_11
+#         omega4 = E_22 - E_11
+
+#         if l == 3:
+#             #second quantization operators 
+#             a1 = np.array([[0,np.exp(-1j*(E_00 - E_10)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_10 - E_20)*t)],[0,0,0]])
+#             a2 = np.array([[0,np.exp(-1j*(E_00 - E_01)*t),0],[0,0,np.sqrt(2)*np.exp(-1j*(E_01 - E_02)*t)],[0,0,0]])
+#             resonantP = 2*(np.cos(omega1*t) + np.cos(omega2*t) + np.cos(omega3*t) + np.cos(omega4*t))
+#             H0 = np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T))
+#             # Hreturn = resonantP*H0
+#             # if isinstance(Evec,torch.Tensor):
+#             #     Hreturn = torch.tensor(Hreturn)
+#             # return Hreturn
+#             return resonantP*H0
+#         elif l ==4:
+#             a1 = np.array([[0,np.exp(-1j*(E_00 - E_10)*t),0,0],[0,0,np.sqrt(2)*np.exp(-1j*(E_10 - E_20)*t),0],[0,0,0,np.sqrt(3)*np.exp(-1j*(E_20 - E_30)*t)],[0,0,0,0]])
+#             a2 = np.array([[0,np.exp(-1j*(E_00 - E_01)*t),0,0],[0,0,np.sqrt(2)*np.exp(-1j*(E_01 - E_02)*t),0],[0,0,0,np.sqrt(3)*np.exp(-1j*(E_02 - E_03)*t)],[0,0,0,0]])
+#             resonantP = 2*(np.cos(omega1*t) + np.cos(omega2*t) + np.cos(omega3*t) + np.cos(omega4*t))
+#             H0 = np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T))
+#             return resonantP*H0
+#         else:
+#             n = l + 1 #number of energy levels, l is the highest energy level
+#             Evec = []
+#             a1 = []
+#             a2 = []
+#             Evec1 = np.zeros(n) # split Evec into two components, then have cross components 
+#             Evec2 = np.zeros(n)
+#             for i in range(1,n):
+#                 tempArr1 = []
+#                 tempArr2 = []
+#                 for j in range(i): tempArr1.append(0)
+#                 for j in range(i): tempArr2.append(0)
+
+#                 tempArr1.append(np.sqrt(i)*np.exp(-1j*(Evec1[i-1] - Evec1[i])*t))
+#                 tempArr2.append(np.sqrt(i)*np.exp(-1j*(Evec2[i-1] - Evec2[i])*t))
+#                 for j in range(n-1-i):
+#                     tempArr1.append(0)
+#                     tempArr2.append(0)
+#                 a1.append(tempArr1)
+#                 a2.append(tempArr2)
+#             a1.append([0 for i in range(n)])
+#             a2.append([0 for i in range(n)])
+
+#             a1 = np.array(a1)
+#             a2 = np.array(a2)
+
+#             resonant = 2*(np.cos((Evec[0]-Evec[2*n+1])*t) + np.cos((Evec[2]-Evec[2*n+1])*t) + np.cos((Evec[n+2]-Evec[2*n+1])*t) + np.cos((Evec[2*n+2]-Evec[2*n+1])*t))
+#             return resonant*(np.kron(a1 + np.conj(a1.T),a2 + np.conj(a2.T)))
+
+# def genEvec(anharm1,anharm2,stag,g): #Turn into generator for arbitrary energy levels (stinky code)
+#         E10 = 500/3 #Set qubit intial frequency to 5 GHz. Here we assume that g ~ 30 MHz.
+#         E01 = E10 + stag*g
+
+#         E11 = E10 + E01
+#         E20 = 2*E10 + anharm1*g
+#         E02 = 2*E01 + anharm2*g
+#         #E12 = E10 + E02
+#         #E21 = E20 + E01
+#         E22 = E20 + E02
+#         E30 = 3*E10 + 2*anharm1*g
+#         E03 = 3*E01 + 2*anharm2*g
+#         return np.array([0,E01,E02,])
+
+def genEvec(anharm1,anharm2,stag,g,level):
+    '''
+    DESC: Generates set energy levels for a two qudit system. \n
+
+    PARAMS: 
+        - anharm1: Anharmonicity for qudit 1 (in the units of coupling strength) \n
+        - anharm2: Anharmonicity for qudit 2 (in the units of coupling strength) \n
+        - stag: Staggering between two qudits (in the units of coupling strength) \n
+        - g: coupling strength between two qudits \n
+        - level: number of energy levels for the system \n
+
+    OUTPUT: [Vector of Energy levels of qudit 1, Vector of Energy levels of qudit 2, [E11,E22]]
+
+    AUTHOR: Bora Basyildiz 
+    
+    '''
+
+    E10 = 500/3 #Set qubit intial frequency to 5 GHz. Here we assume that g ~ 30 MHz.
+    E01 = E10 + stag*g
+
+    Evec1 = [0,E10] #Energy levels for qubit 1
+    for i in range(1,level+1):
+        Evec1.append((i+1)*E10+i*anharm1*g)
+
+    Evec2 = [0,E01] #Energy levels for qubit 2
+    for i in range(1,level+1):
+        Evec2.append((i+1)*E01+i*anharm2*g)
+
+    E11 = E10 + E01
+    E22 = Evec1[2] + Evec2[2]
+    Evec3 = [E11,E22] # Energy levels for multi-excited states
+
+    return np.array([Evec1,Evec2,Evec3])
+
 
 def printMat(M): #Prints how matrices in more readible fashion
     precision = 2

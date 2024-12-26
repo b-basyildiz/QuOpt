@@ -6,10 +6,11 @@ from itertools import product
 import numpy as np
 from helperFuncs import *
 import warnings
+import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer):
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -30,11 +31,14 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     if ContPulse == "False": ContBool = False
 
 
+
+
     if lbool: #for modeling leakage
         quditDrives = drives[1]
         anharm = drives[2]
         drives = drives[0]
         anharmVal = float(anharm[-1,-1])
+
 
     CTLBool = False
     if lbool and ctBool: CTLBool = True
@@ -52,6 +56,10 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     except:
         pass
 
+    warmStartBool=False
+    if weightFName != "False":
+        warmStartBool=True
+
 
 
 
@@ -61,6 +69,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
     manual_seed(rseed)
     dt = torch.cdouble
     infidelity_list=torch.zeros([N_iter,1])
+    weight_list = []
     id = np.eye(level)
     if not ContHBool: H0 = tensor(H0,dtype=dt) #if H0 is numpy array, convert to torch tensor 
     input_gate = tensor(input_gate,dtype=dt)
@@ -131,11 +140,22 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
 
     #PyTorch Parameter Optimization 
     if level >= 4 and CTLBool:
-        R = torch.rand([M,8], dtype=torch.double) *2*np.pi
-        R.requires_grad = True # set flag so we can backpropagate
+        if warmStartBool:
+            try:
+                R = torch.tensor(pd.read_csv(weightFName,header=None).to_numpy(), dtype=torch.double)
+            except:
+                R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
+        else:
+            R = torch.rand([M,8], dtype=torch.double) *2*np.pi
     else:
-        R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
-        R.requires_grad = True # set flag so we can backpropagate
+        if warmStartBool:
+            try:
+                R = torch.tensor(pd.read_csv(weightFName,header=None).to_numpy(), dtype=torch.double)
+            except:
+                R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
+        else:
+            R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
+    R.requires_grad = True # set flag so we can backpropagate
 
     # Supports common optimizers 
     if optimizer == "SGD":
@@ -155,8 +175,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
 
-        if level >= 4 and CTLBool: #Cross talk leakage modeling 
-            if mlbool: 
+        if level >= 4 and CTLBool: #Cross talk leakage modeling. Takes different refernce frame, so we run a different optimziation. 
+            if mlbool: #minimize leakage 
                 #Initializing higher energy state occupancy values
                 l = level - 1
                 qttArr = stateProj(3,l)
@@ -198,8 +218,10 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
 
                         H2[i,i+1] = D2
                         H2[i+1,i] = D2.conj()
-                    
-                    return H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
+                    if ContHBool: H = torch.tensor(H0(t)) + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
+                    else: H = H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
+
+                    return H
 
                 if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,CTL_H))
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
@@ -218,8 +240,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
             # 1. Create a product of pulses to optimize on. These may be continuous or square 
             # 2. Create our coupling Hamiltonian. This may be time independent or dependent 
             # 3. Add Cross-Talk pulses if necessary
-            timeDepen = False #time dependent bool
             for m in range(0,M):#1. Product of pulses
+                timeDepen = False #time dependent bool
                 pulse_coef = R[m]
                 if ContBool: #Continuous (sin^2(x)) pulses
                     timeDepen = True
@@ -227,38 +249,41 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         HD = 0
                         for i,d in enumerate(drives):
                             HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
-                            if lbool:  
-                                HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i],t) 
+                            if lbool and i >= level -2:
+                                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t)
                         if lbool: HD = HD + sum_pauli(tensor([1]*N),anharm,t)
                         return HD
                 else: #Square Pulses
                     H1 = 0
                     for i,d in enumerate(drives):
                         H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],d)
-                        if lbool:  
-                            H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[i]) 
+                        if lbool and i >= level -2:
+                            H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))])
                     if lbool: 
                         #H1 = H1 + sum_pauli(tensor([1]*N),anharm) # different way to account for leakage 
                         H1 = H1 + tensor(kron(id,anharm) + kron(anharm,id))
                 
-
+                #Cross Talk
                 if ctBool:
                     def H1ct(t):
-                        HDct = torch.zeros((len(H0),len(H0)))
+                        if ContHBool: HDct = torch.zeros((len(H0(1)),len(H0(1))))
+                        else: HDct = torch.zeros((len(H0),len(H0)))
                         for i,d in enumerate(drives):
                             HDct = HDct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),d,t,stag)  #Cross talk drives with time dependent phases and fliped coefficients. 
                             if lbool:  
                                 HDct = HDct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[i],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
                         HDct = HDct + HDct.conj().T # Hermitian Conjugate
                         return HDct
-                    if timeDepen: H1 = lambda t: H1(t) + H1ct(t)
+                    if timeDepen: 
+                        H1 = lambda t: H1(t) + H1ct(t)
                     else: 
                         timeDepen = True
-                        H1 = lambda t: H1 + H1ct(t)
+                        H1Cont = lambda t: H1 + torch.tensor(H1ct(t)) 
                 if timeDepen or ContHBool:
                     # Adding static Hamiltonian
-                    if ContHBool and timeDepen: H = lambda t: H0(t) + H1(t)
-                    elif not ContHBool and timeDepen : H = lambda t: H0 + H1(t)
+                    if ContHBool and timeDepen: 
+                        H = lambda t: torch.tensor(H0(t)) + H1Cont(t)
+                    elif not ContHBool and timeDepen : H = lambda t: H0 + H1(t) #Need to fix this
                     elif ContHBool and not timeDepen: H = lambda t: torch.tensor(H0(t)) + H1
 
                     # Time dependent evolution
@@ -283,6 +308,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         fidelity = abs(fidelity + d*d)/(d*d*(d+1))    
         infidelity = 1 - fidelity
         infidelity_list[n] = infidelity.detach()
+        weight_list.append(R.detach().numpy())
+
         if mlbool:
             #minimization type: let's start with average let alpha = 0.2
             mean = 0
@@ -296,11 +323,19 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
             infidelity.backward(retain_graph=True)
 
         #Printing statement
-        if (n+1)%1==0: print('Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
+        #if (n+1)%1==0: print('Fidelity ', str(n+1), ' out of ', str(N_iter), 'complete. Avg Fidelity: ', str(1-infidelity.item()))
 
         #optimizer 
         optimizer.step()
         scheduler.step(infidelity)
         optimizer.zero_grad()
 
-    return [1 - infidelity_list.min().item(),R.detach().numpy()]
+    #If warm start, then save the last iteration of weights.
+    maxFid = 1 - infidelity_list.min().item()
+    if warmStartBool and not wsmBoolF: 
+        return [maxFid,R.detach().numpy()] #returning latest weigthts to put into next iteration 
+
+    return [maxFid, weight_list[np.argmin(infidelity_list)]] #returning maximum fidelity and corresponding weights
+    
+
+
