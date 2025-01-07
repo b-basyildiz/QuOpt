@@ -76,7 +76,7 @@ tgate = gateGen(gateType,level)
 
 #Speed limit Workflow
  #Needs to be change for different couplings, but do in the future
-if gateType == "CNOT" or gateType == "CZ" or gateType == "CZZ":
+if gateType == "CNOT" or gateType == "CZ" or gateType == "CZZ" or gateType == "CZ_0" or gateType == "CNOT_0":
     tmin = np.pi/4
 elif gateType == "iSWAP":
     tmin = np.pi/2

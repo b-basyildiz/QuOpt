@@ -1,13 +1,13 @@
 #!/bin/bash
 quditType="Qutrit" #Qubit, Qutrit, 
-gateType="iSWAP" #CNOT, iSWAP, SWAP, iTwoPhonon
+gateType="CZ_0" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
 
-couplingType="ContH" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp, ContH
+couplingType="SpeedUp" #XX, ZZ, XXX, Ashabb, AshhUnit, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
 crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
-leakage="True"
+leakage="False"
 minimizeLeakage="False" #whether or not to penalize higher energy states 
 
 anharmonicity=10 #only used if larger than qubit system
@@ -21,7 +21,7 @@ segmentCount=1
 g=1
 minTime=0.2
 maxTime=0.6
-points=5
+points=1
 
 randomSeedCount=1
 iterationCount=1
