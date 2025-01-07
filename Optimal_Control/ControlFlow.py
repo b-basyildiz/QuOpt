@@ -90,8 +90,8 @@ else:
 if couplingType != "ContH":
     H0 = g*genCouplMat(couplingType,level)
 else: 
-    Evec = genEvec(anharmonicity,anharmonicity,staggering,g) # we divide by the couplling strength as everything we do is in units of g
-    H0 = lambda t: HC(t,Evec,level)
+    Evec = genEvec(anharmonicity,anharmonicity,staggering,g,level-1) # we divide by the coupling strength as everything we do is in units of g
+    H0 = lambda t: HC(t,Evec,level-1)
 
 #Drives for single phonon transitions 
 if leakage != "True":

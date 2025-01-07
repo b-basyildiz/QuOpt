@@ -282,7 +282,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                 if timeDepen or ContHBool:
                     # Adding static Hamiltonian
                     if ContHBool and timeDepen: 
-                        H = lambda t: torch.tensor(H0(t)) + H1Cont(t)
+                        if ctBool: H = lambda t: torch.tensor(H0(t)) + H1Cont(t)
+                        else: H = lambda t: torch.tensor(H0(t)) + H1(t)
                     elif not ContHBool and timeDepen : H = lambda t: H0 + H1(t) #Need to fix this
                     elif ContHBool and not timeDepen: H = lambda t: torch.tensor(H0(t)) + H1
 

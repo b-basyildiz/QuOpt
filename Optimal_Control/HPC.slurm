@@ -4,10 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --ntasks=1
 #SBATCH --export=ALL
-#SBATCH --time=08:00:00 
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=bbasyildiz@mines.edu
-
+#SBATCH --time=24:00:00 
 
 #Load Anaconda Module 
 module load anaconda

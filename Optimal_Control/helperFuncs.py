@@ -67,6 +67,15 @@ def gateGen(gateType,l):
             if i == l: G[i,i+1] = 1
             elif i == l+1: G[i,i-1] = 1
             else: G[i,i] = 1
+    elif gateType == "CNOT_0":
+        for i in range(l ** 2):
+            if i == l: G[i,i+1] = 1
+            elif i == l+1: G[i,i-1] = 1
+            else: 
+                if i == 0 or i == 1:
+                    G[i,i] = 1
+                else:
+                    G[i,i] = 0
     elif gateType == "iSWAP":
         G[1,l] = 1j
         G = G + G.T
@@ -79,6 +88,24 @@ def gateGen(gateType,l):
         for i in range(len(G)):
             if i != 1 and i != l:
                 G[i,i] = 1
+    elif gateType == "CZ":
+        for i in range(len(G)):
+            if i == l+1: G[i,i] = -1
+            else: G[i,i] = 1
+    elif gateType == "CZ_0":
+        for i in range(l ** 2):
+            if i == l+1: G[i,i] = -1
+            elif i == 0 or i == 1 or i == l: G[i,i] = 1
+            else: G[i,i] = 0
+    elif gateType == "CZZ":
+        if l < 3:
+            raise Exception("CZZ is a qutrit gate. Please have at least three energy levels in your system.")
+        for i in range(len(G)):
+            if i == l+1: G[i,i] = np.e ** (2*np.pi*1j/3)
+            elif i == l+2: G[i,i] = np.e ** (-2*np.pi*1j/3)
+            elif i == 2*l + 1: G[i,i] = np.e ** (-2*np.pi*1j/3)
+            elif i == 2*l + 2: G[i,i] = np.e ** (2*np.pi*1j/3)
+            else: G[i,i] = 1
     else:
         raise Exception("Gate type not implemented.")
     return G
@@ -331,11 +358,11 @@ def genCouplMat(couplingType, level):
             sz = array([[1,0,0],[0,-1,0],[0,0,0]])
             id = array([[1,0,0],[0,1,0],[0,0,1]])
         H0 = kron(sz,id) + kron(id,sz) + kron(sz,sz)
-    elif couplingType == "Ashhab":
+    elif couplingType == "capacitiveCoup":
         annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
         create = annhilate.T
         H0 = kron(annhilate + create,annhilate + create)
-    elif couplingType == "AshhUnit":
+    elif couplingType == "capacitiveCoupUnit":
         annhilate = array([[0,1,0],[0,0,1],[0,0,0]])
         create = annhilate.T
         H0 = kron(annhilate + create,annhilate + create)
@@ -729,7 +756,7 @@ def genEvec(anharm1,anharm2,stag,g,level):
         - anharm2: Anharmonicity for qudit 2 (in the units of coupling strength) \n
         - stag: Staggering between two qudits (in the units of coupling strength) \n
         - g: coupling strength between two qudits \n
-        - level: number of energy levels for the system \n
+        - level: highest energy level for system \n
 
     OUTPUT: [Vector of Energy levels of qudit 1, Vector of Energy levels of qudit 2, [E11,E22]]
 
