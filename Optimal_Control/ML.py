@@ -10,7 +10,7 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
+def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -104,28 +104,28 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         p = tensor(np.exp(1j*phase*t)) 
         return c*p
     
-    def gen_SU():
-        SU = []
-        pauli_int = [1,2,3,4]
-        perms = list(product(pauli_int,repeat=N))#all permutations of paulis
+    # def gen_SU():
+    #     SU = []
+    #     pauli_int = [1,2,3,4]
+    #     perms = list(product(pauli_int,repeat=N))#all permutations of paulis
 
-        sxqb = genDrive(level,1,"x")
-        syqb = genDrive(level,1,"y")
-        idqb = zeros((level, level))
-        idqb[0,0] = 1  
-        idqb[1,1] = 1
-        szqb = diag(concatenate((array([1,-1]),array((level-2)*[0]))))
+    #     sxqb = genDrive(level,1,"x")
+    #     syqb = genDrive(level,1,"y")
+    #     idqb = zeros((level, level))
+    #     idqb[0,0] = 1  
+    #     idqb[1,1] = 1
+    #     szqb = diag(concatenate((array([1,-1]),array((level-2)*[0]))))
 
-        #Making Pauli Basis
-        for p in perms:
-                unitary = 1
-                for pauli in p:
-                    if pauli == 1: unitary = tensor(kron(unitary,sxqb),dtype=dt)
-                    elif pauli == 2: unitary = tensor(kron(unitary,syqb),dtype=dt)
-                    elif pauli == 3: unitary = tensor(kron(unitary,idqb),dtype=dt)
-                    elif pauli == 4: unitary = tensor(kron(unitary,szqb),dtype=dt)
-                SU.append(unitary)
-        return SU
+    #     #Making Pauli Basis
+    #     for p in perms:
+    #             unitary = 1
+    #             for pauli in p:
+    #                 if pauli == 1: unitary = tensor(kron(unitary,sxqb),dtype=dt)
+    #                 elif pauli == 2: unitary = tensor(kron(unitary,syqb),dtype=dt)
+    #                 elif pauli == 3: unitary = tensor(kron(unitary,idqb),dtype=dt)
+    #                 elif pauli == 4: unitary = tensor(kron(unitary,szqb),dtype=dt)
+    #             SU.append(unitary)
+    #     return SU
 
     #Error checking
     if np.shape(input_gate.detach().numpy()) != (level ** N, level ** N):
@@ -174,9 +174,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         U_Exp = 1
         for i in range(0,N):
             U_Exp = tensor(kron(U_Exp,id),dtype=dt)#initializing unitary
-
-        if level >= 4 and CTLBool: #Cross talk leakage modeling. Takes different refernce frame, so we run a different optimziation. 
-            if mlbool: #minimize leakage 
+        
+        if mlbool: #minimize leakage 
                 #Initializing higher energy state occupancy values
                 l = level - 1
                 qttArr = stateProj(3,l)
@@ -192,6 +191,8 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                 for state in qbStates: 
                     qttOccup += spaceOcc(U_Exp,state,qttStates)
                 qttOccVals.append(qttOccup/len(qbStates))
+
+        if level >= 4 and CTLBool: #Cross talk leakage modeling. Takes different refernce frame, so we run a different optimziation. 
             for m in range(M):
                 pc = R[m]
                 def CTL_H(t):
@@ -296,17 +297,33 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                     H = H0 + H1
                     U_Exp = matmul(matrix_exp(-1j*(H)*tmin/M),U_Exp)
 
+                if mlbool: #Calculating higher energy state occupancy
+                    qttOccup = 0
+                    for state in qbStates: 
+                        qttOccup += spaceOcc(U_Exp,state,qttStates)
+                    qttOccVals.append(qttOccup/len(qbStates))
+
         #Fidelity calulcation given by Nielsen Paper
         fidelity = 0
-        d = 2**N
-        SU = gen_SU()
+        # d = 2**N
 
+        SU = genTwoQuditBasis(dspaceLen,level,dt)
+
+        # for U in SU:
+        #     eps_U = matmul(matmul(U_Exp,U),(U_Exp.conj().T))
+        #     target_U = matmul(matmul(input_gate,(U.conj().T)),(input_gate.conj().T))
+        #     tr = trace(matmul(target_U,eps_U))
+        #     fidelity = fidelity + tr 
+        # fidelity = abs(fidelity + d*d)/(d*d*(d+1))    
+
+        fid = 0
         for U in SU:
-            eps_U = matmul(matmul(U_Exp,U),(U_Exp.conj().T))
-            target_U = matmul(matmul(input_gate,(U.conj().T)),(input_gate.conj().T))
-            tr = trace(matmul(target_U,eps_U))
-            fidelity = fidelity + tr 
-        fidelity = abs(fidelity + d*d)/(d*d*(d+1))    
+            eps_U = torch.matmul(torch.matmul(U_Exp,U),(U_Exp.conj().T))
+            target_U = torch.matmul(torch.matmul(input_gate,(U.conj().T)),(input_gate.conj().T))
+            tr = torch.trace(torch.matmul(target_U,eps_U))
+            fid = fid + tr 
+        d2 = dspaceLen**N
+        fidelity = abs((fid +d2**2)/((d2**2) * (d2 + 1)))
         infidelity = 1 - fidelity
         infidelity_list[n] = infidelity.detach()
         weight_list.append(R.detach().numpy())

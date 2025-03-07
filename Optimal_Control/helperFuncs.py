@@ -8,7 +8,7 @@ AUTHOR: Bora Basyildiz
 from numpy import zeros, array, kron, ones
 import numpy as np
 from torch import tensor, matmul, cdouble, trace, sqrt
-from itertools import permutations
+from itertools import permutations,product
 import torch 
 from math import ceil
 import scipy
@@ -359,9 +359,10 @@ def genCouplMat(couplingType, level):
             id = array([[1,0,0],[0,1,0],[0,0,1]])
         H0 = kron(sz,id) + kron(id,sz) + kron(sz,sz)
     elif couplingType == "capacitiveCoup":
-        annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-        create = annhilate.T
-        H0 = kron(annhilate + create,annhilate + create)
+        a = np.zeros((level, level))
+        for i in range(len(a)-1):
+            a[i,i+1] = np.sqrt(i+1)
+        H0 = kron(a + a.T,a + a.T)
     elif couplingType == "capacitiveCoupUnit":
         annhilate = array([[0,1,0],[0,0,1],[0,0,0]])
         create = annhilate.T
@@ -793,3 +794,47 @@ def printMat(M): #Prints how matrices in more readible fashion
             print(startstr + f"{abs(round(np.real(val),precision)):.{precision}f}",end=endstr) 
             print(f"{abs(round(np.imag(val),precision)):.{precision}f}",end="i,")
         print()
+
+def genXMat(d,l):
+    X = np.zeros((l,l),dtype=complex)
+    for i in range(d-1): X[i+1,i] = 1
+    X[0,d-1] = 1
+    return X
+
+def genZMat(d,l):
+    Z = np.zeros((l,l),dtype=complex)
+    for i in range(d):
+        Z[i,i] = np.e ** (2*np.pi*1j*i/d)
+    return Z
+
+def genQuditBasis(d,l):
+    iterlist = list(product(range(d),repeat=2))
+    generators = []
+    for tuple in iterlist: generators.append(np.linalg.matrix_power(genXMat(d,l),tuple[0])@np.linalg.matrix_power(genZMat(d,l),tuple[1])) # Need to make X and Z gate generation
+    return generators
+
+
+def genTwoQuditBasis(d,l,dt):#need to be changed to d and level when extending to leakage systems
+        SU = []
+        N = 2
+
+        generators = genQuditBasis(d,l)
+
+        perms = list(product(range(len(generators)),repeat=N))#all permutations of orthonormal basis of two qudits
+
+        idTemp = np.zeros((l,l))
+        for i in range(d): idTemp[i,i] = 1
+
+        #Making Pauli Basis
+        for tuple in perms:
+            gen1 = generators[tuple[0]]
+            gen2 = generators[tuple[1]]
+            
+            if tuple[0] == 0:
+                 gen1 = idTemp
+            if tuple[1] == 0:
+                 gen2 = idTemp
+
+            tempU = torch.tensor(np.kron(gen1,gen2),dtype=dt)
+            SU.append(tempU)
+        return SU
