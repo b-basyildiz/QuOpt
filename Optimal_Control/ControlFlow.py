@@ -10,44 +10,43 @@ import datetime
 import hashlib
 
 #Input from Control Manger
-quditType = str(sys.argv[1])
-gateType = str(sys.argv[2])
-d = int(sys.argv[3])
+gateType = str(sys.argv[1])
+level = int(sys.argv[2])
 
-couplingType = str(sys.argv[4])
-segmentCount = int(sys.argv[5])
-g = float(sys.argv[6])#coupling strength
-anharmonicity = float(sys.argv[7])
+couplingType = str(sys.argv[3])
+segmentCount = int(sys.argv[4])
+g = float(sys.argv[5])#coupling strength
+anharmonicity = float(sys.argv[6])
 
-crossTalk = str(sys.argv[8])
-staggering = float(sys.argv[9])#staggering of two qubits
+crossTalk = str(sys.argv[7])
+staggering = float(sys.argv[8])#staggering of two qubits
 
-ode = str(sys.argv[10])
-h = float(sys.argv[11])
-alpha = float(sys.argv[12])
+ode = str(sys.argv[9])
+h = float(sys.argv[10])
+alpha = float(sys.argv[11])
 
-ContPulse = str(sys.argv[13])
-leakage = str(sys.argv[14]) #all, qutrits, y
-minLeak = str(sys.argv[15])
-maxDriveStrength = int(sys.argv[16])
+ContPulse = str(sys.argv[12])
+leakage = str(sys.argv[13]) #all, qutrits, y
+minLeak = str(sys.argv[14])
+maxDriveStrength = int(sys.argv[15])
 
-minTime = float(sys.argv[17])
-maxTime = float(sys.argv[18]) #maximum time (T/Tmin)
-points = int(sys.argv[19])#number of points
+minTime = float(sys.argv[16])
+maxTime = float(sys.argv[17]) #maximum time (T/Tmin)
+points = int(sys.argv[18])#number of points
 
 #randomSeedCount = int(sys.argv[17])#random seed count
-iterationCount = int(sys.argv[20])#number of iterations
+iterationCount = int(sys.argv[19])#number of iterations
 
 #Optimzer type
-optimizer=str(sys.argv[21])
+optimizer=str(sys.argv[20])
 
 
 #t = float(sys.argv[19])/points # Input is [1,..,number of points]
-index = int(sys.argv[22])
-seed = int(sys.argv[23])
+index = int(sys.argv[21])
+seed = int(sys.argv[22])
 
 #Warm Start
-warmStart=int(sys.argv[24])
+warmStart=int(sys.argv[23])
 
 #THINGS TO CHANGE WHEN TESTING: random seed count -> 50, iterations -> 5,000
 print_statements = False
@@ -62,12 +61,12 @@ tgate = None
 H0 = None
 tmin = None
 
-# Energy level checking
-tempQuditType= quditType.lower()
-if tempQuditType == "qubit": level = 2
-elif tempQuditType == "qutrit": level = 3
-elif tempQuditType == "quatrit": level = 4
-else: raise Exception("Incorrect qudit. Either qubit, qutrit, qubit(leakage), or qutrit(leakage)")
+# Qudit Type
+quditType = ""
+if level == 2: quditType = "qubit"
+elif level == 3: quditType = "qutrit"
+elif level == 4: quditType = "quatrit"
+else: quditType = "qudit" + str(level)
 
 if leakage == "True": #leakge models the system with an additional energy level. 
     level += 1
@@ -77,7 +76,7 @@ tgate = gateGen(gateType,level)
 
 #Speed limit Workflow
  #Needs to be change for different couplings, but do in the future
-if gateType == "CNOT" or gateType == "CZ" or gateType == "CZZ" or gateType == "CZ_0" or gateType == "CNOT_0":
+if gateType == "CNOT" or gateType == "CZ" or gateType == "CZ" or gateType == "CZ_0" or gateType == "CNOT_0":
     tmin = np.pi/4
 elif gateType == "iSWAP":
     tmin = np.pi/2
@@ -216,7 +215,7 @@ if warmStartBool:
     fWnameRS = "Weights" + "_RS" + str(rseed) + "_t" + str(round(t,4)) + ".csv"
     fWnameRS = os.path.join(gDir, fWnameRS)
 
-[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,d,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
+[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,level,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
 
 flock = FileLock(fname + ".lock")
 wlock = FileLock(fWname + ".lock")

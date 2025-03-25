@@ -1,14 +1,13 @@
 #!/bin/bash
-quditType="Qutrit" #Qubit, Qutrit, 
-gateType="CNOT" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
-d=2 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates (CZZ), d = 3
+gateType="CZ" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
+level=4 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates, d = 3, etc.
 
 couplingType="capacitiveCoup" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
 crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
-leakage="True"
+leakage="False"
 minimizeLeakage="False" #whether or not to penalize higher energy states 
 
 anharmonicity=10 #only used if larger than qubit system
@@ -38,21 +37,21 @@ if [ $((randomSeedCount)) -eq -1 ]; then #This is for a fixed seed
     do
         if [ "$HPC" = "True" ]; then 
             if [ $WarmStart -eq -1 ]; then
-                sbatch HPC.slurm $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
+                sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
             else
                 for ((k=WarmStart; k>0; k--))
                 do
                     if [ $k -eq ${WarmStart} ]; then
-                        OUTPUT=$(sbatch HPC.slurm $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart)
+                        OUTPUT=$(sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart)
                     else
-                        OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $k)
+                        OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $k)
                     fi
                     JOB_ID=$(echo ${OUTPUT} | awk '{print $4}')
                     echo "${OUTPUT}"	
                 done
             fi
         elif [ "$HPC" = "False" ]; then
-            python ControlFlow.py $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
+            python ControlFlow.py $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
         else 
             echo "Incorrect computing location. Either HPC or local machine."
             exit
@@ -65,21 +64,21 @@ else #This is for random seeds
         do
             if [ "$HPC" = "True" ]; then 
                 if [ $WarmStart -eq -1 ]; then
-                    sbatch HPC.slurm $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
+                    sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
                 else
                     for ((k=WarmStart; k>0; k--))
                     do
                         if [ $k -eq ${WarmStart} ]; then
-                            OUTPUT=$(sbatch HPC.slurm $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
+                            OUTPUT=$(sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
                         else
-                            OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $quditType $gateType $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
+                            OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
                         fi
                         JOB_ID=$(echo ${OUTPUT} | awk '{print $4}')
                         echo "${OUTPUT}"	
                     done
                 fi
             elif [ "$HPC" = "False" ]; then
-                python ControlFlow.py $quditType $gateType $d $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
+                python ControlFlow.py $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
             else 
             echo "Incorrect computing location. Either HPC or local machine."
             exit

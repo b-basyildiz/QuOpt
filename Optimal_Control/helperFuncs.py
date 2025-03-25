@@ -88,24 +88,24 @@ def gateGen(gateType,l):
         for i in range(len(G)):
             if i != 1 and i != l:
                 G[i,i] = 1
-    elif gateType == "CZ":
-        for i in range(len(G)):
-            if i == l+1: G[i,i] = -1
-            else: G[i,i] = 1
     elif gateType == "CZ_0":
         for i in range(l ** 2):
             if i == l+1: G[i,i] = -1
             elif i == 0 or i == 1 or i == l: G[i,i] = 1
             else: G[i,i] = 0
-    elif gateType == "CZZ":
-        if l < 3:
-            raise Exception("CZZ is a qutrit gate. Please have at least three energy levels in your system.")
-        for i in range(len(G)):
-            if i == l+1: G[i,i] = np.e ** (2*np.pi*1j/3)
-            elif i == l+2: G[i,i] = np.e ** (-2*np.pi*1j/3)
-            elif i == 2*l + 1: G[i,i] = np.e ** (-2*np.pi*1j/3)
-            elif i == 2*l + 2: G[i,i] = np.e ** (2*np.pi*1j/3)
-            else: G[i,i] = 1
+    elif gateType == "CZ": 
+        G = gen_CZ(l)
+    #         for i in range(len(G)):
+    #         if i == l+1: G[i,i] = -1
+    #         else: G[i,i] = 1
+    # elif gateType == "CZ3":
+    #     if l < 3:
+    #         raise Exception("CZ3 is a qutrit gate. Please have at least three energy levels in your system.")
+    #     G = gen_CZ(3)
+    # elif gateGen == "CZ4":
+    #      if l < 4:
+    #             raise Exception("CZ4 is a ququart gate. Please have at least three energy levels in your system.")
+    #      G = gen_CZ(4)
     else:
         raise Exception("Gate type not implemented.")
     return G
@@ -838,3 +838,12 @@ def genTwoQuditBasis(d,l,dt):#need to be changed to d and level when extending t
             tempU = torch.tensor(np.kron(gen1,gen2),dtype=dt)
             SU.append(tempU)
         return SU
+
+def gen_CZ(d):
+    k = 0
+    mat = np.zeros((d**2,d**2),dtype=complex)
+    for i in range(d):
+        for j in range(d):
+            mat[k,k] = np.e**(2*np.pi*1j/d*i*j)
+            k += 1
+    return mat
