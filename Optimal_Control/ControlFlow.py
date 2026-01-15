@@ -72,7 +72,10 @@ if leakage == "True": #leakge models the system with an additional energy level.
     level += 1
 
 #Gate Workflow
-tgate = gateGen(gateType,level)
+if leakage == "True":
+    tgate = gateGen(gateType,level,level-1)
+else:
+    tgate = gateGen(gateType,level)
 
 #Speed limit Workflow
  #Needs to be change for different couplings, but do in the future
@@ -215,7 +218,11 @@ if warmStartBool:
     fWnameRS = "Weights" + "_RS" + str(rseed) + "_t" + str(round(t,4)) + ".csv"
     fWnameRS = os.path.join(gDir, fWnameRS)
 
-[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,level,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
+d = level
+if leakage == "True":
+    d = level - 1
+
+[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,d,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
 
 flock = FileLock(fname + ".lock")
 wlock = FileLock(fWname + ".lock")

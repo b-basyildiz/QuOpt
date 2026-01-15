@@ -48,7 +48,7 @@ def genDrive(d, dTrans,type):
     drive[dTrans-cIndex,dTrans] = val
     return drive + drive.conj().T
 
-def gateGen(gateType,l):
+def gateGen(gateType,l,d=2):
     '''
     DESC: Creates a two-qubit gate (CNOT, SWAP, iSWAP) for a given energy level \n
 
@@ -94,7 +94,7 @@ def gateGen(gateType,l):
             elif i == 0 or i == 1 or i == l: G[i,i] = 1
             else: G[i,i] = 0
     elif gateType == "CZ": 
-        G = gen_CZ(l)
+        G = gen_CZ(d,l)
     #         for i in range(len(G)):
     #         if i == l+1: G[i,i] = -1
     #         else: G[i,i] = 1
@@ -766,13 +766,13 @@ def genEvec(anharm1,anharm2,stag,g,level):
     '''
 
     E10 = 500/3 #Set qubit intial frequency to 5 GHz. Here we assume that g ~ 30 MHz.
-    E01 = E10 + stag*g
+    E01 = E10 - stag*g
 
     Evec1 = [0,E10] #Energy levels for qubit 1
     for i in range(1,level+1):
         Evec1.append((i+1)*E10+i*anharm1*g)
 
-    Evec2 = [0,E01] #Energy levels for qubit 2
+    Evec2 = [stag*g,E01] #Energy levels for qubit 2
     for i in range(1,level+1):
         Evec2.append((i+1)*E01+i*anharm2*g)
 
@@ -839,11 +839,55 @@ def genTwoQuditBasis(d,l,dt):#need to be changed to d and level when extending t
             SU.append(tempU)
         return SU
 
-def gen_CZ(d):
+def gen_CZ(d,l):
     k = 0
-    mat = np.zeros((d**2,d**2),dtype=complex)
-    for i in range(d):
-        for j in range(d):
-            mat[k,k] = np.e**(2*np.pi*1j/d*i*j)
+    mat = np.eye(l**2,dtype=complex)
+    for i in range(l):
+        for j in range(l):
+            if i <= d and j <= d:
+                val = np.e**(2*np.pi*1j/d*i*j)
+                mat[k,k] = val
             k += 1
     return mat
+
+def PWC(t0,tf,H,U0,n,order):
+    '''
+    DESC: 
+        - Piecewise Constant Hamiltonian Evolution. Models Hamiltonian evolution through piecewise constant matrix exponentials
+
+    PARAMS: 
+        - t0 (float): Initial time 
+        - tf (float): Final time 
+        - H (func): Time dependent Hamiltonian
+        - U0 (matrix, numpy or torch): Initial Unitary
+        - n (int): number of iterations
+        - order (str): order of PWC method
+
+    OUTPUT:
+        - U (matrix, numpy or torch): Unitary matrix that modeled time evolution over [t0,tf]
+
+    AUTHOR: 
+        - Bora Basyildiz
+    '''
+
+    h = (tf - t0)/n
+    t = t0
+    U = U0
+    if isinstance(U,torch.Tensor):
+        for _ in range(n):
+            if order.casefold() == "first":
+                U = torch.linalg.matrix_exp(-1j*h*H(t)) @ U
+            elif order.casefold() == "second":
+                U = torch.linalg.matrix_exp(-1j*h*H(t+h/2)) @ U
+            elif order.casefold() == "fourth":
+                
+            t = t + h
+    elif isinstance(U,np.ndarray):
+        for _ in range(n):
+            U = scipy.linalg.expm(-1j*h*H(t+h/2)) @ U
+            t = t + h
+    else:
+        raise Exception("Incorrect matrix type. Either numpy or pyTorch.")
+    
+    return U
+

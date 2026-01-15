@@ -197,11 +197,8 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
                 pc = R[m]
                 def CTL_H(t):
                     HD = torch.zeros((level,level),dtype=dt)
-                    for mul,l in enumerate(range(1,level)):
-                        if mul == 1:
-                            HD[l,l] = anharmVal
-                        else:
-                            HD[l,l] = (mul*anharmVal)
+                    for l in range(1,level):
+                        HD[l,l] = ((l*(l-1))/2)*anharmVal
                     H1 = HD.clone()
                     H2 = HD.clone()
 
@@ -214,11 +211,11 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
                         D2 = cp(t,pc[1],pc[5]) + cp(t,pc[3],pc[7],anharmVal) + cp(t,pc[0],pc[4],-1*stag) + cp(t,pc[2],pc[6],-1*stag + anharmVal)
 
                     for i in range(len(HD)-1):
-                        H1[i,i+1] = D1
-                        H1[i+1,i] = D1.conj()
+                        H1[i,i+1] = np.sqrt(i+1)*D1
+                        H1[i+1,i] = np.sqrt(i+1)*D1.conj()
 
-                        H2[i,i+1] = D2
-                        H2[i+1,i] = D2.conj()
+                        H2[i,i+1] = np.sqrt(i+1)*D2
+                        H2[i+1,i] = np.sqrt(i+1)*D2.conj()
                     if ContHBool: H = torch.tensor(H0(t)) + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
                     else: H = H0 + torch.kron(H1,torch.tensor(id)) + torch.kron(torch.tensor(id),H2)
 

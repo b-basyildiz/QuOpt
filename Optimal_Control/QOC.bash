@@ -1,17 +1,17 @@
 #!/bin/bash
 gateType="CZ" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
-level=4 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates, d = 3, etc.
+level=3 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates, d = 3, etc.
 
 couplingType="capacitiveCoup" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
-crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
+crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
-leakage="False"
+leakage="True"
 minimizeLeakage="False" #whether or not to penalize higher energy states 
 
-anharmonicity=10 #only used if larger than qubit system
-staggering=15 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
+anharmonicity=14 #only used if larger than qubit system
+staggering=17 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="SRK2" #RK2 or SRK2 
 h=0.0001 # step size for cross talk 
