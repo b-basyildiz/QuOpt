@@ -95,17 +95,10 @@ def gateGen(gateType,l,d=2):
             else: G[i,i] = 0
     elif gateType == "CZ": 
         G = gen_CZ(d,l)
-    #         for i in range(len(G)):
-    #         if i == l+1: G[i,i] = -1
-    #         else: G[i,i] = 1
-    # elif gateType == "CZ3":
-    #     if l < 3:
-    #         raise Exception("CZ3 is a qutrit gate. Please have at least three energy levels in your system.")
-    #     G = gen_CZ(3)
-    # elif gateGen == "CZ4":
-    #      if l < 4:
-    #             raise Exception("CZ4 is a ququart gate. Please have at least three energy levels in your system.")
-    #      G = gen_CZ(4)
+    elif gateType == "SWAP":
+        for i in range(l):
+            for j in range(l):
+                G[i * l + j, j * l + i] = 1
     else:
         raise Exception("Gate type not implemented.")
     return G
@@ -879,8 +872,6 @@ def PWC(t0,tf,H,U0,n,order):
                 U = torch.linalg.matrix_exp(-1j*h*H(t)) @ U
             elif order.casefold() == "second":
                 U = torch.linalg.matrix_exp(-1j*h*H(t+h/2)) @ U
-            elif order.casefold() == "fourth":
-                
             t = t + h
     elif isinstance(U,np.ndarray):
         for _ in range(n):

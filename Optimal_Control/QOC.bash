@@ -13,15 +13,15 @@ minimizeLeakage="False" #whether or not to penalize higher energy states
 anharmonicity=14 #only used if larger than qubit system
 staggering=17 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
-ode="SRK2" #RK2 or SRK2 
+ode="CFME4" #RK2, SRK2, CFME4
 h=0.0001 # step size for cross talk 
 alpha=0.5 # Tuning parameter for leakage minimization 
 
 segmentCount=1
 g=1
 minTime=0.1
-maxTime=0.1
-points=1
+maxTime=0.2
+points=2
 
 randomSeedCount=1
 iterationCount=1

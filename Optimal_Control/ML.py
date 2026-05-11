@@ -8,6 +8,18 @@ from helperFuncs import *
 import warnings
 import pandas as pd
 
+import sys
+import os
+
+cfme_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "CFME", "src")
+)
+
+if cfme_path not in sys.path:
+    sys.path.append(cfme_path)
+
+from cfme.cfme import generate_cfme_unitary
+
 warnings.filterwarnings("ignore")
 
 def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
@@ -223,7 +235,10 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
 
                 if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,CTL_H))
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
-                else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Störmer-Verlet, or symplectic Runge-Kutta.")
+                elif ode == "CFME4": 
+                    temp_H = lambda t: -1j*CTL_H(t)
+                    U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,(m+1)/M*tmin,h,4,2)@ U_Exp
+                else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Cummulant Free Magnus Expansion, or symplectic Runge-Kutta.")
 
                 if mlbool: #Calculating higher energy state occupancy
                     qttOccup = 0
@@ -288,6 +303,10 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
                     # Time dependent evolution
                     if ode == "RK2": U_Exp = normU(RK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,dUdt,H))
                     elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,H)
+                    elif ode == "CFME4": 
+                        temp_H = lambda t: -1j*H(t)
+                        U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,(m+1)/M*tmin,h,4,2) @ U_Exp
+                    else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Cummulant Free Magnus Expansion, or symplectic Runge-Kutta.")
 
                 else:
                     #Time independent Evolution 
