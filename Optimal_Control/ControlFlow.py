@@ -79,7 +79,7 @@ else:
 
 #Speed limit Workflow
  #Needs to be change for different couplings, but do in the future
-if gateType == "CNOT" or gateType == "CZ" or gateType == "CZ" or gateType == "CZ_0" or gateType == "CNOT_0":
+if gateType == "CNOT" or gateType == "CZ" or gateType == "CZ" or gateType == "CZ_0" or gateType == "CNOT_0" or gateType == "Toffoli":
     tmin = np.pi/4
 elif gateType == "iSWAP":
     tmin = np.pi/2
