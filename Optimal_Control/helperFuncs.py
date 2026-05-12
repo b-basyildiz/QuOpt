@@ -99,6 +99,10 @@ def gateGen(gateType,l,d=2):
         for i in range(l):
             for j in range(l):
                 G[i * l + j, j * l + i] = 1
+    elif gateType == "Toffoli":
+        G = np.eye(l**2, dtype=complex)
+        idx = (l - 1) * l + (l - 1)
+        G[idx, idx] = -1
     else:
         raise Exception("Gate type not implemented.")
     return G
