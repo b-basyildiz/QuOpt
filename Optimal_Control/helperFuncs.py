@@ -361,22 +361,33 @@ def genCouplMat(couplingType, level):
             a[i,i+1] = np.sqrt(i+1)
         H0 = kron(a + a.T,a + a.T)
     elif couplingType == "capacitiveCoupUnit":
-        annhilate = array([[0,1,0],[0,0,1],[0,0,0]])
-        create = annhilate.T
-        H0 = kron(annhilate + create,annhilate + create)
-    elif couplingType == "AshhabHopp":
-        annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-        create = annhilate.T
-        H0 = kron(annhilate,create) + kron(create,annhilate)
-    elif couplingType == "AshhabLabFrame":
-        #Couplings Terms
-        annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
-        create = annhilate.T
-        H0 = kron(annhilate + create,annhilate + create)
-        #Diagonal Entries 
-        diagEntries = [0, 5.440, 10.681, 4.994, 10.433, 15.666, 9.832, 15.270, 20.506]
-        for i,d in enumerate(diagEntries):
-            H0[i,i] = d
+        a = np.zeros((level, level))
+        for i in range(len(a)-1):
+            a[i,i+1] = 1 #unit couplings
+        H0 = kron(a + a.T,a + a.T)
+    elif couplingType == "capacitiveCoupExtra":
+        a = np.zeros((level, level))
+        for i in range(len(a)-1):
+            a[i,i+1] = i+1
+        H0 = kron(a + a.T,a + a.T)
+    elif couplingType == "capacitiveCoupMin":
+        a = np.zeros((level, level))
+        for i in range(len(a)-1):
+            a[i,i+1] = 1/(i+1)
+        H0 = kron(a + a.T,a + a.T)
+    # elif couplingType == "AshhabHopp":
+    #     annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
+    #     create = annhilate.T
+    #     H0 = kron(annhilate,create) + kron(create,annhilate)
+    # elif couplingType == "AshhabLabFrame":
+    #     #Couplings Terms
+    #     annhilate = array([[0,1,0],[0,0,np.sqrt(2)],[0,0,0]])
+    #     create = annhilate.T
+    #     H0 = kron(annhilate + create,annhilate + create)
+    #     #Diagonal Entries 
+    #     diagEntries = [0, 5.440, 10.681, 4.994, 10.433, 15.666, 9.832, 15.270, 20.506]
+    #     for i,d in enumerate(diagEntries):
+    #         H0[i,i] = d
     elif couplingType == "CnotProtocol":
         H = np.zeros([3 ** 2, 3 ** 2])
         H[3,4] = 1
@@ -416,7 +427,12 @@ def genCouplMat(couplingType, level):
         H0 = np.ones([level ** 2, level ** 2])
         for i in range(level ** 2):
             H0[i,i] = 0
-    else: raise Exception("Incorrect Coupling Type. (XX, Ashabb, AshhabOnes, AshhabHopp, AshhabbLabFrame, CnotProtocol, iSwapProtocol, AnalyticalSpeedUp, AllCouplings, Diagonal, AllCouplingsDiag)")
+    elif couplingType == "capacitiveCoup_EC":
+        a = np.zeros((level, level))
+        for i in range(level - 1):
+            a[i, i+1] = np.sqrt(i + 1)  
+        H0 = kron(a.T, a) + kron(a, a.T)
+    else: raise Exception("Incorrect Coupling Type. (XX, Ashabb, AshhabOnes, AshhabHopp, AshhabbLabFrame, CnotProtocol, iSwapProtocol, AnalyticalSpeedUp, AllCouplings, Diagonal, AllCouplingsDiag, capacitiveCoup_EC)")
     return H0
 
 

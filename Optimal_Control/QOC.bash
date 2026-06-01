@@ -2,7 +2,7 @@
 gateType="CZ" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
 level=3 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates, d = 3, etc.
 
-couplingType="capacitiveCoup" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
+couplingType="capacitiveCoupMin" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
 crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
@@ -14,14 +14,14 @@ anharmonicity=14 #only used if larger than qubit system
 staggering=17 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="CFME4" #RK2, SRK2, CFME4
-h=0.0001 # step size for cross talk 
+h=0.01 # step size for cross talk 
 alpha=0.5 # Tuning parameter for leakage minimization 
 
 segmentCount=1
 g=1
 minTime=0.1
 maxTime=0.2
-points=2
+points=1
 
 randomSeedCount=1
 iterationCount=1
