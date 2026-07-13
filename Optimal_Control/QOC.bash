@@ -31,63 +31,38 @@ HPC="False" #HPC or local bool. If local, make 'False'
 WarmStart=-1 #Submitting chained jobs that use each others weights as a 'warm start.' -1 if no warm start.
 
 
+set -euo pipefail
+
+# Ensure script runs from its directory and prepare output folder
+cd "$(dirname "$0")"
+mkdir -p slurm_out
+
 # Loop for the specified number of iterations
-if [ $((randomSeedCount)) -eq -1 ]; then #This is for a fixed seed
-    for ((i=0; i<points; i++))
-    do
-        if [ "$HPC" = "True" ]; then 
-            if [ $WarmStart -eq -1 ]; then
-                sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
-            else
-                for ((k=WarmStart; k>0; k--))
-                do
-                    if [ $k -eq ${WarmStart} ]; then
-                        OUTPUT=$(sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart)
-                    else
-                        OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $k)
-                    fi
-                    JOB_ID=$(echo ${OUTPUT} | awk '{print $4}')
-                    echo "${OUTPUT}"	
-                done
-            fi
+if [ "$randomSeedCount" -eq -1 ]; then
+    # Fixed-seed mode
+    for ((i=0; i<points; i++)); do
+        if [ "$HPC" = "True" ]; then
+            sbatch HPC.slurm "$gateType" "$level" "$couplingType" "$segmentCount" "$g" "$anharmonicity" "$crossTalk" "$staggering" "$ode" "$h" "$alpha" "$contPulse" "$leakage" "$minimizeLeakage" "$maxDriveStrength" "$minTime" "$maxTime" "$points" "$iterationCount" "$optimizer" "$i" "$randomSeedCount" "$WarmStart"
         elif [ "$HPC" = "False" ]; then
-            python ControlFlow.py $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $randomSeedCount $WarmStart
-        else 
+            python ControlFlow.py "$gateType" "$level" "$couplingType" "$segmentCount" "$g" "$anharmonicity" "$crossTalk" "$staggering" "$ode" "$h" "$alpha" "$contPulse" "$leakage" "$minimizeLeakage" "$maxDriveStrength" "$minTime" "$maxTime" "$points" "$iterationCount" "$optimizer" "$i" "$randomSeedCount" "$WarmStart"
+        else
             echo "Incorrect computing location. Either HPC or local machine."
-            exit
-        fi 
-    done
-else #This is for random seeds
-    for ((i=0; i<points; i++))
-    do
-        for ((j=0; j<randomSeedCount; j++))
-        do
-            if [ "$HPC" = "True" ]; then 
-                if [ $WarmStart -eq -1 ]; then
-                    sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
-                else
-                    for ((k=WarmStart; k>0; k--))
-                    do
-                        if [ $k -eq ${WarmStart} ]; then
-                            OUTPUT=$(sbatch HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
-                        else
-                            OUTPUT=$(sbatch --dependency=afterok:${JOB_ID} HPC.slurm $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $k)
-                        fi
-                        JOB_ID=$(echo ${OUTPUT} | awk '{print $4}')
-                        echo "${OUTPUT}"	
-                    done
-                fi
-            elif [ "$HPC" = "False" ]; then
-                python ControlFlow.py $gateType $level $couplingType $segmentCount $g $anharmonicity $crossTalk $staggering $ode $h $alpha $contPulse $leakage $minimizeLeakage $maxDriveStrength $minTime $maxTime $points $iterationCount $optimizer $i $j $WarmStart
-            else 
-            echo "Incorrect computing location. Either HPC or local machine."
-            exit
+            exit 1
         fi
-        #     : 'echo -e "\nQudit Type: "$quditType"\nGate Type: "$gateType"\nCoupling Type: "$couplingType"\nSegment Number:"$segmentNum"
-        # Drive Type:"$drivesType"\nAnharmonicity: "$anharmonicity"\nCrossTalk"$crossTalk"\nCoupling Strength: "$g"
-        # Random Seed Count: "$randomSeedCount"\nNumber of Points: "$points"\nML Iteration Count: "$iterationCount "
-        # Max Drive Strength: "$maxDriveStrength"\nMaximum Time: "$maxTime"\nPoint Number: "$i "\n" '
-        done 
+    done
+else
+    # Random-seed mode
+    for ((i=0; i<points; i++)); do
+        for ((j=0; j<randomSeedCount; j++)); do
+            if [ "$HPC" = "True" ]; then
+                sbatch HPC.slurm "$gateType" "$level" "$couplingType" "$segmentCount" "$g" "$anharmonicity" "$crossTalk" "$staggering" "$ode" "$h" "$alpha" "$contPulse" "$leakage" "$minimizeLeakage" "$maxDriveStrength" "$minTime" "$maxTime" "$points" "$iterationCount" "$optimizer" "$i" "$j" "$WarmStart"
+            elif [ "$HPC" = "False" ]; then
+                python ControlFlow.py "$gateType" "$level" "$couplingType" "$segmentCount" "$g" "$anharmonicity" "$crossTalk" "$staggering" "$ode" "$h" "$alpha" "$contPulse" "$leakage" "$minimizeLeakage" "$maxDriveStrength" "$minTime" "$maxTime" "$points" "$iterationCount" "$optimizer" "$i" "$j" "$WarmStart"
+            else
+                echo "Incorrect computing location. Either HPC or local machine."
+                exit 1
+            fi
+        done
     done
 fi
 

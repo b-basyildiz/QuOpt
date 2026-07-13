@@ -180,7 +180,7 @@ except:
     pass
 try: #Each gate type has weights for a given qudit and coupling
     wDir = os.path.join(mainDir, "Weights")
-    os.makedirs(fDir)
+    os.makedirs(wDir)
 except:
     pass
 try: #Each gate type has weights for a given qudit and coupling
@@ -212,6 +212,7 @@ if leakage == "True":
 fname = os.path.join(fDir, fname + ".csv")
 fWname = "Weights_t" + str(round(t,4)) + ".csv"
 fWname = os.path.join(gDir, fWname)
+fWnameBest = os.path.join(gDir, f"Weights_t{round(t,4)}_best.csv")
 
 fWnameRS = "False"
 if warmStartBool:
@@ -239,6 +240,7 @@ def write():
         wRSlock.release()
     else:
         np.savetxt(fWname,W,delimiter=",") #Weights writing
+        np.savetxt(fWnameBest,W,delimiter=",") #Best weights copy
         wlock.release()
     flock.release()
     try:
@@ -274,6 +276,7 @@ if warmStartBool: #For Warm starts, we need to save the weights of each random s
             fidels.to_csv(fname,index=False,header=False) #overwritting the previous file
             if warmStartFinal:
                 np.savetxt(fWname,W,delimiter=",")
+            np.savetxt(fWnameBest,W,delimiter=",")
     else:
         write()
     if warmStartFinal:
@@ -297,6 +300,7 @@ else:
             fidels.iloc[fIndex,0] = fidelity
             fidels.to_csv(fname,index=False,header=False) #overwritting the previous file
             np.savetxt(fWname,W,delimiter=",") #Weights writing
+            np.savetxt(fWnameBest,W,delimiter=",") #Best weights copy
         wlock.release()
         flock.release()
         try:
