@@ -5,9 +5,9 @@ level=3 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit 
 couplingType="capacitiveCoupMin" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
-crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
+crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
 contPulse="False" #whether or not to have continuous pulse shapes
-leakage="True"
+leakage="False"
 minimizeLeakage="False" #whether or not to penalize higher energy states 
 
 anharmonicity=14 #only used if larger than qubit system
@@ -33,9 +33,8 @@ WarmStart=-1 #Submitting chained jobs that use each others weights as a 'warm st
 
 set -euo pipefail
 
-# Ensure script runs from its directory and prepare output folder
+# Ensure script runs from its directory
 cd "$(dirname "$0")"
-mkdir -p slurm_out
 
 # Loop for the specified number of iterations
 if [ "$randomSeedCount" -eq -1 ]; then

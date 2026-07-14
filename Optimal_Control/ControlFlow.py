@@ -75,7 +75,7 @@ if leakage == "True": #leakge models the system with an additional energy level.
 if leakage == "True":
     tgate = gateGen(gateType,level,level-1)
 else:
-    tgate = gateGen(gateType,level)
+    tgate = gateGen(gateType,level,level)
 
 #Speed limit Workflow
  #Needs to be change for different couplings, but do in the future
@@ -205,42 +205,48 @@ else:
     rseed = 1
     t = maxTime
 
+rt = round(t,4) #Rounded time used consistently for storage/lookup so writes and comparisons agree
+
 lbool = False
 if leakage == "True":
     lbool = True
 
 fname = os.path.join(fDir, fname + ".csv")
-fWname = "Weights_t" + str(round(t,4)) + ".csv"
-fWname = os.path.join(gDir, fWname)
-fWnameBest = os.path.join(gDir, f"Weights_t{round(t,4)}_best.csv")
+fWnameBest = os.path.join(gDir, f"Weights_t{rt}_best.csv")
 
 fWnameRS = "False"
 if warmStartBool:
-    fWnameRS = "Weights" + "_RS" + str(rseed) + "_t" + str(round(t,4)) + ".csv"
+    fWnameRS = "Weights" + "_RS" + str(rseed) + "_t" + str(rt) + ".csv"
     fWnameRS = os.path.join(gDir, fWnameRS)
 
 d = level
 if leakage == "True":
     d = level - 1
 
+#Column labels for the weight files. More energy levels -> more transitions -> more X/Y columns.
+weightHeader = ",".join(genWeightHeader(level, leakage == "True"))
+
 [fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,d,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
 
 flock = FileLock(fname + ".lock")
-wlock = FileLock(fWname + ".lock")
+wlock = FileLock(fWnameBest + ".lock")
 if warmStartBool:
     wRSlock = FileLock(fWnameRS + ".lock")
 
+def saveWeights(path):
+    #Writes weights with a header row naming each column's transition (X/Y), and qudit (q0/q1)
+    np.savetxt(path,W,delimiter=",",header=weightHeader,comments='')
+
 def write():
     #Writing the fidelity
-    out_arr = np.array([[fidelity,round(t,4)]]) #File output 
+    out_arr = np.array([[fidelity,rt]]) #File output
     with open(fname, 'a') as file:
         np.savetxt(file,out_arr,delimiter=",") #Fidelty writing
     if warmStartBool: #For Warm starts, we need to save the weights of each random seeds
-        np.savetxt(fWnameRS,W,delimiter=",") #Weights writing
+        saveWeights(fWnameRS) #Weights writing
         wRSlock.release()
     else:
-        np.savetxt(fWname,W,delimiter=",") #Weights writing
-        np.savetxt(fWnameBest,W,delimiter=",") #Best weights copy
+        saveWeights(fWnameBest) #Best weights copy
         wlock.release()
     flock.release()
     try:
@@ -254,7 +260,7 @@ def write():
             pass
     else:
         try:
-            os.remove(fWname + ".lock")
+            os.remove(fWnameBest + ".lock")
         except:
             pass
     exit()
@@ -265,18 +271,16 @@ try: #if the file has been made
     fidels = pd.read_csv(fname,names=["fidelity","time"])
 except: #if the fidelity file has not been made
     write()
-if warmStartBool: #For Warm starts, we need to save the weights of each random seeds. Writing Weights 
-    np.savetxt(fWnameRS,W,delimiter=",") #Weights writing
+if warmStartBool: #For Warm starts, we need to save the weights of each random seeds. Writing Weights
+    saveWeights(fWnameRS) #Weights writing
 
-    if fidels["time"].isin([t]).any(): #if there is a fidelity from optimization convergence, then we check to write it
-        tempFid = float(fidels[fidels["time"] == t]["fidelity"]) 
+    if fidels["time"].isin([rt]).any(): #if there is a fidelity from optimization convergence, then we check to write it
+        tempFid = float(fidels[fidels["time"] == rt]["fidelity"])
         if fidelity > tempFid: #if our fidelity is greater than the previous fidelity
-            fIndex = fidels[fidels["time"] == t].index.to_numpy()[0] #What row our fidelity is at in the file
+            fIndex = fidels[fidels["time"] == rt].index.to_numpy()[0] #What row our fidelity is at in the file
             fidels.iloc[fIndex,0] = fidelity
             fidels.to_csv(fname,index=False,header=False) #overwritting the previous file
-            if warmStartFinal:
-                np.savetxt(fWname,W,delimiter=",")
-            np.savetxt(fWnameBest,W,delimiter=",")
+            saveWeights(fWnameBest)
     else:
         write()
     if warmStartFinal:
@@ -288,19 +292,18 @@ if warmStartBool: #For Warm starts, we need to save the weights of each random s
     except:
         pass
     try:
-        os.remove(fWname + ".lock")
+        os.remove(fWnameBest + ".lock")
     except:
         pass
     exit()
 else:
-    if fidels["time"].isin([t]).any(): #fidelity for time has been previous caluclated <- look into this, we need to compare times not if they exist
-        tempFid = float(fidels[fidels["time"] == t]["fidelity"])
+    if fidels["time"].isin([rt]).any(): #fidelity for time has been previous caluclated
+        tempFid = float(fidels[fidels["time"] == rt]["fidelity"])
         if fidelity > tempFid: #if our fidelity is greater than the previous fidelity
-            fIndex = fidels[fidels["time"] == t].index.to_numpy()[0] #What row our fidelity is at in the file
+            fIndex = fidels[fidels["time"] == rt].index.to_numpy()[0] #What row our fidelity is at in the file
             fidels.iloc[fIndex,0] = fidelity
             fidels.to_csv(fname,index=False,header=False) #overwritting the previous file
-            np.savetxt(fWname,W,delimiter=",") #Weights writing
-            np.savetxt(fWnameBest,W,delimiter=",") #Best weights copy
+            saveWeights(fWnameBest) #Best weights copy
         wlock.release()
         flock.release()
         try:
@@ -308,7 +311,7 @@ else:
         except:
             pass
         try:
-            os.remove(fWname + ".lock")
+            os.remove(fWnameBest + ".lock")
         except:
             pass
         exit()

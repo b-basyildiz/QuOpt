@@ -154,7 +154,7 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
     if level >= 4 and CTLBool:
         if warmStartBool:
             try:
-                R = torch.tensor(pd.read_csv(weightFName,header=None).to_numpy(), dtype=torch.double)
+                R = torch.tensor(pd.read_csv(weightFName,header=0).to_numpy(), dtype=torch.double)
             except:
                 R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
         else:
@@ -162,7 +162,7 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
     else:
         if warmStartBool:
             try:
-                R = torch.tensor(pd.read_csv(weightFName,header=None).to_numpy(), dtype=torch.double)
+                R = torch.tensor(pd.read_csv(weightFName,header=0).to_numpy(), dtype=torch.double)
             except:
                 R = torch.rand([M,len(drives)*N], dtype=torch.double) *2*np.pi
         else:
@@ -342,7 +342,9 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
         fidelity = abs((fid +d2**2)/((d2**2) * (d2 + 1)))
         infidelity = 1 - fidelity
         infidelity_list[n] = infidelity.detach()
-        weight_list.append(R.detach().numpy())
+        #.clone() is required: .numpy() on an uncloned tensor shares R's underlying storage,
+        #so optimizer.step() would silently mutate every past snapshot in weight_list in place
+        weight_list.append(R.detach().clone().numpy())
 
         if mlbool:
             #minimization type: let's start with average let alpha = 0.2

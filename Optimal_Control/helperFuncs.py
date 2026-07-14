@@ -48,6 +48,38 @@ def genDrive(d, dTrans,type):
     drive[dTrans-cIndex,dTrans] = val
     return drive + drive.conj().T
 
+def genWeightHeader(level, leakage=False, N=2):
+    '''
+    DESC: Column labels for the pulse-weight matrices written by ControlFlow.py/fidelity_ml. \n
+
+    PARAMS:
+        - level: energy level of the system (post leakage increment, i.e. the same `level`
+          ControlFlow.py passes into fidelity_ml)
+        - leakage: whether the leakage model is active. Leakage runs one fewer transition
+          in the base drive set (the top transition is handled separately as `ldrives`),
+          matching the `for l in range(1,level-1)` vs `for l in range(1,level)` split in
+          ControlFlow.py \n
+        - N: number of qudits (fixed at 2 in this codebase) \n
+
+    OUTPUT: list of column names, one per column of W, ordered to match sum_pauli's
+    `pulse_coef[i*N:(i+1)*N]` slicing in ML.py: for each transition l (1,2,...), X then Y,
+    and for each, one column per qudit (q0, q1, ...). More energy levels means more
+    transitions and therefore more columns (e.g. quatrit has one more X/Y pair than qutrit).
+    Used for every model (square or continuous/time-dependent pulses, with or without
+    cross-talk) since they all share this same X/Y-per-transition-per-qudit weight layout -
+    ContPulse only changes the time envelope multiplying a given coefficient, not what that
+    coefficient represents. \n
+
+    AUTHOR: Bora Basyildiz
+    '''
+    upperTransition = level - 1 if leakage else level
+    cols = []
+    for l in range(1, upperTransition):
+        for ptype in ("X", "Y"):
+            for q in range(N):
+                cols.append(f"{ptype}{l-1}{l}_q{q}")
+    return cols
+
 def gateGen(gateType,l,d=2):
     '''
     DESC: Creates a two-qubit gate (CNOT, SWAP, iSWAP) for a given energy level \n
