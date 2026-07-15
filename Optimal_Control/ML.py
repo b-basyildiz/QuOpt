@@ -8,17 +8,7 @@ from helperFuncs import *
 import warnings
 import pandas as pd
 
-import sys
-import os
-
-cfme_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "CFME", "src")
-)
-
-if cfme_path not in sys.path:
-    sys.path.append(cfme_path)
-
-from cfme.cfme import generate_cfme_unitary
+from cfme import generate_cfme_unitary
 
 warnings.filterwarnings("ignore")
 
