@@ -12,7 +12,7 @@ from cfme import generate_cfme_unitary
 
 warnings.filterwarnings("ignore")
 
-def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
+def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmVal,stag,ode,ContPulse,optimizer,weightFName,wsmBoolF):
     #!/usr/bin/env python3
     # -*- coding: utf-8 -*-
     """
@@ -313,7 +313,7 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
         fidelity = 0
         # d = 2**N
 
-        SU = genTwoQuditBasis(dspaceLen,level,dt)
+        SU = genTwoQuditBasis(level,level,dt)
 
         # for U in SU:
         #     eps_U = matmul(matmul(U_Exp,U),(U_Exp.conj().T))
@@ -328,7 +328,7 @@ def fidelity_ml(M,input_gate,tmin,dspaceLen,N_iter,rseed,H0,drives,maxDriveStren
             target_U = torch.matmul(torch.matmul(input_gate,(U.conj().T)),(input_gate.conj().T))
             tr = torch.trace(torch.matmul(target_U,eps_U))
             fid = fid + tr 
-        d2 = dspaceLen**N
+        d2 = level**N
         fidelity = abs((fid +d2**2)/((d2**2) * (d2 + 1)))
         infidelity = 1 - fidelity
         infidelity_list[n] = infidelity.detach()

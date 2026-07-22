@@ -219,14 +219,10 @@ if warmStartBool:
     fWnameRS = "Weights" + "_RS" + str(rseed) + "_t" + str(rt) + ".csv"
     fWnameRS = os.path.join(gDir, fWnameRS)
 
-d = level
-if leakage == "True":
-    d = level - 1
-
 #Column labels for the weight files. More energy levels -> more transitions -> more X/Y columns.
 weightHeader = ",".join(genWeightHeader(level, leakage == "True"))
 
-[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,d,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
+[fidelity,W] = fidelity_ml(segmentCount,tgate,t*tmin,iterationCount,rseed,H0,drives,maxDriveStrength,lbool,minLeak,crossTalk,h,alpha,anharmonicity,staggering,ode,ContPulse,optimizer,fWnameRS,warmStartFinal)
 
 flock = FileLock(fname + ".lock")
 wlock = FileLock(fWnameBest + ".lock")

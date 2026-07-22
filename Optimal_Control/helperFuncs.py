@@ -173,6 +173,7 @@ def RK4(t0, tf, U0, h, dUdt, H):
 
 def RK2(t0, tf, U0, h, dUdt, H):
     n = ceil((tf-t0)/h)
+    h = (tf-t0)/n #rescale to the exact step size so n steps land on tf instead of overshooting it
     U = U0
     t = t0
 
@@ -204,6 +205,7 @@ def dUdt(t, U, H):
 
 def SRK2(t0, tf, U0, h, H):
     n = ceil((tf-t0)/h)
+    h = (tf-t0)/n #rescale to the exact step size so n steps land on tf instead of overshooting it
     U = U0
     t = t0
     if isinstance(U0,torch.Tensor):
@@ -859,7 +861,7 @@ def genQuditBasis(d,l):
     return generators
 
 
-def genTwoQuditBasis(d,l,dt):#need to be changed to d and level when extending to leakage systems
+def genTwoQuditBasis(d,l,dt):
         SU = []
         N = 2
 
