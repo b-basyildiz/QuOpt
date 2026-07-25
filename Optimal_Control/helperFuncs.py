@@ -343,6 +343,36 @@ def normU(U):
         norm = np.sqrt(np.trace(np.matmul(U.conj().T,U))/len(U))
     return U/norm
 
+def cp(t,coef1,coef2,maxDriveStrength,phase=0):
+    '''
+    DESC: Single multi-tone drive amplitude used by CTL_drives: a constant complex amplitude
+          (set by coef1,coef2) rotating at the given detuning frequency, phase. \n
+
+    AUTHOR: Bora Basyildiz
+    '''
+    c = tensor(maxDriveStrength/np.sqrt(2)) *( torch.cos(coef1) + 1j * torch.cos(coef2))
+    p = tensor(np.exp(1j*phase*t))
+    return c*p
+
+def CTL_drives(t,pc,stag,anharmVal,maxDriveStrength,ContPulse,M,tmin):
+    '''
+    DESC: Builds the D1, D2 multi-tone drive amplitudes for the qutrit Cross-Talk-Leakage (CTL)
+          model (Qutrit CTL Model, Sec. 3): D_i^m = sum of four tones, one resonant with this
+          qudit's own 0<->1 transition, one with its own 1<->2 transition (offset by anharmVal),
+          and two crosstalk tones leaking in from the other qudit's 0<->1 and 1<->2 transitions
+          (offset by the staggering, stag). pc indexes: [0,4]=Omega_1,1  [1,5]=Omega_1,2
+          [2,6]=Omega_2,1  [3,7]=Omega_2,2 (own-qudit-1, own-qudit-1, own-qudit-2, own-qudit-2). \n
+
+    AUTHOR: Bora Basyildiz
+    '''
+    if ContPulse == "True":
+        shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
+    else:
+        shape = 1
+    D1 = shape*(cp(t,pc[0],pc[4],maxDriveStrength) + cp(t,pc[1],pc[5],maxDriveStrength,anharmVal) + cp(t,pc[2],pc[6],maxDriveStrength,stag) + cp(t,pc[3],pc[7],maxDriveStrength,stag + anharmVal))
+    D2 = shape*(cp(t,pc[2],pc[6],maxDriveStrength) + cp(t,pc[3],pc[7],maxDriveStrength,anharmVal) + cp(t,pc[0],pc[4],maxDriveStrength,-1*stag) + cp(t,pc[1],pc[5],maxDriveStrength,-1*stag + anharmVal))
+    return D1, D2
+
 def normPrint(U):
     if isinstance(U,torch.Tensor):
         print(sqrt(trace(matmul(U.conj().T,U))/len(U)))

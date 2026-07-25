@@ -19,6 +19,16 @@ DESC: Regression tests for two bugs found while debugging the CTL (cross-talk + 
          level, dt), i.e. a proper operator basis on the full physical Hilbert space, with the
          target gate already embedded as identity on the leakage level (via gateGen).
 
+      3. CTL_drives (helperFuncs.py, extracted out of ML.py's CTL_H) builds the D1/D2 multi-tone
+         drive amplitudes for the "Qutrit CTL Model" (paper Sec. 3): D_1^m = W11 + W12*e^{i*d*t} +
+         W21*e^{i*w*t} + W22*e^{i*(d+w)*t}, D_2^m = W21 + W22*e^{i*d*t} + W11*e^{-i*w*t} +
+         W12*e^{i*(d-w)*t}. D2 had two of its four terms swapped: the coefficient pair meant for
+         qudit 2's own (resonant, phase-0) 0<->1 drive (W21) and the pair meant for the crosstalk
+         leak from qudit 1's 1<->2 drive (W12, phase d-w) were exchanged. This left qudit 2 with no
+         genuine resonant own-transition drive at all (that slot held the misplaced W12 instead),
+         letting the optimizer dodge the mandatory crosstalk coupling by suppressing W12 -- which
+         both hid crosstalk's effect (inflating fidelity) and left the physics wrong at long T.
+
 AUTHOR: Claude, at Bora Basyildiz's request
 '''
 import inspect
@@ -28,7 +38,7 @@ import numpy as np
 import scipy.linalg
 import torch
 
-from helperFuncs import RK2, SRK2, dUdt, genXMat, gateGen, genTwoQuditBasis
+from helperFuncs import RK2, SRK2, dUdt, genXMat, gateGen, genTwoQuditBasis, cp, CTL_drives
 import ML
 
 
@@ -132,6 +142,14 @@ class TestLeakageFidelity(unittest.TestCase):
         self.assertIn("genTwoQuditBasis(level,level,dt)", source)
         self.assertIn("d2 = level**N", source)
 
+    def test_ML_module_no_longer_overwrites_anharmVal_from_anharm_matrix(self):
+        # anharmVal used to be silently overwritten with anharm[-1,-1], which for level=4
+        # (qutrit+leakage) evaluates to 2x the intended base anharmonicity constant (28 vs 14),
+        # because anharm's diagonal is built with a different (linear, already-grown-per-level)
+        # convention than CTL_H's own quadratic l(l-1)/2 growth formula expects as its input.
+        source = inspect.getsource(ML.fidelity_ml)
+        self.assertNotIn("anharmVal = float(anharm", source)
+
     def test_perfect_implementation_has_unit_fidelity(self):
         SU = genTwoQuditBasis(self.level, self.level, self.dt)
         d2 = self.level ** self.N
@@ -155,6 +173,65 @@ class TestLeakageFidelity(unittest.TestCase):
         self.assertLess(fid_new, 1.0)
         self.assertLess(fid_new, fid_old,
                          "the old projector-based formula under-penalizes leakage relative to the fixed formula")
+
+
+class TestCTLDrives(unittest.TestCase):
+    '''D1/D2 must match the paper's Qutrit CTL Model (Sec. 3) equations term-by-term.
+
+    pc index <-> paper Omega_{i,j} mapping, established by matching D1:
+        (pc[0],pc[4]) = W11 (qudit1, own 0<->1)   (pc[1],pc[5]) = W12 (qudit1, own 1<->2)
+        (pc[2],pc[6]) = W21 (qudit2, own 0<->1)   (pc[3],pc[7]) = W22 (qudit2, own 1<->2)
+    '''
+
+    def setUp(self):
+        self.pc = torch.rand(8, dtype=torch.double) * 2 * np.pi
+        self.stag = 17.0
+        self.anharmVal = 14.0
+        self.maxDriveStrength = 40
+        self.t = 0.37  # arbitrary, non-special time
+
+    def expected_D1(self, pc):
+        w11 = cp(self.t, pc[0], pc[4], self.maxDriveStrength)
+        w12 = cp(self.t, pc[1], pc[5], self.maxDriveStrength, self.anharmVal)
+        w21 = cp(self.t, pc[2], pc[6], self.maxDriveStrength, self.stag)
+        w22 = cp(self.t, pc[3], pc[7], self.maxDriveStrength, self.stag + self.anharmVal)
+        return w11 + w12 + w21 + w22
+
+    def expected_D2(self, pc):
+        # paper: D2 = W21 + W22*e^{i*d*t} + W11*e^{-i*w*t} + W12*e^{i*(d-w)*t}
+        w21 = cp(self.t, pc[2], pc[6], self.maxDriveStrength)
+        w22 = cp(self.t, pc[3], pc[7], self.maxDriveStrength, self.anharmVal)
+        w11 = cp(self.t, pc[0], pc[4], self.maxDriveStrength, -1 * self.stag)
+        w12 = cp(self.t, pc[1], pc[5], self.maxDriveStrength, self.anharmVal - self.stag)
+        return w21 + w22 + w11 + w12
+
+    def test_D1_matches_paper_formula(self):
+        D1, _ = CTL_drives(self.t, self.pc, self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
+        self.assertAlmostEqual(abs(D1 - self.expected_D1(self.pc)).item(), 0.0, places=10)
+
+    def test_D2_matches_paper_formula(self):
+        _, D2 = CTL_drives(self.t, self.pc, self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
+        self.assertAlmostEqual(abs(D2 - self.expected_D2(self.pc)).item(), 0.0, places=10)
+
+    def test_D2_is_not_the_old_swapped_formula(self):
+        # Regression guard: the old (buggy) D2 swapped (pc[1],pc[5]) <-> (pc[2],pc[6]).
+        _, D2 = CTL_drives(self.t, self.pc, self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
+        pc = self.pc
+        old_buggy_D2 = (cp(self.t, pc[1], pc[5], self.maxDriveStrength)
+                         + cp(self.t, pc[3], pc[7], self.maxDriveStrength, self.anharmVal)
+                         + cp(self.t, pc[0], pc[4], self.maxDriveStrength, -1 * self.stag)
+                         + cp(self.t, pc[2], pc[6], self.maxDriveStrength, -1 * self.stag + self.anharmVal))
+        self.assertGreater(abs(D2 - old_buggy_D2).item(), 1.0)
+
+    def test_D2_is_D1_under_qudit_relabeling(self):
+        # Physical symmetry: relabeling which qudit is "1" vs "2" (swap W1j<->W2j) and flipping
+        # the sign of the staggering should turn D1 into D2. This holds only if D1/D2 are each
+        # internally self-consistent (not just individually matching the paper by coincidence).
+        pc = self.pc
+        pc_swapped = torch.stack([pc[2], pc[3], pc[0], pc[1], pc[6], pc[7], pc[4], pc[5]])
+        D1_swapped, _ = CTL_drives(self.t, pc_swapped, -1 * self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
+        _, D2 = CTL_drives(self.t, pc, self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
+        self.assertAlmostEqual(abs(D1_swapped - D2).item(), 0.0, places=10)
 
 
 if __name__ == "__main__":

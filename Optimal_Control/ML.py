@@ -39,7 +39,6 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         quditDrives = drives[1]
         anharm = drives[2]
         drives = drives[0]
-        anharmVal = float(anharm[-1,-1])
 
 
     CTLBool = False
@@ -99,12 +98,6 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                 if ContBool: total_pauli = total_pauli + phase*(maxDriveStrength*torch.cos(coef[i])) * tensor((np.sin(np.pi * t * M / tmin)) ** 2) *pauli_temp
                 else : total_pauli = total_pauli + phase*maxDriveStrength*torch.cos(coef[i])*pauli_temp
         return total_pauli
-    
-    #Continuous pulses for qutrit Cross-Talk-Leakage (CTL) modeling
-    def cp(t,coef1,coef2,phase=0):
-        c = tensor(maxDriveStrength/np.sqrt(2)) *( torch.cos(coef1) + 1j * torch.cos(coef2))
-        p = tensor(np.exp(1j*phase*t)) 
-        return c*p
     
     # def gen_SU():
     #     SU = []
@@ -204,13 +197,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                     H1 = HD.clone()
                     H2 = HD.clone()
 
-                    if ContPulse == "True":
-                        shape = tensor((np.sin(np.pi * t * M / tmin)) ** 2)
-                        D1 = shape*(cp(t,pc[0],pc[4]) + cp(t,pc[1],pc[5],anharmVal) + cp(t,pc[2],pc[6],stag) + cp(t,pc[3],pc[7],stag + anharmVal))
-                        D2 = shape*(cp(t,pc[1],pc[5]) + cp(t,pc[3],pc[7],anharmVal) + cp(t,pc[0],pc[4],-1*stag) + cp(t,pc[2],pc[6],-1*stag + anharmVal))
-                    else:
-                        D1 = cp(t,pc[0],pc[4]) + cp(t,pc[1],pc[5],anharmVal) + cp(t,pc[2],pc[6],stag) + cp(t,pc[3],pc[7],stag + anharmVal)
-                        D2 = cp(t,pc[1],pc[5]) + cp(t,pc[3],pc[7],anharmVal) + cp(t,pc[0],pc[4],-1*stag) + cp(t,pc[2],pc[6],-1*stag + anharmVal)
+                    D1, D2 = CTL_drives(t,pc,stag,anharmVal,maxDriveStrength,ContPulse,M,tmin)
 
                     for i in range(len(HD)-1):
                         H1[i,i+1] = np.sqrt(i+1)*D1
@@ -227,7 +214,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                 elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,CTL_H)
                 elif ode == "CFME4": 
                     temp_H = lambda t: -1j*CTL_H(t)
-                    U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,(m+1)/M*tmin,h,4,2)@ U_Exp
+                    U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,tmin/M,h,4,2)@ U_Exp
                 else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Cummulant Free Magnus Expansion, or symplectic Runge-Kutta.")
 
                 if mlbool: #Calculating higher energy state occupancy
@@ -295,7 +282,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                     elif ode == "SRK2": U_Exp = SRK2(m/M*tmin,(m+1)/M*tmin,U_Exp,h,H)
                     elif ode == "CFME4": 
                         temp_H = lambda t: -1j*H(t)
-                        U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,(m+1)/M*tmin,h,4,2) @ U_Exp
+                        U_Exp = generate_cfme_unitary(temp_H,m/M*tmin,tmin/M,h,4,2) @ U_Exp
                     else: raise Exception("Incorrect Cross Talk Modeling Type. Either Second Order Runge-Kutta, Cummulant Free Magnus Expansion, or symplectic Runge-Kutta.")
 
                 else:
