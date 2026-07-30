@@ -128,9 +128,7 @@ def gateGen(gateType,l,d=2):
     elif gateType == "CZ": 
         G = gen_CZ(d,l)
     elif gateType == "SWAP":
-        for i in range(l):
-            for j in range(l):
-                G[i * l + j, j * l + i] = 1
+        G = gen_SWAP(d,l)
     elif gateType == "Toffoli":
         G = np.eye(l**2, dtype=complex)
         idx = (l - 1) * l + (l - 1)
@@ -925,6 +923,23 @@ def gen_CZ(d,l):
                 val = np.e**(2*np.pi*1j/d*i*j)
                 mat[k,k] = val
             k += 1
+    return mat
+
+def gen_SWAP(d,l):
+    '''
+    DESC: Two-qudit SWAP gate restricted to the d-dimensional computational subspace,
+          acting as identity on anything touching a leakage level (index >= d). When
+          d == l (no leakage) this reduces exactly to the plain l-dimensional SWAP. \n
+
+    AUTHOR: Bora Basyildiz
+    '''
+    mat = np.eye(l**2,dtype=complex)
+    for i in range(d):
+        for j in range(d):
+            if i == j:
+                continue
+            mat[i*l+j,i*l+j] = 0
+            mat[i*l+j,j*l+i] = 1
     return mat
 
 def PWC(t0,tf,H,U0,n,order):

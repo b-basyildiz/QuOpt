@@ -38,7 +38,7 @@ import numpy as np
 import scipy.linalg
 import torch
 
-from helperFuncs import RK2, SRK2, dUdt, genXMat, gateGen, genTwoQuditBasis, cp, CTL_drives
+from helperFuncs import RK2, SRK2, dUdt, genXMat, gateGen, genTwoQuditBasis, cp, CTL_drives, gen_SWAP
 import ML
 
 
@@ -232,6 +232,49 @@ class TestCTLDrives(unittest.TestCase):
         D1_swapped, _ = CTL_drives(self.t, pc_swapped, -1 * self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
         _, D2 = CTL_drives(self.t, pc, self.stag, self.anharmVal, self.maxDriveStrength, "False", 40, 1.0)
         self.assertAlmostEqual(abs(D1_swapped - D2).item(), 0.0, places=10)
+
+
+class TestLeakageAwareSWAP(unittest.TestCase):
+    '''gen_SWAP(d,l) must swap only the d-dimensional computational subspace, leaving
+    anything touching a leakage level (index >= d) untouched, while reducing exactly
+    to the plain l-dimensional SWAP when there's no leakage level (d == l).'''
+
+    def test_no_leakage_matches_plain_swap(self):
+        for l in [2, 3, 4]:
+            G = gen_SWAP(l, l)
+            expected = np.zeros((l**2, l**2), dtype=complex)
+            for i in range(l):
+                for j in range(l):
+                    expected[i*l+j, j*l+i] = 1
+            self.assertTrue(np.allclose(G, expected), f"mismatch at l={l}")
+
+    def test_leakage_case_is_unitary(self):
+        d, l = 4, 5  # ququart computational space + 1 leakage level
+        G = gen_SWAP(d, l)
+        self.assertTrue(np.allclose(G @ G.conj().T, np.eye(l**2)))
+
+    def test_leakage_level_is_untouched(self):
+        d, l = 4, 5
+        G = gen_SWAP(d, l)
+        I = np.eye(l**2)
+        for i in range(l):
+            for j in range(l):
+                if i >= d or j >= d:
+                    idx = i*l+j
+                    self.assertTrue(np.allclose(G[idx], I[idx]),
+                                     f"row for index ({i},{j}) touching the leak level should be untouched identity")
+
+    def test_computational_subspace_matches_plain_swap(self):
+        d, l = 4, 5
+        G = gen_SWAP(d, l)
+        comp_idx = [i*l+j for i in range(d) for j in range(d)]
+        V = G[np.ix_(comp_idx, comp_idx)]
+        plain = gen_SWAP(d, d)  # d==l case reduces to plain d-dim SWAP
+        self.assertTrue(np.allclose(V, plain))
+
+    def test_gateGen_SWAP_uses_gen_SWAP(self):
+        d, l = 4, 5
+        self.assertTrue(np.allclose(gateGen("SWAP", l, d), gen_SWAP(d, l)))
 
 
 if __name__ == "__main__":
