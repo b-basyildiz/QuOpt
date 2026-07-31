@@ -173,7 +173,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
         if mlbool: #minimize leakage 
                 #Initializing higher energy state occupancy values
                 l = level - 1
-                qttArr = stateProj(3,l)
+                qttArr = stateProj(l,l)
                 qttStates = vecSpaceGen(qttArr)
                 qttOccVals = []
                 
@@ -240,7 +240,7 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                         for i,d in enumerate(drives):
                             HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
                             if lbool and i >= level -2:
-                                    H1 = H1 + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t)
+                                    HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t)
                         if lbool: HD = HD + sum_pauli(tensor([1]*N),anharm,t)
                         return HD
                 else: #Square Pulses
@@ -264,17 +264,20 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                                 HDct = HDct + sum_pauli(flip(pulse_coef[i*N:(i+1)*N],dims=[0]),quditDrives[i],t,stag+anharmVal)  #remove anharmonicty due to interaction picture
                         HDct = HDct + HDct.conj().T # Hermitian Conjugate
                         return HDct
-                    if timeDepen: 
-                        H1 = lambda t: H1(t) + H1ct(t)
-                    else: 
+                    if timeDepen:
+                        H1_orig = H1
+                        H1 = lambda t: H1_orig(t) + H1ct(t)
+                    else:
                         timeDepen = True
                         H1Cont = lambda t: H1 + torch.tensor(H1ct(t)) 
                 if timeDepen or ContHBool:
                     # Adding static Hamiltonian
-                    if ContHBool and timeDepen: 
-                        if ctBool: H = lambda t: torch.tensor(H0(t)) + H1Cont(t)
+                    if ContHBool and timeDepen:
+                        if ctBool and not ContBool: H = lambda t: torch.tensor(H0(t)) + H1Cont(t)
                         else: H = lambda t: torch.tensor(H0(t)) + H1(t)
-                    elif not ContHBool and timeDepen : H = lambda t: H0 + H1(t) #Need to fix this
+                    elif not ContHBool and timeDepen:
+                        if ctBool and not ContBool: H = lambda t: H0 + H1Cont(t)
+                        else: H = lambda t: H0 + H1(t)
                     elif ContHBool and not timeDepen: H = lambda t: torch.tensor(H0(t)) + H1
 
                     # Time dependent evolution
