@@ -1,0 +1,56 @@
+{
+  "purpose": "Independent direct ML.fidelity_ml CTL Hamiltonian and production CFME propagation, with frozen CSV weights; stop before optimizer.",
+  "reference": "reference_t0.1000.npz (DOP853 rtol=atol=1e-13)",
+  "normalized_time": 0.1,
+  "T": 0.15707963267948966,
+  "dimension": 16,
+  "results": [
+    {
+      "case": "all_tones_maximum",
+      "h": 0.000125,
+      "segments": 40,
+      "fidelity": 0.07223937954201924,
+      "reference_fidelity": 0.07223937990187122,
+      "absolute_fidelity_error": 3.598519815461998e-10,
+      "normalized_propagator_error": 9.114350313114285e-08,
+      "normalized_unitarity_error": 1.2581671735993722e-10,
+      "elapsed_seconds": 2.323769540991634
+    },
+    {
+      "case": "alternating_maximum",
+      "h": 0.000125,
+      "segments": 40,
+      "fidelity": 0.1486429047622133,
+      "reference_fidelity": 0.14864290720112952,
+      "absolute_fidelity_error": 2.438916207880837e-09,
+      "normalized_propagator_error": 2.4507827694844573e-08,
+      "normalized_unitarity_error": 1.006671454432822e-10,
+      "elapsed_seconds": 2.6967152500292286
+    },
+    {
+      "case": "all_tones_maximum",
+      "h": 6.25e-05,
+      "segments": 40,
+      "fidelity": 0.07223937988929767,
+      "reference_fidelity": 0.07223937990187122,
+      "absolute_fidelity_error": 1.2573553309636054e-11,
+      "normalized_propagator_error": 3.6264018724137437e-09,
+      "normalized_unitarity_error": 2.004847540478632e-11,
+      "elapsed_seconds": 4.8609211249277,
+      "difference_from_h_0_000125": 8.754917153156566e-08
+    },
+    {
+      "case": "alternating_maximum",
+      "h": 6.25e-05,
+      "segments": 40,
+      "fidelity": 0.14864290705380007,
+      "reference_fidelity": 0.14864290720112952,
+      "absolute_fidelity_error": 1.4732945419204668e-10,
+      "normalized_propagator_error": 1.5368789177819091e-09,
+      "normalized_unitarity_error": 1.7348898062980573e-11,
+      "elapsed_seconds": 4.578318792046048,
+      "difference_from_h_0_000125": 2.297968761710563e-08
+    }
+  ],
+  "total_elapsed_seconds": 14.461658583022654
+}

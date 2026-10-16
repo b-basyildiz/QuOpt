@@ -1,0 +1,40 @@
+{
+  "framework": "jax",
+  "version": "0.4.38",
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "devices": [
+    "TFRT_CPU_0"
+  ],
+  "x64_enabled": true,
+  "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+  "total_seconds": 0.5540487909456715,
+  "spec": {
+    "M": 3,
+    "level": 2,
+    "leakage": false,
+    "crossTalk": "False",
+    "ContPulse": "False",
+    "minLeak": "False",
+    "maxDriveStrength": 4,
+    "anharmVal": 14.0,
+    "stag": 17.0,
+    "h": 0.01,
+    "alpha": 0.5,
+    "ode": "CFME4",
+    "coupling": "XX",
+    "iterations": 5,
+    "seed": 1,
+    "name": "qubit_square",
+    "normalized_time": 0.1
+  },
+  "first_iteration_seconds": 0.41267691703978926,
+  "warmed_iteration_seconds": [
+    0.00020570808555930853,
+    0.0001719159772619605,
+    0.00017891707830131054,
+    0.00016341707669198513
+  ],
+  "median_warmed_iteration_seconds": 0.00017541652778163552,
+  "reported_fidelity": 0.31465697288513184
+}

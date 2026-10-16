@@ -1,0 +1,21 @@
+{
+  "M": 2,
+  "level": 3,
+  "leakage": false,
+  "crossTalk": "False",
+  "ContPulse": "True",
+  "minLeak": "False",
+  "maxDriveStrength": 4,
+  "anharmVal": 14.0,
+  "stag": 17.0,
+  "h": 0.002,
+  "alpha": 0.5,
+  "ode": "CFME4",
+  "coupling": "SpeedUp",
+  "iterations": 3,
+  "seed": 7,
+  "normalized_time": 0.02,
+  "optimizer": "SGD",
+  "name": "conth_continuous",
+  "time_dependent_coupling": true
+}

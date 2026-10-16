@@ -1,0 +1,43 @@
+{
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "jax": "0.4.38",
+    "jaxlib": "0.4.38",
+    "numpy": "1.26.4",
+    "scipy": "1.15.3",
+    "pandas": "2.3.3",
+    "filelock": "3.29.0",
+    "ml-dtypes": "0.5.3",
+    "opt-einsum": "3.4.0",
+    "python-dateutil": "2.9.0.post0",
+    "pytz": "2026.5",
+    "six": "1.17.0",
+    "tzdata": "2026.5"
+  },
+  "source_sha256": {
+    "ControlFlow.py": "47ed3408d8ffd453aca342d1a94a02d029124ded1e68d3f418b5b178206cb8e1",
+    "HPC.slurm": "2eef177d02e087c0401ec14ea0f04e3718a95a1e62f9386e73d2cae451921a8f",
+    "ML.py": "b69ef45315795a455bb5deb8b106a64046effe863924a6b95f00d9229b1a2f08",
+    "QOC.bash": "15a854a61c24bfdb1d9e33f7d799239baf7b94d566f324434e81dc144a9e744a",
+    "benchmark_parity.py": "b4f2e3448a4a298860692fc4bab933194f09af9a7f3829f01a2c23a36eb0b84e",
+    "cfme.py": "536f60dc2fc9231d2df3f9bdb944c2f83571449a52815382848c1ce9b5002e26",
+    "helperFuncs.py": "5d6bddc9f6a2b62e83024cfe67a3cf26f415a9f3cb813ef45edf32f4f41f2c0e",
+    "requirements.txt": "9b95780427182e7c4e8a1e38f6ff608de50aa039b9d6402d9836218ddba4ceb5",
+    "setup_caltech.bash": "3e586b75b9fa4e78d907f51eb3d81f0b537959f3e938bb8296ee2696d92ecb09",
+    "setup_env.bash": "c2ae8ba062144432d7ca908639a414aa586c91ef7f33b4d99c40494424bdcaf3",
+    "smoke_cli.py": "08c671422d047499def4ce2014d4cf7f60eaa113dcdd192b39402abe47d28f02",
+    "test_additional_modes.py": "967d2604b8995c08b3ba601aae9403b8acd8066a6eccd59c3793a31a8faaff2d",
+    "test_jax_control.py": "ca2693f64892abf1d7a2b43f4e4a7bb3145ebff8a88324a886513a3bd92c8ac4"
+  },
+  "max_absolute_errors": {
+    "unitaries": 5.346709346839048e-09,
+    "fidelities": 3.422206962255814e-11,
+    "costs": 3.422206962255814e-11,
+    "gradients": 6.259980099392048e-11,
+    "weights_after": 1.8423396141997728e-10,
+    "best_weights": 1.2089618195432195e-10,
+    "reported_fidelity": 0.0
+  },
+  "original_training_files_edited_in_this_task": false
+}

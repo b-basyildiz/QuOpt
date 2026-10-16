@@ -1,0 +1,41 @@
+{
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "regression_tests": 23,
+  "pilots": [
+    {
+      "normalized_time": 0.1,
+      "iterations": 3,
+      "repeat": 1,
+      "fidelity": 0.06496649980545044,
+      "elapsed_seconds": 3.2448795420350507,
+      "weights_shape": [
+        40,
+        8
+      ]
+    },
+    {
+      "normalized_time": 0.1,
+      "iterations": 3,
+      "repeat": 2,
+      "fidelity": 0.06496649980545044,
+      "elapsed_seconds": 3.183775416924618,
+      "weights_shape": [
+        40,
+        8
+      ]
+    },
+    {
+      "normalized_time": 1.0,
+      "iterations": 2,
+      "repeat": 1,
+      "fidelity": 0.05942124128341675,
+      "elapsed_seconds": 19.71053895901423,
+      "weights_shape": [
+        40,
+        8
+      ]
+    }
+  ],
+  "target_hpc_python311_tested": false,
+  "note": "Numerical smoke checks validated locally. The existing conda torch WHEEL metadata says x86_64 on arm64, so local pip check fails; target Linux environment must be checked by the complete Slurm smoke runner."
+}

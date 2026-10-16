@@ -1,0 +1,82 @@
+{
+  "passed": true,
+  "iterations_per_call": 3,
+  "configuration": [
+    "iSWAP",
+    "3",
+    "SpeedUp",
+    "40",
+    "1",
+    "14",
+    "True",
+    "17",
+    "CFME4",
+    "0.0005",
+    "0.5",
+    "True",
+    "True",
+    "False",
+    "40",
+    "0.1",
+    "0.1",
+    "-1",
+    "3",
+    "SGD",
+    "0",
+    "0"
+  ],
+  "initial_weights_sha256": "c9546ed984782b3914b6442281a943057f568b461eacd4c93429d6ca13ffe735",
+  "torch_python": "/opt/anaconda3/envs/qutrit_QST/bin/python",
+  "jax_python": "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/JAX_Optimal_Control/.venv/bin/python",
+  "absolute_tolerance": 1e-08,
+  "relative_tolerance": 1e-08,
+  "stages": [
+    {
+      "stage": "fresh",
+      "max_absolute_errors": {
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv": 0.0,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_Weights/Weights_t0.1_best.csv": 3.1032953984322376e-12
+      },
+      "passed": true
+    },
+    {
+      "stage": "repeat_existing_csv",
+      "max_absolute_errors": {
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv": 0.0,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_Weights/Weights_t0.1_best.csv": 3.1032953984322376e-12
+      },
+      "passed": true
+    },
+    {
+      "stage": "warm_start_create",
+      "max_absolute_errors": {
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv": 0.0,
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS.csv": 0.0,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS_Weights/Weights_RS1_t0.1.csv": 5.579536832556187e-12,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_Weights/Weights_t0.1_best.csv": 3.1032953984322376e-12
+      },
+      "passed": true
+    },
+    {
+      "stage": "warm_start_continue",
+      "max_absolute_errors": {
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv": 0.0,
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS.csv": 0.0,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS_Weights/Weights_RS1_t0.1.csv": 1.1222134332911082e-11,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS_Weights/Weights_t0.1_best.csv": 1.1222134332911082e-11,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_Weights/Weights_t0.1_best.csv": 3.1032953984322376e-12
+      },
+      "passed": true
+    },
+    {
+      "stage": "warm_start_final",
+      "max_absolute_errors": {
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv": 0.0,
+        "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS.csv": 0.0,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_WS_Weights/Weights_t0.1_best.csv": 1.4357404154452524e-11,
+        "Data/CTL/SpeedUp/Weights/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3_Weights/Weights_t0.1_best.csv": 3.1032953984322376e-12
+      },
+      "passed": true
+    }
+  ]
+}

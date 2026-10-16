@@ -1,0 +1,2 @@
+/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/JAX_Optimal_Control/.venv/lib/python3.10/site-packages/jax/_src/lax/lax.py:3480: ComplexWarning: Casting complex values to real discards the imaginary part
+  x_bar = _convert_element_type(x_bar, x.aval.dtype, x.aval.weak_type)

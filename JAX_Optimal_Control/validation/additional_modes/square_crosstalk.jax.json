@@ -1,0 +1,34 @@
+{
+  "framework": "jax",
+  "version": "0.4.38",
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "spec": {
+    "M": 2,
+    "level": 3,
+    "leakage": false,
+    "crossTalk": "True",
+    "ContPulse": "False",
+    "minLeak": "False",
+    "maxDriveStrength": 4,
+    "anharmVal": 14.0,
+    "stag": 17.0,
+    "h": 0.002,
+    "alpha": 0.5,
+    "ode": "CFME4",
+    "coupling": "SpeedUp",
+    "iterations": 3,
+    "seed": 7,
+    "normalized_time": 0.02,
+    "optimizer": "SGD",
+    "name": "square_crosstalk"
+  },
+  "total_seconds": 1.0753487918991596,
+  "first_iteration_seconds": 0.8992463750764728,
+  "warmed_iteration_seconds": [
+    0.0011324579827487469,
+    0.001091292011551559
+  ],
+  "median_warmed_iteration_seconds": 0.001111874997150153,
+  "reported_fidelity": 0.5744004845619202
+}

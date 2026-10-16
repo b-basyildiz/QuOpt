@@ -1,0 +1,1266 @@
+{
+  "scope": "Same-input CPU smoke comparison; 5 SGD updates per case, not full convergence.",
+  "timing_notes": "Sequential workers; first iteration separated from warmed iterations. JAX first iteration includes compilation, and all JAX iterations synchronize. Both include diagnostic host copies. PyTorch uses one CPU thread; XLA flags and BLAS thread limits are recorded, but are not a guarantee of identical backend threading.",
+  "source_sha256": {
+    "Optimal_Control/ML.py": "ce7ba708f98f955eae46ab4bf63ced2caf1c47d42cf6a90d7f41ca7216066082",
+    "Optimal_Control/cfme.py": "9e41d1c8718818a3deddb79c6988e8211f0ac4de3ad0d5e8157f99c45c2ceba2",
+    "Optimal_Control/helperFuncs.py": "1c382aead250b9d6fd07af2bd1cd1e4b1f128c7403636289e33e7b6d9bdd6f6a",
+    "Optimal_Control/QOC.bash": "d40ab345b2396138597bd95653ae13973d6697a22991d57ff976997ea282d736",
+    "JAX_Optimal_Control/ML.py": "c69da5658b16c5301994932137c45dee95e3de9b24d1089c4200f9f10dfc16de",
+    "JAX_Optimal_Control/cfme.py": "536f60dc2fc9231d2df3f9bdb944c2f83571449a52815382848c1ce9b5002e26",
+    "JAX_Optimal_Control/helperFuncs.py": "5d6bddc9f6a2b62e83024cfe67a3cf26f415a9f3cb813ef45edf32f4f41f2c0e",
+    "JAX_Optimal_Control/benchmark_parity.py": "b4f2e3448a4a298860692fc4bab933194f09af9a7f3829f01a2c23a36eb0b84e"
+  },
+  "cases": [
+    {
+      "name": "qoc_t0.1",
+      "spec": {
+        "M": 40,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 40,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.0005,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "qoc_t0.1",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 1.0611299874302826e-09,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 8.666845019433822e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 1.2359002710127243e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 2.114908508737967e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.2054579556775025e-11,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.2054579556775025e-11,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 8.666845019433822e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 4.328360416926444,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t0.1",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.8266826249891892,
+          "warmed_iteration_seconds": [
+            0.8802431249059737,
+            0.8441918750759214,
+            0.8740702919894829,
+            0.8528627910418436
+          ],
+          "median_warmed_iteration_seconds": 0.8634665415156633,
+          "reported_fidelity": 0.06561976671218872
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 1.532816500053741,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t0.1",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 1.1568518329877406,
+          "warmed_iteration_seconds": [
+            0.03663637500721961,
+            0.0344482499640435,
+            0.035034333006478846,
+            0.033779332996346056
+          ],
+          "median_warmed_iteration_seconds": 0.03474129148526117,
+          "reported_fidelity": 0.06561976671218872
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 24.854186606217127
+    },
+    {
+      "name": "qoc_t0.5",
+      "spec": {
+        "M": 40,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 40,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.0005,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "qoc_t0.5",
+        "normalized_time": 0.5
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 3.3105283889096455e-09,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 2.8411051289367606e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 4.155253918725066e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 8.910490929630276e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 3.3743008387432383e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 3.3743008387432383e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 2.8411051289367606e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 22.448107750038616,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t0.5",
+            "normalized_time": 0.5
+          },
+          "first_iteration_seconds": 4.269822541973554,
+          "warmed_iteration_seconds": [
+            4.505458125029691,
+            4.454618499963544,
+            4.455792166059837,
+            4.521476584021002
+          ],
+          "median_warmed_iteration_seconds": 4.480625145544764,
+          "reported_fidelity": 0.05953240394592285
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 2.141315915971063,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t0.5",
+            "normalized_time": 0.5
+          },
+          "first_iteration_seconds": 1.2207352080149576,
+          "warmed_iteration_seconds": [
+            0.1694213750306517,
+            0.17480449995491654,
+            0.17003195802681148,
+            0.17245025001466274
+          ],
+          "median_warmed_iteration_seconds": 0.1712411040207371,
+          "reported_fidelity": 0.05953240394592285
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 26.16559365911449
+    },
+    {
+      "name": "qoc_t1",
+      "spec": {
+        "M": 40,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 40,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.0005,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "qoc_t1",
+        "normalized_time": 1.0
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 5.346709346839048e-09,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 1.2089618195432195e-10,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 1.8423396141997728e-10,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 6.259980099392048e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 8.743672452737883e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 8.743672452737883e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 1.2089618195432195e-10,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 49.753913709078915,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t1",
+            "normalized_time": 1.0
+          },
+          "first_iteration_seconds": 9.491004167008214,
+          "warmed_iteration_seconds": [
+            10.368699082988314,
+            9.911751792067662,
+            9.925596290966496,
+            9.560849208966829
+          ],
+          "median_warmed_iteration_seconds": 9.918674041517079,
+          "reported_fidelity": 0.06066983938217163
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 2.9045775830745697,
+          "spec": {
+            "M": 40,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 40,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.0005,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qoc_t1",
+            "normalized_time": 1.0
+          },
+          "first_iteration_seconds": 1.3790136659517884,
+          "warmed_iteration_seconds": [
+            0.3310583750717342,
+            0.32925270800478756,
+            0.35290833294857293,
+            0.33223900001030415
+          ],
+          "median_warmed_iteration_seconds": 0.33164868754101917,
+          "reported_fidelity": 0.06066983938217163
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 29.907171094383756
+    },
+    {
+      "name": "ctl_square",
+      "spec": {
+        "M": 3,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "False",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.01,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "ctl_square",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 3.4844027277880974e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 6.808789643208968e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 0.32461483299266547,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "False",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "ctl_square",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.07289399998262525,
+          "warmed_iteration_seconds": [
+            0.06281591695733368,
+            0.06203287502285093,
+            0.06133041705470532,
+            0.06238266592845321
+          ],
+          "median_warmed_iteration_seconds": 0.06220777047565207,
+          "reported_fidelity": 0.12190020084381104
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 0.8234767499379814,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "True",
+            "ContPulse": "False",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "ctl_square",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.6607614160748199,
+          "warmed_iteration_seconds": [
+            0.0024599579628556967,
+            0.0025691670598462224,
+            0.002366500091738999,
+            0.0023229579674080014
+          ],
+          "median_warmed_iteration_seconds": 0.002413229027297348,
+          "reported_fidelity": 0.12190020084381104
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 25.77781460938274
+    },
+    {
+      "name": "leakage_continuous",
+      "spec": {
+        "M": 3,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "False",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.01,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "leakage_continuous",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 7.106634329978455e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 2.9408983928669308e-18,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 0.44992729206569493,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "False",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "leakage_continuous",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.09243354201316833,
+          "warmed_iteration_seconds": [
+            0.08561416692100465,
+            0.08474866603501141,
+            0.08464816701598465,
+            0.09961070795543492
+          ],
+          "median_warmed_iteration_seconds": 0.08518141647800803,
+          "reported_fidelity": 0.062037527561187744
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 1.0150764170102775,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "False",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "leakage_continuous",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.8645964170573279,
+          "warmed_iteration_seconds": [
+            0.0033429169561713934,
+            0.003215541015379131,
+            0.0024097500136122108,
+            0.0023862089728936553
+          ],
+          "median_warmed_iteration_seconds": 0.002812645514495671,
+          "reported_fidelity": 0.062037527561187744
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 30.285158950534058
+    },
+    {
+      "name": "leakage_penalty",
+      "spec": {
+        "M": 3,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "False",
+        "ContPulse": "True",
+        "minLeak": "True",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.01,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "leakage_penalty",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 6.4394514979292455e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 4.9873299934333204e-18,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 0.47408766590524465,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "False",
+            "ContPulse": "True",
+            "minLeak": "True",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "leakage_penalty",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.10579237493220717,
+          "warmed_iteration_seconds": [
+            0.0926467910176143,
+            0.090396250016056,
+            0.08857029199134558,
+            0.09280824998859316
+          ],
+          "median_warmed_iteration_seconds": 0.09152152051683515,
+          "reported_fidelity": 0.062037765979766846
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 1.1006579169770703,
+          "spec": {
+            "M": 3,
+            "level": 4,
+            "leakage": true,
+            "crossTalk": "False",
+            "ContPulse": "True",
+            "minLeak": "True",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "leakage_penalty",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.9496287909569219,
+          "warmed_iteration_seconds": [
+            0.002779165981337428,
+            0.002550208941102028,
+            0.0024432919453829527,
+            0.002387167070992291
+          ],
+          "median_warmed_iteration_seconds": 0.0024967504432424903,
+          "reported_fidelity": 0.062037765979766846
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 36.656254838980864
+    },
+    {
+      "name": "qubit_square",
+      "spec": {
+        "M": 3,
+        "level": 2,
+        "leakage": false,
+        "crossTalk": "False",
+        "ContPulse": "False",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.01,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "XX",
+        "iterations": 5,
+        "seed": 1,
+        "name": "qubit_square",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 1.1133411481696098e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 3.8163916471489756e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 0.021245624986477196,
+          "spec": {
+            "M": 3,
+            "level": 2,
+            "leakage": false,
+            "crossTalk": "False",
+            "ContPulse": "False",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "XX",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qubit_square",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.013437915942631662,
+          "warmed_iteration_seconds": [
+            0.0023317920276895165,
+            0.0017715420108288527,
+            0.001649125013500452,
+            0.0018932909006252885
+          ],
+          "median_warmed_iteration_seconds": 0.0018324164557270706,
+          "reported_fidelity": 0.31465697288513184
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 0.5540487909456715,
+          "spec": {
+            "M": 3,
+            "level": 2,
+            "leakage": false,
+            "crossTalk": "False",
+            "ContPulse": "False",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "XX",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qubit_square",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.41267691703978926,
+          "warmed_iteration_seconds": [
+            0.00020570808555930853,
+            0.0001719159772619605,
+            0.00017891707830131054,
+            0.00016341707669198513
+          ],
+          "median_warmed_iteration_seconds": 0.00017541652778163552,
+          "reported_fidelity": 0.31465697288513184
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 10.44608782821266
+    },
+    {
+      "name": "qutrit_crosstalk",
+      "spec": {
+        "M": 3,
+        "level": 3,
+        "leakage": false,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.01,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 5,
+        "seed": 1,
+        "name": "qutrit_crosstalk",
+        "normalized_time": 0.1
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 2.7678757868805105e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 1.3233858453531866e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 1.8474111129762605e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 3.3426386658597096e-14,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 6.461498003318411e-13,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 6.461498003318411e-13,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 1.3233858453531866e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      },
+      "timing": {
+        "torch": {
+          "framework": "torch",
+          "version": "1.13.1",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "device": "cpu",
+          "torch_threads": 1,
+          "total_seconds": 0.48417062498629093,
+          "spec": {
+            "M": 3,
+            "level": 3,
+            "leakage": false,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qutrit_crosstalk",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.10407883301377296,
+          "warmed_iteration_seconds": [
+            0.09576995798852295,
+            0.09214195900131017,
+            0.0915064160944894,
+            0.09667279198765755
+          ],
+          "median_warmed_iteration_seconds": 0.09395595849491656,
+          "reported_fidelity": 0.5827582478523254
+        },
+        "jax": {
+          "framework": "jax",
+          "version": "0.4.38",
+          "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+          "platform": "macOS-26.5.2-arm64-arm-64bit",
+          "devices": [
+            "TFRT_CPU_0"
+          ],
+          "x64_enabled": true,
+          "xla_flags": "--xla_cpu_multi_thread_eigen=false intra_op_parallelism_threads=1",
+          "total_seconds": 1.1157715000445023,
+          "spec": {
+            "M": 3,
+            "level": 3,
+            "leakage": false,
+            "crossTalk": "True",
+            "ContPulse": "True",
+            "minLeak": "False",
+            "maxDriveStrength": 4,
+            "anharmVal": 14.0,
+            "stag": 17.0,
+            "h": 0.01,
+            "alpha": 0.5,
+            "ode": "CFME4",
+            "coupling": "SpeedUp",
+            "iterations": 5,
+            "seed": 1,
+            "name": "qutrit_crosstalk",
+            "normalized_time": 0.1
+          },
+          "first_iteration_seconds": 0.965930457925424,
+          "warmed_iteration_seconds": [
+            0.0012689169961959124,
+            0.0012262919917702675,
+            0.0011967499740421772,
+            0.001172332908026874
+          ],
+          "median_warmed_iteration_seconds": 0.0012115209829062223,
+          "reported_fidelity": 0.5827582478523254
+        }
+      },
+      "warmed_speed_ratio_torch_over_jax": 77.5520686975912
+    }
+  ],
+  "passed": true,
+  "post_benchmark_source_updates": [
+    {
+      "file": "JAX_Optimal_Control/ML.py",
+      "measured_sha256": "c69da5658b16c5301994932137c45dee95e3de9b24d1089c4200f9f10dfc16de",
+      "updated_sha256": "b69ef45315795a455bb5deb8b106a64046effe863924a6b95f00d9229b1a2f08",
+      "change": "Only the unused-in-this-benchmark CosineLR scheduler branch and its documentation changed: preserve original ML.py passing infidelity as an explicit epoch. SGD numerical code and timing code are unchanged.",
+      "validation": "Eight analytic tests passed after this change, including explicit-epoch CosineLR checks."
+    }
+  ]
+}

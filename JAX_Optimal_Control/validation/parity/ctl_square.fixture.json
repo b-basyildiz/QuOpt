@@ -1,0 +1,19 @@
+{
+  "M": 3,
+  "level": 4,
+  "leakage": true,
+  "crossTalk": "True",
+  "ContPulse": "False",
+  "minLeak": "False",
+  "maxDriveStrength": 4,
+  "anharmVal": 14.0,
+  "stag": 17.0,
+  "h": 0.01,
+  "alpha": 0.5,
+  "ode": "CFME4",
+  "coupling": "SpeedUp",
+  "iterations": 5,
+  "seed": 1,
+  "name": "ctl_square",
+  "normalized_time": 0.1
+}

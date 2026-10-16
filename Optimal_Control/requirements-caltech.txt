@@ -1,0 +1,9 @@
+# Direct runtime dependencies, matching the local convergence-test environment.
+# Use the confirmed Caltech Python 3.11 module (local tests used Python 3.10).
+# Install CPU PyTorch separately; a Linux x86_64 CPython 3.11 wheel is available:
+# python -m pip install 'torch==1.13.1+cpu' --extra-index-url https://download.pytorch.org/whl/cpu
+numpy==1.26.4
+scipy==1.15.3
+pandas==2.3.3
+matplotlib==3.10.9
+filelock==3.29.0

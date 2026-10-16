@@ -241,7 +241,9 @@ def fidelity_ml(M,input_gate,tmin,N_iter,rseed,H0,drives,maxDriveStrength,lbool,
                             HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],d,t)
                             if lbool and i >= level -2:
                                     HD = HD + sum_pauli(pulse_coef[i*N:(i+1)*N],quditDrives[(i % len(quditDrives))],t)
-                        if lbool: HD = HD + sum_pauli(tensor([1]*N),anharm,t)
+                        if lbool:
+                            # Anharmonicity is static: do not apply the drive cap or pulse envelope.
+                            HD = HD + tensor(kron(id,anharm) + kron(anharm,id),dtype=dt)
                         return HD
                 else: #Square Pulses
                     H1 = 0

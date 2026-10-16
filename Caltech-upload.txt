@@ -1,0 +1,155 @@
+QuOpt on Caltech HPC - 2026-10-14
+
+Project directory:    /home/bbasyild/QuOpt (~/QuOpt)
+Virtual environment: ~/QuOpt/.venv
+Environment prompt:  (QuOpt)
+Python module:       python/3.11.6-gcc-13.2.0-fh6i4o3
+
+Yes, this uses the HPC's Python 3.11.6 installation to create a separate QuOpt
+environment. It does not use or modify the TrotterReactivity environment.
+Any old ~/quopt-caltech directory is left alone. Create the new environment;
+do not move an existing venv, because its scripts contain absolute paths.
+
+The archive includes the static anharmonicity fix and h=0.0005. Its QOC.bash
+uses HPC="True"; the local working QOC.bash remains HPC="False". HPC.slurm is
+the Caltech-specific HPC.caltech.slurm, renamed for the existing launcher.
+
+Included files:
+  ControlFlow.py              command-line entry point and output handling
+  ML.py                       control optimization and Hamiltonians
+  helperFuncs.py              gates, drives, fidelity helpers and integrators
+  cfme.py                     local CFME integrator used by ML.py
+  QOC.bash                    production configuration and submission loop
+  HPC.slurm                   Caltech CPU job wrapper
+  requirements-caltech.txt    pinned direct dependencies (PyTorch separate)
+  setup_caltech.bash          fail-fast environment installation
+  activate_quopt.bash         one-command activation for the current shell
+  smoke_caltech.py            package, regression and actual optimization checks
+  test_bugfixes.py            existing regression checks
+  test_continuous_pulses.py   continuous-pulse regression checks
+  README.txt                 these instructions
+  SHA256SUMS                 integrity checks for the other files
+
+WarmStart=-1 needs no input Data/ or saved weights. The pipeline creates Data/.
+The CFME/ submodule, notebooks, plots, validation artifacts and local Python
+environment are not needed on the HPC.
+
+1. UPLOAD FROM YOUR MAC
+
+Use campus networking or the Caltech VPN. Run in a local terminal:
+
+  scp "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/caltech-upload-2026-10-14.tar.gz" bbasyild@login.hpc.caltech.edu:~/
+  ssh bbasyild@login.hpc.caltech.edu
+
+Upload this refreshed archive even if you uploaded an earlier version: it has
+the new setup and smoke scripts, and now extracts into QuOpt/.
+
+2. EXTRACT, VERIFY AND INSTALL ON THE HPC
+
+This deactivates an existing venv in your current shell without deleting it.
+The subshell stops at the first error without closing your SSH session.
+Only the listed project files are extracted; existing Data/ is not removed.
+
+  if declare -F deactivate >/dev/null; then deactivate; fi
+  (
+    set -e
+    cd "$HOME"
+    tar -xzf caltech-upload-2026-10-14.tar.gz
+    cd QuOpt
+    sha256sum -c SHA256SUMS
+    bash setup_caltech.bash
+  )
+
+The setup script loads Python 3.11.6 and creates/completes ~/QuOpt/.venv with
+the prompt name QuOpt. Allow venv creation to finish even if it is silent.
+It installs numpy 1.26.4, scipy 1.15.3, pandas 2.3.3, matplotlib 3.10.9,
+filelock 3.29.0 and CPU torch 1.13.1+cpu, then runs pip check.
+An existing ~/QuOpt/.venv using another Python version causes a clear error;
+the script does not delete or replace it.
+
+The official CPU wheel index includes torch 1.13.1+cpu for CPython 3.11/Linux
+x86_64. Dependency resolution for that target was checked. Local numerical
+tests use Python 3.10; the Slurm smoke job below validates the actual HPC
+Python 3.11 runtime. No GPU is required.
+
+3. ACTIVATE AFTER INSTALLATION SUCCEEDS
+
+Run this command after seeing "QuOpt environment installed" and whenever you
+want to switch to QuOpt after logging in:
+
+  source ~/QuOpt/activate_quopt.bash
+
+Use source, not bash, so the activation affects your current terminal. The
+script deactivates your current venv, loads the Python 3.11.6 module, activates
+QuOpt, exports the Slurm environment settings, and changes directory to ~/QuOpt.
+It does not change which environment activates by default on your next login.
+Expect a (QuOpt) prompt. To verify:
+
+  python --version
+  python -c 'import sys; print(sys.executable)'
+
+Expect Python 3.11.6 and /home/bbasyild/QuOpt/.venv/bin/python.
+
+4. SUBMIT THE SMOKE TESTS
+
+Run from ~/QuOpt in the same shell as the activation command:
+
+  smoke_job=$(sbatch --parsable --time=00:20:00 --mem=16G HPC.slurm --smoke)
+  echo "Smoke-test job: $smoke_job"
+  squeue -j "$smoke_job"
+
+This submits ONE CPU job. It checks:
+  - Python 3.11, the selected venv, exact package versions, imports and pip check.
+  - All 23 regression tests, including the continuous anharmonicity tests.
+  - Real CFME4 propagation, autograd and SGD with h=0.0005 and 40 pulses.
+  - The shortest duration (T=0.1), three iterations, run twice to check both
+    new-output and existing-CSV paths. The fixed-seed fidelity must match
+    0.06496649980545044 within 1e-6 absolute tolerance.
+  - The longest duration (T=1.0), two iterations, with finite fidelity and
+    finite 40 x 8 optimized weights.
+
+Pilot Data/ is created in a temporary directory and removed automatically.
+Production results are not touched. A JSON report and, on success, pip freeze
+are saved under ~/QuOpt/smoke-results/.
+
+5. CHECK THE FINISHED JOB
+
+When squeue no longer lists the job, run in the same shell:
+
+  sacct -j "$smoke_job" --format=JobID,State,ExitCode,Elapsed,MaxRSS
+  cat "quopt-${smoke_job}.out" "quopt-${smoke_job}.err"
+  cat "smoke-results/QuOpt-${smoke_job}.json"
+
+Success means COMPLETED, ExitCode 0:0 and QUOPT SMOKE TESTS PASSED in stdout.
+The unittest summary is in stderr: expect "Ran 23 tests" and "OK". A stderr
+file is normal because unittest writes there. If a check fails, inspect both
+logs and the JSON report before submitting production jobs.
+
+The wrapper uses your default Slurm account/partition. If your allocation
+requires explicit values, use those supplied by your group or HPC support.
+
+6. LATER: PRODUCTION SWEEP
+
+After the smoke job passes, size production memory and wall time using pilots
+and seff. The wrapper's one CPU, 16 GB and 24 hours are initial requests, not a
+guarantee that 5000 iterations fit. The code saves results at completion and
+does not have intermediate checkpoints.
+
+The command below submits the FULL 500-job sweep (10 durations x 50 seed slots,
+5000 SGD iterations each); it is not needed to install or smoke-test QuOpt:
+
+  bash QOC.bash
+
+Production results are written under ~/QuOpt/Data/. For final numerical
+accuracy, re-evaluate optimized weights with h=0.00025 while holding the
+weights fixed. QOC.bash does not automate that refinement.
+
+The archive is a snapshot: rebuild or upload changed files after edits.
+Preparing it has not uploaded files, installed anything on the HPC, or
+submitted jobs. Keep an off-cluster copy of important results.
+
+Official references, checked 2026-10-14:
+https://www.hpc.caltech.edu/docs/documentation/quick-start.html
+https://www.hpc.caltech.edu/docs/documentation/software-and-modules.html
+https://pytorch.org/get-started/previous-versions/#v1131
+https://download.pytorch.org/whl/cpu/torch/

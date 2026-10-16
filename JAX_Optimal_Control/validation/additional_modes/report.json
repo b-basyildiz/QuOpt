@@ -1,0 +1,634 @@
+{
+  "scope": "Three matched updates per alternate optimizer/model; correctness smoke checks.",
+  "notes": "ContH supplies original energy values directly: original genEvec ragged-array construction fails with modern NumPy before training. CosineLR preserves the original scheduler.step(infidelity) metric-as-epoch behavior.",
+  "source_sha256": {
+    "Optimal_Control/ML.py": "ce7ba708f98f955eae46ab4bf63ced2caf1c47d42cf6a90d7f41ca7216066082",
+    "Optimal_Control/cfme.py": "9e41d1c8718818a3deddb79c6988e8211f0ac4de3ad0d5e8157f99c45c2ceba2",
+    "Optimal_Control/helperFuncs.py": "1c382aead250b9d6fd07af2bd1cd1e4b1f128c7403636289e33e7b6d9bdd6f6a",
+    "Optimal_Control/QOC.bash": "d40ab345b2396138597bd95653ae13973d6697a22991d57ff976997ea282d736",
+    "JAX_Optimal_Control/ML.py": "b69ef45315795a455bb5deb8b106a64046effe863924a6b95f00d9229b1a2f08",
+    "JAX_Optimal_Control/cfme.py": "536f60dc2fc9231d2df3f9bdb944c2f83571449a52815382848c1ce9b5002e26",
+    "JAX_Optimal_Control/helperFuncs.py": "5d6bddc9f6a2b62e83024cfe67a3cf26f415a9f3cb813ef45edf32f4f41f2c0e",
+    "JAX_Optimal_Control/benchmark_parity.py": "b4f2e3448a4a298860692fc4bab933194f09af9a7f3829f01a2c23a36eb0b84e",
+    "JAX_Optimal_Control/test_additional_modes.py": "967d2604b8995c08b3ba601aae9403b8acd8066a6eccd59c3793a31a8faaff2d"
+  },
+  "cases": [
+    {
+      "name": "adam_ctl",
+      "spec": {
+        "M": 2,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "ADAM",
+        "name": "adam_ctl"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 4.399849705274345e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 3.9898639947466563e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.6653345369377348e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.6653345369377348e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "cosine_ctl",
+      "spec": {
+        "M": 2,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "CosineLR",
+        "name": "cosine_ctl"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 4.329870235843657e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 5.377642775528102e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.6653345369377348e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.6653345369377348e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "rk2_ctl",
+      "spec": {
+        "M": 2,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "RK2",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "rk2_ctl"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 3.608224830031759e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 2.42861286636753e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "srk2_ctl",
+      "spec": {
+        "M": 2,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "SRK2",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "srk2_ctl"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 3.554447978966673e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 1.3010426069826053e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "conth_continuous",
+      "spec": {
+        "M": 2,
+        "level": 3,
+        "leakage": false,
+        "crossTalk": "False",
+        "ContPulse": "True",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "conth_continuous",
+        "time_dependent_coupling": true
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 2.0225598302169542e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 9.769962616701378e-14,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 1.7497114868092467e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 6.567706448135091e-14,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 6.191047674519723e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 6.191047674519723e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 9.769962616701378e-14,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "conth_square",
+      "spec": {
+        "M": 2,
+        "level": 3,
+        "leakage": false,
+        "crossTalk": "False",
+        "ContPulse": "False",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "conth_square",
+        "time_dependent_coupling": true
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 4.87473367168805e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 1.2523315717771766e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 2.2470914018413168e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 8.423513622735079e-14,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 1.475042310516983e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 1.475042310516983e-12,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 1.2523315717771766e-13,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "square_crosstalk",
+      "spec": {
+        "M": 2,
+        "level": 3,
+        "leakage": false,
+        "crossTalk": "True",
+        "ContPulse": "False",
+        "minLeak": "False",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "square_crosstalk"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 8.355338887386661e-11,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 2.5353052990340075e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 4.596545366553073e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 1.7792000511773765e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 3.422206962255814e-11,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 3.422206962255814e-11,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 2.5353052990340075e-12,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    },
+    {
+      "name": "ctl_leakage_penalty",
+      "spec": {
+        "M": 2,
+        "level": 4,
+        "leakage": true,
+        "crossTalk": "True",
+        "ContPulse": "True",
+        "minLeak": "True",
+        "maxDriveStrength": 4,
+        "anharmVal": 14.0,
+        "stag": 17.0,
+        "h": 0.002,
+        "alpha": 0.5,
+        "ode": "CFME4",
+        "coupling": "SpeedUp",
+        "iterations": 3,
+        "seed": 7,
+        "normalized_time": 0.02,
+        "optimizer": "SGD",
+        "name": "ctl_leakage_penalty"
+      },
+      "comparison": {
+        "unitaries": {
+          "max_absolute_error": 4.723343357811471e-15,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_before": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "weights_after": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "gradients": {
+          "max_absolute_error": 3.9898639947466563e-17,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "fidelities": {
+          "max_absolute_error": 2.1094237467877974e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "costs": {
+          "max_absolute_error": 2.1094237467877974e-15,
+          "absolute_tolerance": 2e-09,
+          "passed": true
+        },
+        "learning_rates_before": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "learning_rates_after": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-14,
+          "passed": true
+        },
+        "reported_fidelity": {
+          "max_absolute_error": 0.0,
+          "absolute_tolerance": 1e-07,
+          "passed": true
+        },
+        "best_weights": {
+          "max_absolute_error": 8.881784197001252e-16,
+          "absolute_tolerance": 2e-08,
+          "passed": true
+        },
+        "passed": true
+      }
+    }
+  ],
+  "passed": true,
+  "post_primary_benchmark_revision": {
+    "file": "JAX_Optimal_Control/ML.py",
+    "primary_benchmark_sha256": "c69da5658b16c5301994932137c45dee95e3de9b24d1089c4200f9f10dfc16de",
+    "supplemental_sha256": "b69ef45315795a455bb5deb8b106a64046effe863924a6b95f00d9229b1a2f08",
+    "change": "Only CosineLR scheduling branch and its documentation changed: preserve original scheduler.step(infidelity), interpreting infidelity as epoch. SGD propagation, objective, gradients, update, timing, and main benchmark paths are unchanged. Supplemental cosine_ctl verifies actual original optimizer outputs."
+  }
+}

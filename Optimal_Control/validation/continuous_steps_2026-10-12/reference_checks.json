@@ -1,0 +1,72 @@
+[
+  {
+    "normalized_time": 0.1,
+    "max_normalized_propagator_difference": 5.0581801454663036e-11,
+    "max_fidelity_difference": 1.2424505868580127e-12,
+    "nfev": 9920,
+    "nfev_tight": 12716
+  },
+  {
+    "normalized_time": 0.2,
+    "max_normalized_propagator_difference": 4.2840554100343833e-11,
+    "max_fidelity_difference": 1.7001400287597335e-12,
+    "nfev": 12380,
+    "nfev_tight": 16376
+  },
+  {
+    "normalized_time": 0.30000000000000004,
+    "max_normalized_propagator_difference": 7.050647489958609e-11,
+    "max_fidelity_difference": 5.1061654904316356e-12,
+    "nfev": 14804,
+    "nfev_tight": 19232
+  },
+  {
+    "normalized_time": 0.4,
+    "max_normalized_propagator_difference": 6.472286861889702e-11,
+    "max_fidelity_difference": 4.5333181653006704e-13,
+    "nfev": 16724,
+    "nfev_tight": 21704
+  },
+  {
+    "normalized_time": 0.5,
+    "max_normalized_propagator_difference": 6.201067946036586e-11,
+    "max_fidelity_difference": 3.596845044029351e-13,
+    "nfev": 18800,
+    "nfev_tight": 24056
+  },
+  {
+    "normalized_time": 0.6,
+    "max_normalized_propagator_difference": 5.825605274067318e-11,
+    "max_fidelity_difference": 1.9584334154387761e-13,
+    "nfev": 20636,
+    "nfev_tight": 26372
+  },
+  {
+    "normalized_time": 0.7000000000000001,
+    "max_normalized_propagator_difference": 5.4530789822266204e-11,
+    "max_fidelity_difference": 3.6915609458176846e-13,
+    "nfev": 22700,
+    "nfev_tight": 28460
+  },
+  {
+    "normalized_time": 0.8,
+    "max_normalized_propagator_difference": 5.241139580374151e-11,
+    "max_fidelity_difference": 1.0883238754644253e-12,
+    "nfev": 24212,
+    "nfev_tight": 30452
+  },
+  {
+    "normalized_time": 0.9,
+    "max_normalized_propagator_difference": 5.0915981105149885e-11,
+    "max_fidelity_difference": 4.103800632648813e-13,
+    "nfev": 25484,
+    "nfev_tight": 32864
+  },
+  {
+    "normalized_time": 1.0,
+    "max_normalized_propagator_difference": 5.5775967197442653e-11,
+    "max_fidelity_difference": 5.367650768306476e-13,
+    "nfev": 27380,
+    "nfev_tight": 35396
+  }
+]

@@ -1,0 +1,42 @@
+Python 3.11 compatibility assessment - 2026-10-14
+
+Conclusion: the pinned dependencies resolve for CPython 3.11.6 / Linux x86_64.
+No Python 3.11-specific source incompatibility was identified. Actual execution
+on Caltech Python 3.11 remains unverified; this is not a runtime certification.
+
+Package verification:
+Public PyPI and the official PyTorch CPU index provide compatible distributions.
+A pip --dry-run --ignore-installed --only-binary=:all: with CPython 3.11.6
+and Linux x86_64 target tags resolved all 6 direct and 12 transitive packages.
+No packages were installed or changed. linux_cp311_resolution.json contains
+pip metadata, distribution URLs and hashes. Its environment field describes
+the local resolver process (Python 3.10/macOS), not the selected target.
+NumPy remains 1.26.4; pandas remains 2.3.3; torch remains 1.13.1+cpu.
+
+Runtime verification available locally:
+Python: 3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]
+Platform: macOS-26.5.2-arm64-arm-64bit
+The uploaded 23 regression tests passed earlier in the local Python 3.10 env.
+Those tests alone do not exercise complete ControlFlow execution. Therefore
+ControlFlow.py was run twice with exactly the following positional arguments:
+iSWAP 3 SpeedUp 40 1 14 True 17 CFME4 0.0005 0.5 True True False 40 0.1 0.1 -1 3 SGD 0 0 -1
+points=-1 selects rseed=1, making the initial parameters independent of date.
+Three optimization iterations cover actual CFME matrix exponentials, complex
+autograd, SGD, the scheduler, NumPy conversion, and output/file locking.
+The first run creates output files; the second reads the existing fidelity CSV.
+Both runs exited successfully, produced finite 40x8 weights, and gave:
+F = 0.064966499805450439
+T/Tmin = 0.1
+This is a compatibility pilot, not a high-fidelity optimization result.
+
+Remaining target checks:
+1. In the new QuOpt venv on Caltech, run python -m pip check.
+2. Run sbatch HPC.slurm --check and confirm all 23 tests pass.
+3. Run the production pilot above through HPC.slurm on a compute node.
+   Its fidelity should agree with the local reference to about 1e-6 absolute.
+4. Repeat the pilot after the first job completes to cover existing output CSVs.
+5. Save python -m pip freeze after successful validation for reproducibility.
+
+The existing TrotterReactivity environment was not inspected or modified.
+Only validation artifacts were added by this assessment; runtime source and
+package pins were not changed.

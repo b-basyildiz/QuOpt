@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "mocked_calls": 500,
+  "positional_arguments": 23,
+  "h": 0.0005,
+  "qoc_sha256": "15a854a61c24bfdb1d9e33f7d799239baf7b94d566f324434e81dc144a9e744a"
+}

@@ -1,0 +1,87 @@
+Continuous-pulse SGD step-size choice (2026-10-14)
+
+Recommendation: use h=0.0005 for optimization in the current QOC.bash setup.
+Re-evaluate final optimized weights at h=0.00025 without changing the weights.
+If finer accuracy is needed, continue refinement to h=0.000125 or below.
+This final verification is a recommendation, not an automatic pipeline stage.
+
+Setup: iSWAP, SpeedUp, g=1, 40 sin^2 pulses, cap=40, anharmonicity=14,
+staggering=17, qutrit with leakage, crosstalk, CFME4, no leakage penalty.
+T/Tmin ranges from 0.1 to 1, with Tmin=pi/2. Pulse duration T/40 ranges
+from 0.00392699 to 0.0392699. h=0.0005 yields 8-79 integration steps,
+or 16-158 distinct Gauss quadrature times, per pulse. The controls remain
+40 x 8 = 320 trainable angles regardless of h. SGD starts with lr=0.3,
+momentum=0.99, Nesterov=True, and the existing ReduceLROnPlateau scheduler.
+
+Prior frozen-control sweep (continuous_steps_2026-10-12):
+h          steps/pulse    maximum absolute fidelity error
+0.001      4-40           8.21925e-6
+0.0005     8-79           5.08782e-7
+0.000125   32-315         2.43892e-9
+These are empirical maxima across 50 starting-control seed slots plus two
+stress controls at each of 10 durations. They are not global error bounds.
+The previous h=0.000125 choice required |delta F| <= 1e-8 AND
+||delta U||_F/4 <= 1e-6. The new choice relaxes that strict propagation
+criterion to prioritize optimization cost; it does not pass the old limits.
+
+New production-code checks:
+All runs call actual ML.fidelity_ml and its unchanged SGD/scheduler.
+Same initial controls for every h: frozen random_slot_00_seed_628.
+12 iterations at normalized T=0.1, 3 at T=0.5, 1 at T=1.0 for all h.
+At T=1.0 this is a loss/gradient/runtime check of the initial controls,
+not evidence of optimization progress. Best returned controls are evaluated
+independently with per-pulse DOP853, rtol=atol=1e-12.
+
+T/Tmin    h          initial gradient relative difference vs h=0.000125    median sec/iteration
+0.1       0.001      0.0005150763                                          0.4686
+0.1       0.0005     3.329941e-05                                          0.9337
+0.1       0.000125   0                                                     4.0096
+0.5       0.001      1.937017e-06                                          2.4232
+0.5       0.0005     1.778986e-07                                          4.7088
+0.5       0.000125   0                                                     23.5248
+1         0.001      5.381661e-07                                          5.0404
+1         0.0005     3.263731e-08                                          12.6003
+1         0.000125   0                                                     47.7552
+
+Gradient comparison uses ||grad_h-grad_fine||_2/||grad_fine||_2.
+At the shortest gate, h=0.0005 changes the initial gradient by 0.00333%.
+Timings are local single-thread measurements with concurrent processes;
+speed ratios are approximate, not isolated HPC benchmarks. The integration
+step count itself is about four times smaller than at h=0.000125.
+
+Additional 100-iteration pilots at the shortest normalized time T=0.1:
+h          best fidelity       independent reference    absolute numerical error
+0.001      0.188569581053      0.188570431555         8.505028e-07
+0.0005     0.188569849576      0.188569906355         5.677891e-08
+Both runs select iteration 98 as best and reduce lr from 0.3 to 0.09
+for update 80. Their reference-evaluated best fidelities differ by
+5.252002e-07.
+Maximum fidelity-history difference over 100 iterations: 8.313231e-05.
+
+Hold the best h=0.0005 pilot weights fixed and refine the propagator:
+h=0.001      F=0.188569054949
+h=0.0005     F=0.188569849576
+h=0.00025    F=0.188569900632
+h=0.000125   F=0.188569905849
+Independent DOP853 F=0.188569906355.
+Halving h from 0.0005 to 0.00025 changes F by 5.105614e-08.
+
+The evidence supports cheaper optimization with essentially unchanged early
+gradients at h=0.0005. It does not show that smaller h intrinsically suppresses
+SGD gradients, nor establish convergence of the full 5000-iteration, 50-seed
+production sweep. An h change affects integration, not the SGD learning rate.
+
+Files: h*.json contain complete histories and provenance; h*.npz contain
+initial angles, first gradients and best angles. shortest_100/ contains the
+longer pilots and final fixed-weight refinement. comparison.json summarizes
+gradient comparisons and the selection. No production Data/ files were written.
+
+Reproduce from Optimal_Control with the qutrit_QST environment:
+export PYTHONDONTWRITEBYTECODE=1 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+export MPLCONFIGDIR=/private/tmp/qutrit_audit_mpl
+for h in 0.001 0.0005 0.000125; do
+  python continuous_sgd_pilot.py --h "$h" --output /private/tmp/qutrit_sgd_repeat
+done
+for h in 0.001 0.0005; do
+  python continuous_sgd_pilot.py --h "$h" --times 0.1 --iterations 100 --output /private/tmp/qutrit_sgd_repeat/shortest_100
+done

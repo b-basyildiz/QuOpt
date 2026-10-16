@@ -1,0 +1,73 @@
+{
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "torch": "1.13.1",
+    "numpy": "1.26.4",
+    "scipy": "1.15.3",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.9",
+    "filelock": "3.29.0"
+  },
+  "arguments": [
+    "iSWAP",
+    "3",
+    "SpeedUp",
+    "40",
+    "1",
+    "14",
+    "True",
+    "17",
+    "CFME4",
+    "0.0005",
+    "0.5",
+    "True",
+    "True",
+    "False",
+    "40",
+    "0.1",
+    "0.1",
+    "-1",
+    "3",
+    "SGD",
+    "0",
+    "0",
+    "-1"
+  ],
+  "seed_note": "points=-1 selects fixed rseed=1 in ControlFlow.py, independent of date",
+  "source_sha256": {
+    "ControlFlow.py": "e5d6deb25efe2b581e399035ce98fefae1af3351d77c40320da8926b52dfe14b",
+    "ML.py": "ce7ba708f98f955eae46ab4bf63ced2caf1c47d42cf6a90d7f41ca7216066082",
+    "helperFuncs.py": "1c382aead250b9d6fd07af2bd1cd1e4b1f128c7403636289e33e7b6d9bdd6f6a",
+    "cfme.py": "9e41d1c8718818a3deddb79c6988e8211f0ac4de3ad0d5e8157f99c45c2ceba2"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "elapsed_seconds": 3.7505792080191895,
+      "fidelity": 0.06496649980545044,
+      "normalized_time": 0.1,
+      "weights_shape": [
+        40,
+        8
+      ],
+      "stdout": "",
+      "stderr": "",
+      "fidelity_file": "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv"
+    },
+    {
+      "run": 2,
+      "elapsed_seconds": 3.2649252499686554,
+      "fidelity": 0.06496649980545044,
+      "normalized_time": 0.1,
+      "weights_shape": [
+        40,
+        8
+      ],
+      "stdout": "",
+      "stderr": "",
+      "fidelity_file": "Data/CTL/SpeedUp/Fidelities/qutrit_iSWAP_SpeedUp_M40_SGD_CFME4_leakage14.0_g1.0_maxT0.1_maxD40_CTh0.0005_stag17.0_ContCFME4_it3.csv"
+    }
+  ],
+  "scope": "Reference run on local Python 3.10/macOS. Python 3.11/Linux runtime has not been tested here."
+}

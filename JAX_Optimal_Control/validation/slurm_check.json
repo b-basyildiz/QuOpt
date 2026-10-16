@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "scope": "Mocked module/srun dispatch only, no HPC job submitted",
+  "check_dispatch": true,
+  "training_argument_forwarding": true,
+  "uses_separate_jax_environment": true
+}

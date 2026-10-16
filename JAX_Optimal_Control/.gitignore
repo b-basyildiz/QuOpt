@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+.jax_cache/
+Data/
+quopt-jax-*.out
+quopt-jax-*.err
+validation/**/mplconfig/

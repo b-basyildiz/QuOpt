@@ -1,0 +1,37 @@
+{
+  "framework": "torch",
+  "version": "1.13.1",
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "device": "cpu",
+  "torch_threads": 1,
+  "total_seconds": 0.48417062498629093,
+  "spec": {
+    "M": 3,
+    "level": 3,
+    "leakage": false,
+    "crossTalk": "True",
+    "ContPulse": "True",
+    "minLeak": "False",
+    "maxDriveStrength": 4,
+    "anharmVal": 14.0,
+    "stag": 17.0,
+    "h": 0.01,
+    "alpha": 0.5,
+    "ode": "CFME4",
+    "coupling": "SpeedUp",
+    "iterations": 5,
+    "seed": 1,
+    "name": "qutrit_crosstalk",
+    "normalized_time": 0.1
+  },
+  "first_iteration_seconds": 0.10407883301377296,
+  "warmed_iteration_seconds": [
+    0.09576995798852295,
+    0.09214195900131017,
+    0.0915064160944894,
+    0.09667279198765755
+  ],
+  "median_warmed_iteration_seconds": 0.09395595849491656,
+  "reported_fidelity": 0.5827582478523254
+}

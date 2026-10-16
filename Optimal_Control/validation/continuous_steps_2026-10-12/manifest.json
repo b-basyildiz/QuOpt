@@ -1,0 +1,520 @@
+{
+  "configuration": {
+    "gateType": "iSWAP",
+    "level": 3,
+    "couplingType": "SpeedUp",
+    "maxDriveStrength": 40.0,
+    "crossTalk": "True",
+    "contPulse": "True",
+    "leakage": "True",
+    "minimizeLeakage": "False",
+    "anharmonicity": 14.0,
+    "staggering": 17.0,
+    "ode": "CFME4",
+    "h": 0.01,
+    "alpha": "0.5",
+    "segmentCount": 40,
+    "g": 1.0,
+    "minTime": 0.1,
+    "maxTime": 1.0,
+    "points": 10,
+    "randomSeedCount": 50,
+    "iterationCount": 5000,
+    "optimizer": "SGD",
+    "HPC": "False",
+    "WarmStart": "-1"
+  },
+  "seed_date": "20261012",
+  "seeds": [
+    628,
+    314,
+    660,
+    312,
+    809,
+    943,
+    28,
+    798,
+    981,
+    39,
+    999,
+    414,
+    218,
+    61,
+    669,
+    566,
+    829,
+    926,
+    671,
+    371,
+    949,
+    534,
+    580,
+    871,
+    872,
+    963,
+    613,
+    250,
+    70,
+    669,
+    584,
+    816,
+    391,
+    220,
+    187,
+    629,
+    49,
+    531,
+    217,
+    758,
+    381,
+    317,
+    389,
+    634,
+    638,
+    105,
+    667,
+    626,
+    163,
+    23
+  ],
+  "cases": [
+    "random_slot_00_seed_628",
+    "random_slot_01_seed_314",
+    "random_slot_02_seed_660",
+    "random_slot_03_seed_312",
+    "random_slot_04_seed_809",
+    "random_slot_05_seed_943",
+    "random_slot_06_seed_28",
+    "random_slot_07_seed_798",
+    "random_slot_08_seed_981",
+    "random_slot_09_seed_39",
+    "random_slot_10_seed_999",
+    "random_slot_11_seed_414",
+    "random_slot_12_seed_218",
+    "random_slot_13_seed_61",
+    "random_slot_14_seed_669",
+    "random_slot_15_seed_566",
+    "random_slot_16_seed_829",
+    "random_slot_17_seed_926",
+    "random_slot_18_seed_671",
+    "random_slot_19_seed_371",
+    "random_slot_20_seed_949",
+    "random_slot_21_seed_534",
+    "random_slot_22_seed_580",
+    "random_slot_23_seed_871",
+    "random_slot_24_seed_872",
+    "random_slot_25_seed_963",
+    "random_slot_26_seed_613",
+    "random_slot_27_seed_250",
+    "random_slot_28_seed_70",
+    "random_slot_29_seed_669",
+    "random_slot_30_seed_584",
+    "random_slot_31_seed_816",
+    "random_slot_32_seed_391",
+    "random_slot_33_seed_220",
+    "random_slot_34_seed_187",
+    "random_slot_35_seed_629",
+    "random_slot_36_seed_49",
+    "random_slot_37_seed_531",
+    "random_slot_38_seed_217",
+    "random_slot_39_seed_758",
+    "random_slot_40_seed_381",
+    "random_slot_41_seed_317",
+    "random_slot_42_seed_389",
+    "random_slot_43_seed_634",
+    "random_slot_44_seed_638",
+    "random_slot_45_seed_105",
+    "random_slot_46_seed_667",
+    "random_slot_47_seed_626",
+    "random_slot_48_seed_163",
+    "random_slot_49_seed_23",
+    "all_tones_maximum",
+    "alternating_maximum"
+  ],
+  "steps": [
+    0.01,
+    0.005,
+    0.0025,
+    0.001,
+    0.0005,
+    0.00025,
+    0.000125
+  ],
+  "production_verification": {
+    "max_hamiltonian_entry_difference": 2.929642751054232e-14,
+    "production_propagator_differences": {
+      "0.01": 6.604399141311976e-16,
+      "0.001": 2.7184304015796342e-15
+    },
+    "operator_basis_fidelity_difference": 0.0
+  },
+  "reference_method": "DOP853, every segment separately, rtol=atol=1e-12",
+  "reference_check": "repeat all cases/times at rtol=atol=1e-13",
+  "fidelity_tolerance": 1e-08,
+  "normalized_propagator_tolerance": 1e-06,
+  "scope": "Frozen initial controls and amplitude-bound stress controls; no reoptimization.",
+  "versions": {
+    "numpy": "1.26.4",
+    "scipy": "1.15.3",
+    "torch": "1.13.1",
+    "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]"
+  },
+  "elapsed_seconds": 489.84742708306294,
+  "summary": [
+    {
+      "h": 0.01,
+      "max_absolute_fidelity_error": 0.1295047646510733,
+      "max_normalized_propagator_error": 1.450568762837541,
+      "max_normalized_unitarity_error": 4.10524375673307e-14,
+      "worst_fidelity_case": {
+        "normalized_time": 0.30000000000000004,
+        "T": 0.471238898038469,
+        "pulse_duration": 0.011780972450961725,
+        "case": "alternating_maximum",
+        "h": 0.01,
+        "steps_per_pulse": 2,
+        "fidelity": 0.2912210485250277,
+        "reference_fidelity": 0.16171628387395443,
+        "absolute_fidelity_error": 0.1295047646510733,
+        "normalized_propagator_error": 0.40850748972475065,
+        "normalized_unitarity_error": 2.1347984127199282e-14
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.30000000000000004,
+        "T": 0.471238898038469,
+        "pulse_duration": 0.011780972450961725,
+        "case": "all_tones_maximum",
+        "h": 0.01,
+        "steps_per_pulse": 2,
+        "fidelity": 0.059493550106403455,
+        "reference_fidelity": 0.05961792096872743,
+        "absolute_fidelity_error": 0.00012437086232397476,
+        "normalized_propagator_error": 1.450568762837541,
+        "normalized_unitarity_error": 2.0543291630267016e-14
+      },
+      "passes": false
+    },
+    {
+      "h": 0.005,
+      "max_absolute_fidelity_error": 0.030581307709481073,
+      "max_normalized_propagator_error": 1.409644841548998,
+      "max_normalized_unitarity_error": 9.086292509850083e-12,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "random_slot_01_seed_314",
+        "h": 0.005,
+        "steps_per_pulse": 1,
+        "fidelity": 0.12750499492679834,
+        "reference_fidelity": 0.09692368721731727,
+        "absolute_fidelity_error": 0.030581307709481073,
+        "normalized_propagator_error": 0.37594245835976664,
+        "normalized_unitarity_error": 9.505202766440474e-15
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.005,
+        "steps_per_pulse": 1,
+        "fidelity": 0.0591726970787027,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 0.013066682823168509,
+        "normalized_propagator_error": 1.409644841548998,
+        "normalized_unitarity_error": 7.634221370113883e-15
+      },
+      "passes": false
+    },
+    {
+      "h": 0.0025,
+      "max_absolute_fidelity_error": 0.0014863299933632057,
+      "max_normalized_propagator_error": 0.24986427558047747,
+      "max_normalized_unitarity_error": 8.629507525867099e-11,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "random_slot_01_seed_314",
+        "h": 0.0025,
+        "steps_per_pulse": 2,
+        "fidelity": 0.09841001721068048,
+        "reference_fidelity": 0.09692368721731727,
+        "absolute_fidelity_error": 0.0014863299933632057,
+        "normalized_propagator_error": 0.02069291524042706,
+        "normalized_unitarity_error": 1.980583164929364e-14
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.0025,
+        "steps_per_pulse": 2,
+        "fidelity": 0.0712613948027033,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 0.0009779850991679107,
+        "normalized_propagator_error": 0.24986427558047747,
+        "normalized_unitarity_error": 1.89376267040571e-14
+      },
+      "passes": false
+    },
+    {
+      "h": 0.001,
+      "max_absolute_fidelity_error": 8.21924645250105e-06,
+      "max_normalized_propagator_error": 0.001359531976321254,
+      "max_normalized_unitarity_error": 5.918861111853669e-10,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "alternating_maximum",
+        "h": 0.001,
+        "steps_per_pulse": 4,
+        "fidelity": 0.14863468795467702,
+        "reference_fidelity": 0.14864290720112952,
+        "absolute_fidelity_error": 8.21924645250105e-06,
+        "normalized_propagator_error": 9.511300746448016e-05,
+        "normalized_unitarity_error": 8.289050679980214e-11
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.001,
+        "steps_per_pulse": 4,
+        "fidelity": 0.07223386887068889,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 5.511031182320325e-06,
+        "normalized_propagator_error": 0.001359531976321254,
+        "normalized_unitarity_error": 4.004971823842407e-11
+      },
+      "passes": false
+    },
+    {
+      "h": 0.0005,
+      "max_absolute_fidelity_error": 5.087817018245566e-07,
+      "max_normalized_propagator_error": 8.674489686465848e-05,
+      "max_normalized_unitarity_error": 3.5719149617197733e-10,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "random_slot_01_seed_314",
+        "h": 0.0005,
+        "steps_per_pulse": 8,
+        "fidelity": 0.0969241959990191,
+        "reference_fidelity": 0.09692368721731727,
+        "absolute_fidelity_error": 5.087817018245566e-07,
+        "normalized_propagator_error": 7.772713146072912e-06,
+        "normalized_unitarity_error": 3.9322247584538707e-11
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.0005,
+        "steps_per_pulse": 8,
+        "fidelity": 0.07223902886918465,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 3.510326865574509e-07,
+        "normalized_propagator_error": 8.674489686465848e-05,
+        "normalized_unitarity_error": 5.011258555126196e-11
+      },
+      "passes": false
+    },
+    {
+      "h": 0.00025,
+      "max_absolute_fidelity_error": 3.5871019793409786e-08,
+      "max_normalized_propagator_error": 3.7324510769684266e-06,
+      "max_normalized_unitarity_error": 3.7275969643902714e-10,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "alternating_maximum",
+        "h": 0.00025,
+        "steps_per_pulse": 16,
+        "fidelity": 0.14864287133010973,
+        "reference_fidelity": 0.14864290720112952,
+        "absolute_fidelity_error": 3.5871019793409786e-08,
+        "normalized_propagator_error": 3.940926986306973e-07,
+        "normalized_unitarity_error": 3.9391670956139835e-11
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.00025,
+        "steps_per_pulse": 16,
+        "fidelity": 0.07223936481798605,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 1.508388515480963e-08,
+        "normalized_propagator_error": 3.7324510769684266e-06,
+        "normalized_unitarity_error": 6.115166311183148e-11
+      },
+      "passes": false
+    },
+    {
+      "h": 0.000125,
+      "max_absolute_fidelity_error": 2.438916846259076e-09,
+      "max_normalized_propagator_error": 9.114350289024459e-08,
+      "max_normalized_unitarity_error": 4.6045152623545046e-10,
+      "worst_fidelity_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "alternating_maximum",
+        "h": 0.000125,
+        "steps_per_pulse": 32,
+        "fidelity": 0.14864290476221267,
+        "reference_fidelity": 0.14864290720112952,
+        "absolute_fidelity_error": 2.438916846259076e-09,
+        "normalized_propagator_error": 2.450782792540592e-08,
+        "normalized_unitarity_error": 1.0066496579848823e-10
+      },
+      "worst_propagator_case": {
+        "normalized_time": 0.1,
+        "T": 0.15707963267948966,
+        "pulse_duration": 0.003926990816987242,
+        "case": "all_tones_maximum",
+        "h": 0.000125,
+        "steps_per_pulse": 32,
+        "fidelity": 0.07223937954201902,
+        "reference_fidelity": 0.07223937990187121,
+        "absolute_fidelity_error": 3.598521897130169e-10,
+        "normalized_propagator_error": 9.114350289024459e-08,
+        "normalized_unitarity_error": 1.258170360421176e-10
+      },
+      "passes": true
+    }
+  ],
+  "largest_tested_passing_h": 0.000125,
+  "reference_convergence": [
+    {
+      "normalized_time": 0.1,
+      "max_normalized_propagator_difference": 5.0581801454663036e-11,
+      "max_fidelity_difference": 1.2424505868580127e-12,
+      "nfev": 9920,
+      "nfev_tight": 12716
+    },
+    {
+      "normalized_time": 0.2,
+      "max_normalized_propagator_difference": 4.2840554100343833e-11,
+      "max_fidelity_difference": 1.7001400287597335e-12,
+      "nfev": 12380,
+      "nfev_tight": 16376
+    },
+    {
+      "normalized_time": 0.30000000000000004,
+      "max_normalized_propagator_difference": 7.050647489958609e-11,
+      "max_fidelity_difference": 5.1061654904316356e-12,
+      "nfev": 14804,
+      "nfev_tight": 19232
+    },
+    {
+      "normalized_time": 0.4,
+      "max_normalized_propagator_difference": 6.472286861889702e-11,
+      "max_fidelity_difference": 4.5333181653006704e-13,
+      "nfev": 16724,
+      "nfev_tight": 21704
+    },
+    {
+      "normalized_time": 0.5,
+      "max_normalized_propagator_difference": 6.201067946036586e-11,
+      "max_fidelity_difference": 3.596845044029351e-13,
+      "nfev": 18800,
+      "nfev_tight": 24056
+    },
+    {
+      "normalized_time": 0.6,
+      "max_normalized_propagator_difference": 5.825605274067318e-11,
+      "max_fidelity_difference": 1.9584334154387761e-13,
+      "nfev": 20636,
+      "nfev_tight": 26372
+    },
+    {
+      "normalized_time": 0.7000000000000001,
+      "max_normalized_propagator_difference": 5.4530789822266204e-11,
+      "max_fidelity_difference": 3.6915609458176846e-13,
+      "nfev": 22700,
+      "nfev_tight": 28460
+    },
+    {
+      "normalized_time": 0.8,
+      "max_normalized_propagator_difference": 5.241139580374151e-11,
+      "max_fidelity_difference": 1.0883238754644253e-12,
+      "nfev": 24212,
+      "nfev_tight": 30452
+    },
+    {
+      "normalized_time": 0.9,
+      "max_normalized_propagator_difference": 5.0915981105149885e-11,
+      "max_fidelity_difference": 4.103800632648813e-13,
+      "nfev": 25484,
+      "nfev_tight": 32864
+    },
+    {
+      "normalized_time": 1.0,
+      "max_normalized_propagator_difference": 5.5775967197442653e-11,
+      "max_fidelity_difference": 5.367650768306476e-13,
+      "nfev": 27380,
+      "nfev_tight": 35396
+    }
+  ],
+  "source_sha256": {
+    "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/Optimal_Control/continuous_step_sweep.py": "670e9f38b20a0670247fb805b35c8ce0886521031dbdb4fffd3c33f0b7c8dd1a",
+    "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/Optimal_Control/ML.py": "ce7ba708f98f955eae46ab4bf63ced2caf1c47d42cf6a90d7f41ca7216066082",
+    "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/Optimal_Control/helperFuncs.py": "1c382aead250b9d6fd07af2bd1cd1e4b1f128c7403636289e33e7b6d9bdd6f6a",
+    "/Users/borabasyildiz/Documents/Research_Projects/Qutrit Speed Limits/QuOpt/Optimal_Control/cfme.py": "9e41d1c8718818a3deddb79c6988e8211f0ac4de3ad0d5e8157f99c45c2ceba2"
+  },
+  "source_revision_note": "Input guards, provenance metadata and plotting were added while the sweep ran; numerical routines were unchanged. Updated CLI passed an end-to-end smoke run.",
+  "production_selected_step_check_file": "production_selected_step_check.json",
+  "distinct_random_seeds": 49,
+  "largest_tested_passing_h_by_time": [
+    {
+      "normalized_time": 0.1,
+      "largest_tested_passing_h": 0.000125
+    },
+    {
+      "normalized_time": 0.2,
+      "largest_tested_passing_h": 0.00025
+    },
+    {
+      "normalized_time": 0.30000000000000004,
+      "largest_tested_passing_h": 0.000125
+    },
+    {
+      "normalized_time": 0.4,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 0.5,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 0.6,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 0.7000000000000001,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 0.8,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 0.9,
+      "largest_tested_passing_h": 0.0005
+    },
+    {
+      "normalized_time": 1.0,
+      "largest_tested_passing_h": 0.0005
+    }
+  ]
+}

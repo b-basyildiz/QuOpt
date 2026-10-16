@@ -1,0 +1,43 @@
+JAX / PyTorch smoke validation
+=============================
+
+All 16 numerical cases passed: 8 cases with 5 SGD updates, plus 8 alternate-mode cases with 3 updates.
+All 8 analytic JAX regression tests passed.
+All 5 real CLI stages passed (fresh, repeated CSV, warm-start create/continue/final).
+The QOC launcher passed 500 mocked calls with 23 arguments and h=0.0005; no jobs submitted.
+
+Maximum absolute discrepancies across all numerical comparisons:
+  unitaries: 5.34670934684e-09
+  fidelities: 3.42220696226e-11
+  costs: 3.42220696226e-11
+  gradients: 6.25998009939e-11
+  weights_after: 1.8423396142e-10
+  best_weights: 1.20896181954e-10
+  reported_fidelity: 0
+
+Current QOC: M=40, h=0.0005, 16x16 complex128 matrices.
+Warmed times are median seconds per complete training iteration over the last four of five steps.
+Normalized T    PyTorch       JAX           ratio    JAX first step (includes compile)
+         0.1     0.863467     0.034741     24.85     1.156852
+         0.5     4.480625     0.171241     26.17     1.220735
+         1.0     9.918674     0.331649     29.91     1.379014
+
+Hardware: local Mac CPU; sequential workers, PyTorch thread count 1, BLAS/XLA thread settings in per-case metadata.
+Backend threading is not guaranteed identical. Timings include synchronized diagnostics.
+The first JAX step combines compilation and execution; it is not a pure compilation-time measurement.
+This compares a compiled/refactored JAX implementation with the current eager PyTorch code.
+No GPU/HPC timing or 5,000-step convergence claim is made.
+Identical parameter arrays were supplied; same numeric RNG seeds alone do not match across frameworks.
+
+Evidence:
+  parity/report.json and per-case input/output arrays: main comparison and timings.
+  additional_modes/report.json: ADAM, CosineLR, RK2, SRK2, ContH, square crosstalk, CTL leakage penalty.
+  cli_smoke.json: actual script/CSV/warm-start comparisons in temporary directories.
+  environment.json: final source hashes and dependency versions.
+
+The primary SGD benchmark preceded an isolated CosineLR compatibility correction.
+Original measured hashes are retained in its report; the post-benchmark revision is recorded explicitly.
+The supplemental suite and analytic scheduler checks exercise the corrected CosineLR branch.
+No SGD numerical code changed after the primary benchmark.
+For ContH, the original training was supplied its intended energy values directly because its genEvec ragged-array constructor fails with NumPy1.26.
+The JAX helper fixes that construction error.

@@ -1,0 +1,19 @@
+{
+  "M": 40,
+  "level": 4,
+  "leakage": true,
+  "crossTalk": "True",
+  "ContPulse": "True",
+  "minLeak": "False",
+  "maxDriveStrength": 40,
+  "anharmVal": 14.0,
+  "stag": 17.0,
+  "h": 0.0005,
+  "alpha": 0.5,
+  "ode": "CFME4",
+  "coupling": "SpeedUp",
+  "iterations": 5,
+  "seed": 1,
+  "name": "qoc_t0.1",
+  "normalized_time": 0.1
+}

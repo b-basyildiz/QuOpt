@@ -1,30 +1,31 @@
 #!/bin/bash
-gateType="CZ" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
+gateType="iSWAP" #CNOT, iSWAP, SWAP, iTwoPhonon, CNOT_0, CZ_0
 level=3 #Size of computational space. For qubit gates (CNOT), d = 2. For qutrit gates, d = 3, etc.
 
-couplingType="capacitiveCoupMin" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
+couplingType="SpeedUp" #XX, ZZ, XXX, capacitiveCoup, SpeedUp, ContH
 maxDriveStrength=40 #natural number for capped max frequency, -1 for unlimited drive frequency
 
-crossTalk="False" #models Cross Talk (CT), False for not CT, True for CT
-contPulse="False" #whether or not to have continuous pulse shapes
-leakage="False"
+crossTalk="True" #models Cross Talk (CT), False for not CT, True for CT
+contPulse="True" #whether or not to have continuous pulse shapes
+leakage="True"
 minimizeLeakage="False" #whether or not to penalize higher energy states 
 
 anharmonicity=14 #only used if larger than qubit system
 staggering=17 # staggering of the two qudits in units of coupling strength, only relavent for Cross Talk
 
 ode="CFME4" #RK2, SRK2, CFME4
-h=0.01 # step size for cross talk 
+h=0.0005 # Optimization: 8-79 CFME4 steps/pulse for this setup; see validation/continuous_sgd_2026-10-14
+# Check final optimized weights again at h=0.00025 (without changing the weights).
 alpha=0.5 # Tuning parameter for leakage minimization 
 
-segmentCount=1
+segmentCount=40
 g=1
 minTime=0.1
-maxTime=0.2
-points=1
+maxTime=1.0
+points=10
 
-randomSeedCount=1
-iterationCount=1
+randomSeedCount=50
+iterationCount=5000
 optimizer="SGD"
 
 HPC="False" #HPC or local bool. If local, make 'False'

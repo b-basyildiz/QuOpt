@@ -1,0 +1,34 @@
+{
+  "framework": "torch",
+  "version": "1.13.1",
+  "python": "3.10.20 | packaged by conda-forge | (main, Mar  5 2026, 17:06:34) [Clang 19.1.7 ]",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "spec": {
+    "M": 2,
+    "level": 4,
+    "leakage": true,
+    "crossTalk": "True",
+    "ContPulse": "True",
+    "minLeak": "False",
+    "maxDriveStrength": 4,
+    "anharmVal": 14.0,
+    "stag": 17.0,
+    "h": 0.002,
+    "alpha": 0.5,
+    "ode": "CFME4",
+    "coupling": "SpeedUp",
+    "iterations": 3,
+    "seed": 7,
+    "normalized_time": 0.02,
+    "optimizer": "ADAM",
+    "name": "adam_ctl"
+  },
+  "total_seconds": 0.19898658304009587,
+  "first_iteration_seconds": 0.06696112500503659,
+  "warmed_iteration_seconds": [
+    0.05911449994891882,
+    0.0576837919652462
+  ],
+  "median_warmed_iteration_seconds": 0.05839914595708251,
+  "reported_fidelity": 0.4734140634536743
+}

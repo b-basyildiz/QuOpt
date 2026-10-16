@@ -1,0 +1,44 @@
+Continuous-pulse integration convergence for QOC.bash (2026-10-12)
+
+Configuration: iSWAP, qutrit + leakage level (16-dimensional two-qudit Hilbert space),
+SpeedUp coupling, g=1, crosstalk enabled, sin^2 envelopes, CFME4, 40 segments,
+maximum drive strength 40, anharmonicity 14, staggering 17.
+Gate times: T/Tmin=0.1,...,1.0 (10 points), Tmin=pi/2.
+
+Selected fixed step: h=0.000125. This is the largest TESTED step that passes
+both |F-Fref| <= 1e-8 and ||U-Uref||_F/4 <= 1e-6 for every tested case.
+It produces 32 to 315 integration steps per pulse across the time range.
+
+Cases: 50 configured date-hashed seed slots (49 distinct seeds), plus
+all-maximum and alternating-maximum controls, each at all 10 gate times.
+The same weights were held fixed across 7 step sizes: 3640 CFME propagations.
+This measures integration error; it does not run the 5000-iteration optimizations.
+
+Independent reference: DOP853, with a separate integration for every pulse.
+Every case was checked at atol=rtol=1e-12 and repeated at 1e-13.
+Maximum reference refinement difference: fidelity=5.10617e-12, propagator=7.05065e-11.
+The batched Hamiltonian, solver, and fidelity were checked against production.
+The two worst short-pulse stress cases were additionally evaluated through the
+actual fidelity_ml CTL closures at h=0.000125 and h=0.0000625; both converge.
+
+h             maximum fidelity error       maximum normalized propagator error      passes
+0.01          0.12950476                   1.4505688                                 False
+0.005         0.030581308                  1.4096448                                 False
+0.0025        0.00148633                   0.24986428                                False
+0.001         8.2192465e-06                0.001359532                               False
+0.0005        5.087817e-07                 8.6744897e-05                             False
+0.00025       3.587102e-08                 3.7324511e-06                             False
+0.000125      2.4389168e-09                9.1143503e-08                             True
+
+Scope: this is empirical convergence over the frozen starting/stress controls,
+not a guarantee for every possible or subsequently optimized pulse. Re-evaluate
+final optimized weights at h/2 before interpreting extremely small infidelities.
+
+The ordinary continuous leakage anharmonicity bug was fixed in ML.py and covered
+by regression tests. This configured CTL branch already had static anharmonicity.
+All 23 regression tests pass.
+
+Reproduce from Optimal_Control with the qutrit_QST environment:
+OPENBLAS_NUM_THREADS=1 MPLCONFIGDIR=/private/tmp/qutrit_audit_mpl python continuous_step_sweep.py --config validation/continuous_steps_2026-10-12/QOC.input.bash --output /private/tmp/qutrit_sweep_repeat --seed-date 20261012
+
+Sweep elapsed time: 489.8 seconds.
